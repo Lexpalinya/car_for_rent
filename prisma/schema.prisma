@@ -1,0 +1,421 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum userRoles {
+  customer
+  admin
+  superadmin
+}
+
+//---------users----------------------------
+
+model users {
+  id            String         @id @default(uuid()) @db.VarChar(36)
+  is_active     Boolean        @default(true)
+  username      String
+  email         String
+  phone_number  String
+  password      String
+  profile       String         @default("")
+  fackbook_id   String         @default("")
+  google_id     String         @default("")
+  device_token  String         @default("")
+  login_version Int            @default(0)
+  role          userRoles      @default(customer)
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @updatedAt
+  wallet        wallet[]
+  reels         reels[]
+  like_reel     like_reel[]
+  comments      comments[]
+  like_comment  like_comment[]
+  like_reply    like_reply[]
+  post          posts[]
+  car_rent      car_rent[]
+  replys        replys[]
+}
+
+//----------banner--------------------------
+model banners {
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  is_active  Boolean  @default(true)
+  is_public  Boolean  @default(true)
+  image      String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+//
+//------------Promotion---------------------------
+model promotions {
+  id         String     @id @default(uuid()) @db.VarChar(36)
+  is_active  Boolean    @default(true)
+  is_public  Boolean    @default(true)
+  code       String     @db.VarChar(6)
+  price      Float      @db.Double
+  amount     Int        @db.Int
+  count_use  Int        @db.Int
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+  wallet     wallet[]
+  car_rent   car_rent[]
+}
+
+//
+
+model wallet {
+  id           String     @id @default(uuid()) @db.VarChar(36)
+  is_active    Boolean    @default(true)
+  user_id      String     @db.VarChar(36)
+  promotion_id String     @db.VarChar(36)
+  users        users      @relation(fields: [usersId], references: [id])
+  promotions   promotions @relation(fields: [promotion_id], references: [id])
+  created_at   DateTime   @default(now())
+  updated_at   DateTime   @updatedAt
+  usersId      String     @db.VarChar(36)
+}
+
+model review {
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  is_active  Boolean  @default(true)
+  user_id    String   @db.VarChar(36)
+  post_id    String   @db.VarChar(36)
+  star       Float    @default(0.0)
+  comment    String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+//--------------------Post-------------------------------
+model post_status {
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  is_active  Boolean  @default(true)
+  name       String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  post       posts[]
+}
+
+//
+
+model car_types {
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  is_active  Boolean  @default(true)
+  name       String
+  icon       String
+  detail     String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  post       posts[]
+}
+
+//
+
+model labels {
+  id          String        @id @default(uuid()) @db.VarChar(36)
+  is_active   Boolean       @default(true)
+  name        String
+  icon        String
+  created_at  DateTime      @default(now())
+  updated_at  DateTime      @updatedAt
+  labels_data labels_data[]
+}
+
+//
+model labels_data {
+  id       String @id @default(uuid()) @db.VarChar(36)
+  post_id  String @db.VarChar(36)
+  label_id String @db.VarChar(36)
+  post     posts  @relation(fields: [post_id], references: [id])
+  label    labels @relation(fields: [label_id], references: [id])
+}
+
+model car_brands {
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  is_active  Boolean  @default(true)
+  name       String
+  icon       String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  post       posts[]
+}
+//
+
+model level_insurances {
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  is_active  Boolean  @default(true)
+  name       String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  post       posts[]
+}
+
+//
+
+model insurance_companies {
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  is_active  Boolean  @default(true)
+  name       String
+  icon       String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  post       posts[]
+}
+//
+
+model type_of_fuals {
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  is_active  Boolean  @default(true)
+  name       String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  post       posts[]
+}
+
+//
+
+//------------main table----------------------------------------------------------
+model posts {
+  id                        String                      @id @default(uuid()) @db.VarChar(36)
+  is_active                 Boolean                     @default(true)
+  car_type_id               String                      @db.VarChar(36)
+  user_id                   String                      @db.VarChar(36)
+  star                      Float                       @default(0.0)
+  frist_name                String
+  last_name                 String
+  birth_day                 DateTime                    @db.Date
+  nationnality              String
+  doc_type                  String
+  car_insured               Boolean
+  insurance_company_id      String?                     @db.VarChar(36)
+  level_insurance_id        String?                     @db.VarChar(36)
+  car_brand_id              String                      @db.VarChar(36)
+  car_version               String
+  car_year                  String
+  car_resgistration         String
+  type_of_fual_id           String                      @db.VarChar(36)
+  driver_system             String
+  seat                      String
+  car_color                 String
+  description               String
+  address                   String
+  deposits_fee              Float                       @db.Double
+  status_id                 String                      @db.VarChar(36)
+  created_at                DateTime                    @default(now())
+  updated_at                DateTime                    @updatedAt
+  car_types                 car_types                   @relation(fields: [car_type_id], references: [id])
+  users                     users                       @relation(fields: [user_id], references: [id])
+  insurance_company         insurance_companies?        @relation(fields: [insurance_company_id], references: [id])
+  level_insurance           level_insurances?           @relation(fields: [level_insurance_id], references: [id])
+  car_brands                car_brands                  @relation(fields: [car_brand_id], references: [id])
+  type_of_fual              type_of_fuals               @relation(fields: [type_of_fual_id], references: [id])
+  status                    post_status                 @relation(fields: [status_id], references: [id])
+  post_doc_image            post_doc_image[]
+  post_driver_license_image post_driver_license_image[]
+  post_car_image            post_car_image[]
+  post_insurance_image      post_insurance_image[]
+  post_rent_dat             post_rent_data[]
+  labels_data               labels_data[]
+  car_rent                  car_rent[]
+
+  @@index([car_type_id])
+}
+
+model post_doc_image {
+  id      Int    @id @default(autoincrement())
+  post_id String @db.VarChar(36)
+  url     String
+  post    posts  @relation(fields: [post_id], references: [id])
+
+  @@index([post_id])
+}
+
+model post_driver_license_image {
+  id      Int    @id @default(autoincrement())
+  post_id String @db.VarChar(36)
+  url     String
+  post    posts  @relation(fields: [post_id], references: [id])
+
+  @@index([post_id])
+}
+
+model post_car_image {
+  id      Int    @id @default(autoincrement())
+  post_id String @db.VarChar(36)
+  url     String
+  post    posts  @relation(fields: [post_id], references: [id])
+
+  @@index([post_id])
+}
+
+model post_insurance_image {
+  id      Int    @id @default(autoincrement())
+  post_id String @db.VarChar(36)
+  url     String
+  post    posts  @relation(fields: [post_id], references: [id])
+
+  @@index([post_id])
+}
+
+model post_rent_data {
+  id          Int    @id @default(autoincrement())
+  post_id     String @db.VarChar(36)
+  varchar     String
+  price       Float  @db.Double
+  deposit     Float  @db.Double
+  system_cost Float  @db.Double
+  total       Float  @db.Double
+  post        posts  @relation(fields: [post_id], references: [id])
+
+  @@index([post_id])
+}
+
+//------------car_rent-------------------------------
+model car_rent_status {
+  id         String     @id @default(uuid()) @db.VarChar(36)
+  is_active  Boolean    @default(true)
+  name       String
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+  car_rent   car_rent[]
+}
+
+//
+
+//-----main table-----------------------------------------------------
+model car_rent {
+  id                     String                   @id @default(uuid()) @db.VarChar(36)
+  is_active              Boolean                  @default(true)
+  user_id                String                   @db.VarChar(36)
+  post_id                String                   @db.VarChar(36)
+  start_date             DateTime                 @db.Date
+  end_date               DateTime                 @db.Date
+  frist_name             String
+  last_name              String
+  email                  String
+  phone_number           String
+  doc_type               String
+  description            String?                  @db.LongText
+  promotion_id           String?                  @db.VarChar(36)
+  booking_fee            Float                    @db.Double
+  pay_destination        Float                    @db.Double
+  pay_type               String
+  bank_no                String                   @db.VarChar(17)
+  pay_status             Boolean                  @default(false)
+  reason                 String?                  @db.LongText
+  status_id              String                   @db.VarChar(36)
+  created_at             DateTime                 @default(now())
+  updated_at             DateTime                 @updatedAt
+  user                   users                    @relation(fields: [user_id], references: [id])
+  post                   posts                    @relation(fields: [post_id], references: [id])
+  promotion              promotions?              @relation(fields: [promotion_id], references: [id])
+  status                 car_rent_status          @relation(fields: [status_id], references: [id])
+  car_rent_doc_image     car_rent_doc_image[]
+  car_rent_payment_image car_rent_payment_image[]
+  car_rent_visa          car_rent_visa?
+}
+
+model car_rent_doc_image {
+  id          Int      @id @default(autoincrement())
+  car_rend_id String   @db.VarChar(36)
+  url         String
+  car_rend    car_rent @relation(fields: [car_rend_id], references: [id])
+
+  @@index([car_rend_id])
+}
+
+model car_rent_payment_image {
+  id          Int      @id @default(autoincrement())
+  car_rend_id String   @db.VarChar(36)
+  url         String
+  car_rend    car_rent @relation(fields: [car_rend_id], references: [id])
+
+  @@index([car_rend_id])
+}
+
+model car_rent_visa {
+  id          Int      @id @default(autoincrement())
+  car_rend_id String   @unique @db.VarChar(36)
+  name        String
+  exp_date    DateTime @db.Date
+  cvv         String   @db.VarChar(3)
+  car_rend    car_rent @relation(fields: [car_rend_id], references: [id])
+
+  @@index([car_rend_id])
+}
+
+//----------------reels----------------------------
+model reels {
+  id           String         @id @default(uuid()) @db.VarChar(36)
+  is_active    Boolean        @default(true)
+  title        String
+  detail       String
+  url          String
+  user_id      String         @db.VarChar(36)
+  users        users          @relation(fields: [user_id], references: [id])
+  created_at   DateTime       @default(now())
+  updated_at   DateTime       @updatedAt
+  like_reel    like_reel[]
+  comments     comments[]
+  like_comment like_comment[]
+  like_reply   like_reply[]
+}
+
+model like_reel {
+  id       String @id @default(uuid()) @db.VarChar(36)
+  user_id  String @db.VarChar(36)
+  reels_id String @db.VarChar(36)
+  users    users  @relation(fields: [user_id], references: [id])
+  reels    reels  @relation(fields: [reels_id], references: [id])
+}
+
+//------------------comment---------------
+model comments {
+  id           String   @id @default(uuid()) @db.VarChar(36)
+  is_active    Boolean  @default(true)
+  user_id      String   @db.VarChar(36)
+  reels_id     String   @db.VarChar(36)
+  comment_text String
+  timestamp    DateTime @default(now())
+  users        users    @relation(fields: [user_id], references: [id])
+  reels        reels    @relation(fields: [reels_id], references: [id])
+}
+
+model like_comment {
+  id         String @id @default(uuid()) @db.VarChar(36)
+  user_id    String @db.VarChar(36)
+  comment_id String @db.VarChar(36)
+  users      users  @relation(fields: [user_id], references: [id])
+  reels      reels  @relation(fields: [comment_id], references: [id])
+}
+
+//-----------------Reply-------------------------
+model replys {
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  is_active  Boolean  @default(true)
+  user_id    String   @db.VarChar(36)
+  comment_id String   @db.VarChar(36)
+  reply_text String
+  timestamp  DateTime @default(now())
+  users      users    @relation(fields: [user_id], references: [id])
+}
+
+model like_reply {
+  id       String @id @default(uuid()) @db.VarChar(36)
+  user_id  String @db.VarChar(36)
+  reply_id String @db.VarChar(36)
+  users    users  @relation(fields: [user_id], references: [id])
+  reply    reels  @relation(fields: [reply_id], references: [id])
+}
