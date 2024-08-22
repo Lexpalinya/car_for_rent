@@ -31,6 +31,8 @@ export const EMessage = {
 
   notAllow: "You are not allow",
   userAlreadyExists: "User already exists",
+
+  passwordnotmatch: "Password not match",
 };
 
 export const userType = {

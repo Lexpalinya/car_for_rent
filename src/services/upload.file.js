@@ -15,6 +15,11 @@ export const UploadImage = (image, old_image) => {
         public_id: `IMG_${Date.now()}`,
         result_type: "image",
         format: "webp",
+        // transformation: [
+        //   { width: 1000, crop: "scale" },
+        //   { quality: "auto:best" },
+        //   { fetch_format: "auto" },
+        // ],
       });
       return resolve(result.url);
     } catch (error) {

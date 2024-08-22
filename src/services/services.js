@@ -20,7 +20,7 @@ export const SendCreate = (res, message, data) => {
 export const SendError = (res, statuscode = 400, message, err) => {
   return res.status(statuscode).json({
     status: true,
-    message: message || "Operation Successful",
+    message: message || "Operation failed",
     err,
   });
 };
@@ -28,7 +28,7 @@ export const SendErrorLog = (res, message, err) => {
   console.error(`Erro ${message}:${err}`);
   return res.status(500).json({
     status: false,
-    message: message || "Operation Successful",
+    message: message || "Operation Error Iternal Server",
     err,
   });
 };

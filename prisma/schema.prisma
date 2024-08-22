@@ -45,8 +45,14 @@ model users {
   post          posts[]
   car_rent      car_rent[]
   replys        replys[]
+  like_post     like_post[]
+
+  @@index([username])
+  @@index([email])
+  @@index([phone_number])
 }
 
+//\\//\\
 //----------banner--------------------------
 model banners {
   id         String   @id @default(uuid()) @db.VarChar(36)
@@ -80,12 +86,16 @@ model wallet {
   is_active    Boolean    @default(true)
   user_id      String     @db.VarChar(36)
   promotion_id String     @db.VarChar(36)
-  users        users      @relation(fields: [usersId], references: [id])
+  users        users      @relation(fields: [user_id], references: [id])
   promotions   promotions @relation(fields: [promotion_id], references: [id])
   created_at   DateTime   @default(now())
   updated_at   DateTime   @updatedAt
-  usersId      String     @db.VarChar(36)
+
+  @@index([user_id])
+  @@index([promotion_id])
 }
+
+//\\//\\//\\
 
 model review {
   id         String   @id @default(uuid()) @db.VarChar(36)
@@ -96,8 +106,11 @@ model review {
   comment    String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+
+  @@index([post_id])
 }
 
+//\\//\\
 //--------------------Post-------------------------------
 model post_status {
   id         String   @id @default(uuid()) @db.VarChar(36)
@@ -135,13 +148,16 @@ model labels {
 
 //
 model labels_data {
-  id       String @id @default(uuid()) @db.VarChar(36)
+  id       Int    @id @default(autoincrement())
   post_id  String @db.VarChar(36)
   label_id String @db.VarChar(36)
   post     posts  @relation(fields: [post_id], references: [id])
   label    labels @relation(fields: [label_id], references: [id])
+
+  @@index([post_id])
 }
 
+//\\//\\
 model car_brands {
   id         String   @id @default(uuid()) @db.VarChar(36)
   is_active  Boolean  @default(true)
@@ -189,6 +205,15 @@ model type_of_fuals {
 
 //
 
+model like_post {
+  user_id String @db.VarChar(36)
+  post_id String @db.VarChar(36)
+  users   users  @relation(fields: [user_id], references: [id])
+  posts   posts  @relation(fields: [post_id], references: [id])
+
+  @@id([user_id, post_id])
+}
+
 //------------main table----------------------------------------------------------
 model posts {
   id                        String                      @id @default(uuid()) @db.VarChar(36)
@@ -232,6 +257,7 @@ model posts {
   post_rent_dat             post_rent_data[]
   labels_data               labels_data[]
   car_rent                  car_rent[]
+  like_post                 like_post[]
 
   @@index([car_type_id])
 }
@@ -376,13 +402,18 @@ model reels {
   like_reply   like_reply[]
 }
 
+//\\/\\//\\
+
 model like_reel {
-  id       String @id @default(uuid()) @db.VarChar(36)
   user_id  String @db.VarChar(36)
   reels_id String @db.VarChar(36)
   users    users  @relation(fields: [user_id], references: [id])
   reels    reels  @relation(fields: [reels_id], references: [id])
+
+  @@id([user_id, reels_id])
 }
+
+//\\//\/\/\/\
 
 //------------------comment---------------
 model comments {
