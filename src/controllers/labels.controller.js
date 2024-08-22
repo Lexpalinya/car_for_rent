@@ -26,17 +26,13 @@ const LabelsController = {
       const validate = ValidateLabels(req.body);
       if (validate.length > 0)
         return SendError(
-          re,
+          res,
           400,
           `${EMessage.pleaseInput}: ${validate.join(", ")}`
         );
       const data = req.files;
       if (!data || !data.icon)
-        return SendError(
-          re,
-          400,
-          `${EMessage.pleaseInput}: ${validate.join(", ")}`
-        );
+        return SendError(res, 400, `${EMessage.pleaseInput}: icon`);
       const { name } = req.body;
       const icon = await UploadImage(data.icon.data);
       if (!icon) {
@@ -89,11 +85,7 @@ const LabelsController = {
         return SendError(res, 400, `${EMessage.pleaseInput}:old_icon`);
       const data = req.files;
       if (!data || !data.icon)
-        return SendError(
-          re,
-          400,
-          `${EMessage.pleaseInput}: ${validate.join(", ")}`
-        );
+        return SendError(res, 400, `${EMessage.pleaseInput}: icon`);
       const labelsExists = await FindLablesById(id);
       if (!labelsExists)
         return SendError(res, 404, `${EMessage.notFound}: label id`);

@@ -63,8 +63,8 @@ model promotions {
   id         String     @id @default(uuid()) @db.VarChar(36)
   is_active  Boolean    @default(true)
   is_public  Boolean    @default(true)
-  code       String     @db.VarChar(6)
-  price      Float      @db.Double
+  code       String
+  price      Int        @db.Int
   amount     Int        @db.Int
   count_use  Int        @db.Int
   created_at DateTime   @default(now())
@@ -151,6 +151,7 @@ model car_brands {
   updated_at DateTime @updatedAt
   post       posts[]
 }
+
 //
 
 model level_insurances {
@@ -173,12 +174,14 @@ model insurance_companies {
   updated_at DateTime @updatedAt
   post       posts[]
 }
+
 //
 
 model type_of_fuals {
   id         String   @id @default(uuid()) @db.VarChar(36)
   is_active  Boolean  @default(true)
   name       String
+  icon       String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   post       posts[]

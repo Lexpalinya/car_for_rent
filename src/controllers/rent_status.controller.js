@@ -27,7 +27,7 @@ const Car_Rent_StatusController = {
         return SendError(
           res,
           400,
-          `${EMessage.pleaseInput}:${validate.Join(", ")}`
+          `${EMessage.pleaseInput}:${validate.join(", ")}`
         );
       const { name } = req.body;
       const car_rent_status = await prisma.car_rent_status.create({
@@ -100,6 +100,7 @@ const Car_Rent_StatusController = {
   },
   async SelectOne(req, res) {
     try {
+      const id = req.params.id;
       const status = await FindCar_Rent_StatusById(id);
       if (!status)
         return SendError(res, 404, `${EMessage.notFound}:car_rent_status id`);

@@ -26,17 +26,13 @@ const Car_BrandsController = {
       const validate = ValidateCar_Brands(req.body);
       if (validate.length > 0)
         return SendError(
-          re,
+          res,
           400,
           `${EMessage.pleaseInput}: ${validate.join(", ")}`
         );
       const data = req.files;
       if (!data || !data.icon)
-        return SendError(
-          re,
-          400,
-          `${EMessage.pleaseInput}: ${validate.join(", ")}`
-        );
+        return SendError(res, 400, `${EMessage.pleaseInput}:icon`);
       const { name } = req.body;
       const icon = await UploadImage(data.icon.data);
       if (!icon) {
@@ -89,11 +85,7 @@ const Car_BrandsController = {
         return SendError(res, 400, `${EMessage.pleaseInput}:old_icon`);
       const data = req.files;
       if (!data || !data.icon)
-        return SendError(
-          re,
-          400,
-          `${EMessage.pleaseInput}: ${validate.join(", ")}`
-        );
+        return SendError(res, 400, `${EMessage.pleaseInput}: icon`);
       const car_brandsExists = await FindCar_BrandsById(id);
       if (!car_brandsExists)
         return SendError(res, 404, `${EMessage.notFound}: car_brands id`);

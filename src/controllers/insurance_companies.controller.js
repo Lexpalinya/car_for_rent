@@ -12,37 +12,33 @@ import { UploadImage } from "../services/upload.file";
 import { DataExists, ValidateInsurances_Companies } from "../services/validate";
 import prisma from "../utils/prisma.client";
 
-let key = "insurance_companys";
-let model = "insurance_companys";
+let key = "insurance_companies";
+let model = "insurance_companies";
 let select;
 let where = { is_active: true };
 const RecacheData = async () => {
   await DeleteCachedKey(key);
   await CachDataNoClear(key, model, where, select);
 };
-const insurance_companysController = {
+const Insurance_companysController = {
   async Insert(req, res) {
     try {
       const validate = ValidateInsurances_Companies(req.body);
       if (validate.length > 0)
         return SendError(
-          re,
+          res,
           400,
           `${EMessage.pleaseInput}: ${validate.join(", ")}`
         );
       const data = req.files;
       if (!data || !data.icon)
-        return SendError(
-          re,
-          400,
-          `${EMessage.pleaseInput}: ${validate.join(", ")}`
-        );
+        return SendError(res, 400, `${EMessage.pleaseInput}: icon`);
       const { name } = req.body;
       const icon = await UploadImage(data.icon.data);
       if (!icon) {
         throw new Error("upload image failed");
       }
-      const companies = await prisma.insurance_companys.create({
+      const companies = await prisma.insurance_companies.create({
         data: {
           name,
           icon,
@@ -65,7 +61,7 @@ const insurance_companysController = {
       const insurance_companysExists = await FindInsurance_CompanysById(id);
       if (!insurance_companysExists)
         return SendError(res, 404, `${EMessage.notFound}: companies id`);
-      const companies = await prisma.insurance_companys.update({
+      const companies = await prisma.insurance_companies.update({
         where: {
           id,
         },
@@ -90,9 +86,9 @@ const insurance_companysController = {
       const data = req.files;
       if (!data || !data.icon)
         return SendError(
-          re,
+          res,
           400,
-          `${EMessage.pleaseInput}: ${validate.join(", ")}`
+          `${EMessage.pleaseInput}: icon`
         );
       const insurance_companysExists = await FindInsurance_CompanysById(id);
       if (!insurance_companysExists)
@@ -101,7 +97,7 @@ const insurance_companysController = {
       if (!icon) {
         throw new Error("upload image failed");
       }
-      const companies = await prisma.insurance_companys.update({
+      const companies = await prisma.insurance_companies.update({
         where: {
           id,
         },
@@ -126,7 +122,7 @@ const insurance_companysController = {
       const insurance_companysExists = await FindInsurance_CompanysById(id);
       if (!insurance_companysExists)
         return SendError(res, 404, `${EMessage.notFound}: companies id`);
-      const companies = await prisma.insurance_companys.update({
+      const companies = await prisma.insurance_companies.update({
         where: {
           id,
         },
@@ -171,4 +167,4 @@ const insurance_companysController = {
     }
   },
 };
-export default insurance_companysController;
+export default Insurance_companysController;

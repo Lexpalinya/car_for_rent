@@ -30,7 +30,7 @@ export const CachDataLimit = async (
   key,
   model,
   where = { is_active: true },
-  page,
+  page = 0,
   select,
 
   orderBy = {
@@ -47,6 +47,13 @@ export const CachDataLimit = async (
       select,
       orderBy,
     });
+    const count = await prisma[model].count({
+      where,
+    });
+    data = {
+      count,
+      data,
+    };
     await redis.set(key, JSON.stringify(data), "EX", 3600);
   } else {
     data = JSON.parse(cachData);
@@ -114,14 +121,17 @@ export const CachDataFindByIdNoClear = async (
   let cachedData = await redis.get(key);
   if (!cachedData) {
     const results = await prisma[model].findUnique({ where, select });
+    delete where.id;
     await CachDataNoClear(key, model, where, select, orderBy);
     return results;
   }
   const data = JSON.parse(cachedData);
 
+  // console.log("data :>> ", data, where.id);
   const result = data.find((item) => {
+    // console.log('object :>> ', item.id == where.id);
     return item.id == where.id;
   });
-
+  // console.log("result :>> ", result);
   return result || null;
 };

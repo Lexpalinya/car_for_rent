@@ -100,6 +100,7 @@ const Post_StatusController = {
   },
   async SelectOne(req, res) {
     try {
+      const id = req.params.id;
       const status = await FindPost_StatusById(id);
       if (!status)
         return SendError(res, 404, `${EMessage.notFound}:post_status id`);

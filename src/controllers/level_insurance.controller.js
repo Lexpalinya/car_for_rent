@@ -27,7 +27,7 @@ const Level_InsurancesController = {
         return SendError(
           res,
           400,
-          `${EMessage.pleaseInput}:${validate.Join(", ")}`
+          `${EMessage.pleaseInput}:${validate.join(", ")}`
         );
       const { name } = req.body;
       const level_insurances = await prisma.level_insurances.create({
@@ -100,6 +100,7 @@ const Level_InsurancesController = {
   },
   async SelectOne(req, res) {
     try {
+      const id = req.params.id;
       const level_insurance = await FindLevel_InsurancesById(id);
       if (!level_insurance)
         return SendError(res, 404, `${EMessage.notFound}:level_insurances id`);

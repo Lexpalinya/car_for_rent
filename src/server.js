@@ -47,7 +47,7 @@ const CheckConnectionDatabase = async () => {
 // const c = await CachDataAll("banners", "banners", { is_active: true });
 // console.log("object :>> ", c);
 app.listen(SERVER_PORT, async () => {
-  await CheckConnectionDatabase();
   console.log(`server listening on port:${SERVER_PORT}`);
   console.log(`url: http://localhost:${SERVER_PORT}`);
+  await CheckConnectionDatabase();
 });

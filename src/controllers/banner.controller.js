@@ -27,8 +27,9 @@ const BannerController = {
         return SendError(res, 400, `${EMessage.pleaseInput}:image`);
       }
       const url = await UploadImage(data.image.data);
+      console.log("url :>> ", url);
       if (!url) {
-        return SendError(res, 400, `Upload image failed`);
+        throw new Error("upload image failed");
       }
       const banner = await prisma.banners.create({
         data: {
@@ -48,17 +49,21 @@ const BannerController = {
   async Update(req, res) {
     try {
       const id = req.params.id;
-      const bannerExists = await FindBannerById(id);
-      if (!bannerExists) {
-        return SendError(res, `${EMessage.notFound}: banner id`);
-      }
+      const { old_image } = req.body;
+      if (!old_image)
+        return SendError(res, 400, `${EMessage.pleaseInput} :old_image`);
       const data = req.files;
       if (!data || !data.image) {
         return SendError(res, 400, `${EMessage.pleaseInput}:image`);
       }
+      const bannerExists = await FindBannerById(id);
+      if (!bannerExists) {
+        return SendError(res, `${EMessage.notFound}: banner id`);
+      }
       const url = await UploadImage(data.image.data);
+      console.log("url :>> ", url);
       if (!url) {
-        return SendError(res, 400, `Upload image failed`);
+        throw new Error("upload image failed");
       }
       const banner = await prisma.banners.update({
         where: { id },
@@ -110,7 +115,7 @@ const BannerController = {
       );
     }
   },
-  async SelectIsPublic(res, res) {
+  async SelectIsPublic(req, res) {
     try {
       const bannerData = await CachDataAll(key, model, where, select);
       let banner = bannerData.filter((item) => item.is_public === true);

@@ -7,7 +7,7 @@ export const DataExists = (data) => {
 };
 
 export const ValidateData = (data) => {
-  return Object.keys(data).forEach((key) => !data[key]);
+  return Object.keys(data).filter((key) => !data[key]);
 };
 //----------Promotion-----------------------------
 export const ValidatePromotion = (data) => {
