@@ -1,5 +1,10 @@
-import Jwt from "jsonwebtoken";
-import { JWT_REFRECH_TIMEOUT, JWT_SECRET_KEY, JWT_TIMEOUT } from "./api.config";
+import jwt from "jsonwebtoken";
+import {
+  JWT_REFRECH_TIMEOUT,
+  JWT_SECRET_KEY,
+  JWT_TIMEOUT,
+  SECRET_KEY,
+} from "./api.config";
 import { Encrypt } from "../services/services";
 
 export const generateToken = async (data) => {
@@ -8,30 +13,46 @@ export const generateToken = async (data) => {
       id: data.id,
       loginversion: data.loginversion,
     };
+
+    // Encrypt the user ID
     const encrypt_id = await Encrypt(payload.id);
-    const jwt_data = {
-      expiresIn: String(JWT_TIMEOUT),
-    };
-    const jwt_refrech_data = {
-      expiresIn: String(JWT_REFRECH_TIMEOUT),
-    };
-    const payload_refresh = {
+
+    // JWT options for access and refresh tokens
+    const jwtOptions = { expiresIn: String(JWT_TIMEOUT) };
+    const jwtRefreshOptions = { expiresIn: String(JWT_REFRECH_TIMEOUT) };
+
+    // Create payloads for the tokens
+    const refreshPayload = {
       id: encrypt_id,
       loginversion: data.loginversion,
     };
-    const token = jwt.sing(payload, JWT_SECRET_KEY, jwt_data);
-    const refresh_token = jwt.sing(
-      payload_refresh,
+
+    // Generate the access token
+    const token = jwt.sign(payload, JWT_SECRET_KEY, jwtOptions);
+
+    // Generate the refresh token
+    const refreshToken = jwt.sign(
+      refreshPayload,
       JWT_SECRET_KEY,
-      jwt_refrech_data
+      jwtRefreshOptions
     );
-    const result = {
+
+    // Verify the generated access token (optional)
+    // jwt.verify(token, JWT_SECRET_KEY, (err, decoded) => {
+    //   if (err) {
+    //     console.error("Token verification error:", err);
+    //   } else {
+    //     console.log("Verified token payload:", decoded);
+    //   }
+    // });
+
+    // Return the tokens
+    return {
       token,
-      refresh_token,
+      refresh_token: refreshToken,
     };
-    return result;
   } catch (err) {
-    console.log("Error generating token :=>", err);
+    console.error("Error generating token:", err);
     return false;
   }
 };

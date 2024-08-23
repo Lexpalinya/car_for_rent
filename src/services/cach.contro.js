@@ -37,9 +37,11 @@ export const CachDataLimit = async (
     created_at: "desc",
   }
 ) => {
+  // await redis.del(key);
   const cachData = await redis.get(key);
   let data;
   if (!cachData) {
+    console.log("model :>> ", model);
     data = await prisma[model].findMany({
       take: KLimit,
       skip: KLimit * page,
@@ -54,10 +56,12 @@ export const CachDataLimit = async (
       count,
       data,
     };
+
     await redis.set(key, JSON.stringify(data), "EX", 3600);
   } else {
     data = JSON.parse(cachData);
   }
+
   return data;
 };
 
@@ -73,10 +77,14 @@ export const CachDataFindById = async (
   let cachedData = await redis.get(key);
   if (!cachedData) {
     const results = await prisma[model].findUnique({ where, select });
-    await CachDataAll(key, model, where, select, orderBy);
+    await redis.set(key, JSON.stringify(results), "EX", 3600);
     return results;
   }
-  const data = JSON.parse(cachedData);
+  let data = JSON.parse(cachedData);
+  console.log("data :>> ", data);
+  if (!Array.isArray(data)) {
+    return data;
+  }
 
   const result = data.find((item) => {
     return item.id == where.id;
@@ -133,5 +141,32 @@ export const CachDataFindByIdNoClear = async (
     return item.id == where.id;
   });
   // console.log("result :>> ", result);
+  return result || null;
+};
+
+export const CachDataFindUserNoClear = async (
+  key,
+  model,
+  where,
+  select,
+  search,
+  orderBy = {
+    created_at: "desc",
+  }
+) => {
+  let cachedData = await redis.get(key);
+  if (!cachedData) {
+    const results = await prisma[model].findFirst({ where, select });
+
+    await CachDataNoClear(key, model, { is_active: true }, select, orderBy);
+    return results;
+  }
+  const data = JSON.parse(cachedData);
+
+  // Enhanced find condition
+  const result = data.find((item) => {
+    // Check if the search field exists in the item and matches the condition
+    return item[search] !== undefined && item[search] === where[search];
+  });
   return result || null;
 };

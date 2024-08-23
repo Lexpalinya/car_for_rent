@@ -54,3 +54,29 @@ export const ValidateCar_Rent_Status = (data) => {
   const { name } = data;
   return ValidateData({ name });
 };
+
+//---------------User----------------------------
+
+export const ValidateUserRegistor = (data) => {
+  const { username, email, password, phone_number } = data;
+  return ValidateData({ username, email, password, phone_number });
+};
+
+export const ValidateLogin = (data) => {
+  const { username, password } = data;
+  return ValidateData({ username, password });
+};
+export const ValidateLoginPhoneNumber = (data) => {
+  const { phone_number, password } = data;
+  return ValidateData({ phone_number, password });
+};
+
+export const ValidateChangePassword = (data) => {
+  const { new_password, old_password } = data;
+  return ValidateData({ new_password, old_password });
+};
+
+export const ValidateForgotPassword = (data) => {
+  const { phone_number, new_password } = data;
+  return ValidateData({ phone_number, new_password });
+};

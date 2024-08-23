@@ -1,7 +1,8 @@
 import redis from "../DB/redis";
 
 export const DeleteCachedKey = async (key) => {
-  const keys = await redis.keys(key);
+  const keys = await redis.keys(key+"*");
+  console.log('keys :>> ', keys);
   if (keys.length > 0) {
     const result = await redis.del(keys);
     console.log(`${result} keys deleted successfully`);

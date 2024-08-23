@@ -19,7 +19,7 @@ let select;
 const RecacheData = async () => {
   await DeleteCachedKey(key + "*");
   await CachDataAll(key, model, where, select);
-  CachDataLimit(key + "-" + "0", model, where, select);
+  CachDataLimit(key + "-" + "0", model, where, 0, select);
   let id = "";
   FindPromotionById_ID(id);
 };

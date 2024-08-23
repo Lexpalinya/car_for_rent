@@ -9,6 +9,7 @@ import Level_InsurancesController from "../controllers/level_insurance.controlle
 import Type_of_FualsController from "../controllers/type_of_fuals.controller";
 import Post_StatusController from "../controllers/post_status.controller";
 import Car_Rent_StatusController from "../controllers/rent_status.controller";
+import UsersController from "../controllers/user.controller";
 const route = express.Router();
 
 //-----------Promotion-------------------------
@@ -144,4 +145,20 @@ route.post(`${car_rent_status}/insert`, Car_Rent_StatusController.Insert);
 route.put(`${car_rent_status}/update/:id`, Car_Rent_StatusController.Update);
 route.delete(`${car_rent_status}/delete/:id`, Car_Rent_StatusController.Delete);
 
+//----------Users------------------------------------
+const user = "/users";
+route.get(`${user}/selAllPage`, UsersController.SelectAllPage);
+route.get(`${user}/selOne/:id`, UsersController.SelectOne);
+
+route.post(`${user}/refrechToken`, UsersController.RefrechToken);
+route.post(`${user}/registor`, UsersController.Registor);
+route.post(`${user}/login`, UsersController.Login);
+route.post(`${user}/loginPhoneNumber`, UsersController.LoginPhoneNumber);
+
+route.put(`${user}/update/:id`, UsersController.Update);
+route.put(`${user}/updateProfile/:id`, UsersController.UpdateProfile);
+route.put(`${user}/forgotPassword`, UsersController.ForgotPassword);
+route.put(`${user}/changePassword/:id`, UsersController.ChangePassword);
+
+route.delete(`${user}/delete/:id`, UsersController.Delete);
 export default route;

@@ -1,5 +1,9 @@
 import prisma from "../utils/prisma.client";
-import { CachDataFindById, CachDataFindByIdNoClear } from "./cach.contro";
+import {
+  CachDataFindById,
+  CachDataFindByIdNoClear,
+  CachDataFindUserNoClear,
+} from "./cach.contro";
 
 const findUnique = (model, id, select) => {
   return new Promise(async (resolve, reject) => {
@@ -86,6 +90,117 @@ export const FindInsurance_CompanysById = (id) => {
   });
 };
 
+//--------------------User----------------------------------
+export const FindUserById = (id) => {
+  return CachDataFindById(
+    id + "users",
+    "users",
+    {
+      id,
+      is_active: true,
+    },
+    {
+      id: true,
+      is_active: true,
+      username: true,
+      email: true,
+      phone_number: true,
+      // password: true,
+      profile: true,
+      // fackbook_id: true,
+      // google_id: true,
+      // device_token: true,
+      login_version: true,
+      role: true,
+      created_at: true,
+      updated_at: true,
+    }
+  );
+};
+
+export const FindUserById_ID = (id) => {
+  // console.log("idfaf :>> ", id);
+  return CachDataFindByIdNoClear(
+    "ID_user",
+    "users",
+    {
+      id,
+      is_active: true,
+    },
+    {
+      id: true,
+      username: true,
+      email: true,
+      phone_number: true,
+      password: true,
+      login_version: true,
+      role: true,
+    }
+  );
+};
+
+//--------------
+export const FindUserUserNameAlready = (username) => {
+  return CachDataFindUserNoClear(
+    "ID_user",
+    "users",
+    {
+      username,
+      is_active: true,
+    },
+    {
+      id: true,
+      username: true,
+      email: true,
+      phone_number: true,
+      password: true,
+      login_version: true,
+      role: true,
+    },
+    "username"
+  );
+};
+export const FindUserEmailAlready = (email) => {
+  return CachDataFindUserNoClear(
+    "ID_user",
+    "users",
+    {
+      email,
+      is_active: true,
+    },
+    {
+      id: true,
+      username: true,
+      email: true,
+      phone_number: true,
+      password: true,
+      login_version: true,
+      role: true,
+    },
+    "email"
+  );
+};
+
+export const FindUserPhone_NumberAlready = (phone_number) => {
+  return CachDataFindUserNoClear(
+    "ID_user",
+    "users",
+    {
+      phone_number,
+      is_active: true,
+    },
+    {
+      id: true,
+      username: true,
+      email: true,
+      phone_number: true,
+      password: true,
+      login_version: true,
+      role: true,
+    },
+    "phone_number"
+  );
+};
 // export const FindPromotionById = (id) => {
 //   return findUnique("promotions", id, select);
 // };
