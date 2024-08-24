@@ -27,3 +27,16 @@ export const UploadImage = (image, old_image) => {
     }
   });
 };
+
+export const uploadImages = (images) => {
+  return Promise.all(
+    images.map((img) =>
+      UploadImage(img.data).then((url) => {
+        if (!url) {
+          throw new Error("Upload Image failed");
+        }
+        return url;
+      })
+    )
+  );
+};

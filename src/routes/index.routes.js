@@ -11,6 +11,7 @@ import Post_StatusController from "../controllers/post_status.controller";
 import Car_Rent_StatusController from "../controllers/rent_status.controller";
 import UsersController from "../controllers/user.controller";
 import WalletController from "../controllers/wallet.controller";
+import PostController from "../controllers/post.controller";
 const route = express.Router();
 
 //-----------Promotion-------------------------
@@ -168,8 +169,15 @@ route.delete(`${user}/delete/:id`, UsersController.Delete);
 const wallet = "/wallets";
 route.get(`${wallet}/selAllPage`, WalletController.SelectAllPage);
 route.get(`${wallet}/selByUserId/:id`, WalletController.SelectByUserID);
-route.get(`${wallet}/selByPromotionId/:id`, WalletController.SelectByPromotionID);
+route.get(
+  `${wallet}/selByPromotionId/:id`,
+  WalletController.SelectByPromotionID
+);
 route.post(`${wallet}/insert`, WalletController.Insert);
 route.put(`${wallet}/update/:id`, WalletController.Update);
 route.delete(`${wallet}/delete/:id`, WalletController.Delete);
+//------------Post---------------------------------
+const post = "/post";
+route.post(`${post}/insert`, PostController.Insert);
+route.get(`${post}/selAllPage`, PostController.SelectAllPage);
 export default route;

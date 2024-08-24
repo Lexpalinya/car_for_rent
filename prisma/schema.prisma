@@ -52,7 +52,7 @@ model users {
   @@index([phone_number])
 }
 
-//\\//\\
+//
 //----------banner--------------------------
 model banners {
   id         String   @id @default(uuid()) @db.VarChar(36)
@@ -95,7 +95,7 @@ model wallet {
   @@index([promotion_id])
 }
 
-//\\//\\//\\
+//
 
 model review {
   id         String   @id @default(uuid()) @db.VarChar(36)
@@ -226,7 +226,7 @@ model posts {
   birth_day                 DateTime                    @db.Date
   nationnality              String
   doc_type                  String
-  car_insured               Boolean
+  car_insurance             Boolean
   insurance_company_id      String?                     @db.VarChar(36)
   level_insurance_id        String?                     @db.VarChar(36)
   car_brand_id              String                      @db.VarChar(36)
@@ -237,7 +237,7 @@ model posts {
   driver_system             String
   seat                      String
   car_color                 String
-  description               String
+  description               String                      @db.Text
   address                   String
   deposits_fee              Float                       @db.Double
   status_id                 String                      @db.VarChar(36)
@@ -254,7 +254,7 @@ model posts {
   post_driver_license_image post_driver_license_image[]
   post_car_image            post_car_image[]
   post_insurance_image      post_insurance_image[]
-  post_rent_dat             post_rent_data[]
+  post_rent_data             post_rent_data[]
   labels_data               labels_data[]
   car_rent                  car_rent[]
   like_post                 like_post[]
@@ -298,10 +298,11 @@ model post_insurance_image {
   @@index([post_id])
 }
 
+//-------------------------------
 model post_rent_data {
   id          Int    @id @default(autoincrement())
   post_id     String @db.VarChar(36)
-  varchar     String
+  title       String
   price       Float  @db.Double
   deposit     Float  @db.Double
   system_cost Float  @db.Double

@@ -86,3 +86,56 @@ export const ValidateWallet = (data) => {
   const { user_id, promotion_id } = data;
   return ValidateData({ user_id, promotion_id });
 };
+
+//--------Post---------------------------------
+
+export const ValidatePost = (data) => {
+  const {
+    car_type_id,
+    user_id,
+    frist_name,
+    last_name,
+    birth_day,
+    nationnality,
+    doc_type,
+    car_insurance,
+    car_brand_id,
+    car_version,
+    car_year,
+    car_resgistration,
+    type_of_fual_id,
+    driver_system,
+    seat,
+    car_color,
+    description,
+    address,
+    deposits_fee,
+    status_id,
+    //
+    post_rent_data,
+  } = data;
+  return ValidateData({
+    car_type_id,
+    user_id,
+    frist_name,
+    last_name,
+    birth_day: new Date(birth_day).toString(),
+    nationnality,
+    doc_type,
+    car_insurance,
+    car_brand_id,
+    car_version,
+    car_year,
+    car_resgistration,
+    type_of_fual_id,
+    driver_system,
+    seat,
+    car_color,
+    description,
+    address,
+    deposits_fee,
+    status_id,
+    //
+    post_rent_data,
+  });
+};
