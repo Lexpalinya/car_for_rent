@@ -1,15 +1,37 @@
+import redis from "../DB/redis";
 import { CachDataAll, CachDataLimit } from "../services/cach.contro";
+import { DeleteCachedKey } from "../services/cach.deletekey";
 import { EMessage } from "../services/enum";
-import { FindPromotionById_ID } from "../services/find";
+import {
+  FindPromotionById_ID,
+  FindUserById_ID,
+  FindWalletById,
+} from "../services/find";
 import {
   SendCreate,
   SendError,
   SendErrorLog,
   SendSuccess,
 } from "../services/services";
-import { DataExists } from "../services/validate";
+import { DataExists, ValidateWallet } from "../services/validate";
 import prisma from "../utils/prisma.client";
 
+let key = "wallets";
+let model = "wallet";
+let where = { is_active: true };
+let select = {
+  id: true,
+  user_id: true,
+  promotion_id: true,
+  created_at: true,
+  updated_at: true,
+  users: {
+    select: {
+      username: true,
+    },
+  },
+  promotions: true,
+};
 const WalletController = {
   async Insert(req, res) {
     try {
@@ -31,12 +53,31 @@ const WalletController = {
           400,
           `${EMessage.notFound} :${!userExists ? "user id" : "promotion id"}`
         );
+      if (promotionExists.amount < 1) {
+        return SendError(
+          res,
+          400,
+          `The promotion code:${promotionExists.code} is over `
+        );
+      }
       const wallet = await prisma.wallet.create({
         data: {
           user_id,
           promotion_id,
         },
+        select,
       });
+      const promotion = await prisma.promotions.update({
+        where: { id: promotion_id },
+        data: { amount: promotionExists.amount - 1 },
+      });
+
+      await redis.del(user_id + key, promotion_id + key);
+      await DeleteCachedKey("promotions");
+
+      await DeleteCachedKey(key);
+      await CachDataAll(key, model, where, select);
+
       SendCreate(res, `${EMessage.insertSuccess}`, wallet);
     } catch (error) {
       return SendErrorLog(
@@ -54,7 +95,7 @@ const WalletController = {
       const data = DataExists(req.body);
 
       // Initialize an array of promises to validate relationships
-      const promises = [FindWalletById_ID(id)];
+      const promises = [FindWalletById(id)];
       if (data.user_id) promises.push(FindUserById_ID(data.user_id));
       if (data.promotion_id)
         promises.push(FindPromotionById_ID(data.promotion_id));
@@ -98,7 +139,7 @@ const WalletController = {
   async Delete(req, res) {
     try {
       const id = req.params.id;
-      const walletExists = await FindWalletById_ID(id);
+      const walletExists = await FindWalletById(id);
       if (!walletExists) {
         return SendError(res, 404, `${EMessage.notFound}:wallet id`);
       }
@@ -108,6 +149,14 @@ const WalletController = {
           is_active: false,
         },
       });
+      await redis.del(
+        walletExists.user_id + key,
+        walletExists.promotion_id + key
+      );
+      // await DeleteCachedKey("promotions");
+
+      await DeleteCachedKey(key);
+      await CachDataAll(key, model, where, select);
       return SendSuccess(res, `${EMessage.deleteSuccess}`, wallet);
     } catch (error) {
       return SendErrorLog(
@@ -122,9 +171,27 @@ const WalletController = {
     try {
       const id = req.params.id;
       const wallet = await CachDataAll(
-        key,
+        id + key,
         model,
         { is_active: true, user_id: id },
+        select
+      );
+      return SendSuccess(res, `${EMessage.fetchAllSuccess}`, wallet);
+    } catch (error) {
+      return SendErrorLog(
+        res,
+        `${EMessage.serverError} ${EMessage.errorFetchingAll} wallet by user id`,
+        error
+      );
+    }
+  },
+  async SelectByPromotionID(req, res) {
+    try {
+      const id = req.params.id;
+      const wallet = await CachDataAll(
+        id + key,
+        model,
+        { is_active: true, promotion_id: id },
         select
       );
       return SendSuccess(res, `${EMessage.fetchAllSuccess}`, wallet);

@@ -80,3 +80,9 @@ export const ValidateForgotPassword = (data) => {
   const { phone_number, new_password } = data;
   return ValidateData({ phone_number, new_password });
 };
+
+//-----------------------------------------
+export const ValidateWallet = (data) => {
+  const { user_id, promotion_id } = data;
+  return ValidateData({ user_id, promotion_id });
+};

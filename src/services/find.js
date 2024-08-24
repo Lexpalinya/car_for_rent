@@ -31,7 +31,7 @@ export const FindPromotionById_ID = (id) => {
     "promotions-id",
     "promotions",
     { id, is_active: true },
-    { id: true }
+    { id: true, amount: true, count_use: true }
   );
 };
 
@@ -204,3 +204,11 @@ export const FindUserPhone_NumberAlready = (phone_number) => {
 // export const FindPromotionById = (id) => {
 //   return findUnique("promotions", id, select);
 // };
+
+//----------------Wallet-------------------------------
+export const FindWalletById = (id) => {
+  return CachDataFindById("wallets", "wallet", {
+    id,
+    is_active: true,
+  });
+};

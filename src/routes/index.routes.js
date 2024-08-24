@@ -10,6 +10,7 @@ import Type_of_FualsController from "../controllers/type_of_fuals.controller";
 import Post_StatusController from "../controllers/post_status.controller";
 import Car_Rent_StatusController from "../controllers/rent_status.controller";
 import UsersController from "../controllers/user.controller";
+import WalletController from "../controllers/wallet.controller";
 const route = express.Router();
 
 //-----------Promotion-------------------------
@@ -161,4 +162,14 @@ route.put(`${user}/forgotPassword`, UsersController.ForgotPassword);
 route.put(`${user}/changePassword/:id`, UsersController.ChangePassword);
 
 route.delete(`${user}/delete/:id`, UsersController.Delete);
+
+//-----------Wallets-------------------------------------
+
+const wallet = "/wallets";
+route.get(`${wallet}/selAllPage`, WalletController.SelectAllPage);
+route.get(`${wallet}/selByUserId/:id`, WalletController.SelectByUserID);
+route.get(`${wallet}/selByPromotionId/:id`, WalletController.SelectByPromotionID);
+route.post(`${wallet}/insert`, WalletController.Insert);
+route.put(`${wallet}/update/:id`, WalletController.Update);
+route.delete(`${wallet}/delete/:id`, WalletController.Delete);
 export default route;
