@@ -4,8 +4,11 @@ import {
   FindCar_BrandsById,
   FindCar_typesById,
   FindInsurance_CompanysById,
+  FindLablesById,
   FindLevel_InsurancesById,
   FindPost_StatusById,
+  FindPostById,
+  FindPostById_for_edit,
   FindType_of_FualsById,
   FindUserById_ID,
 } from "../services/find";
@@ -21,6 +24,8 @@ import {
   Post_doc_image,
   Post_driver_license_image,
   Post_insurance_image,
+  Post_label_data,
+  Post_like_posts,
   Post_rent_data,
 } from "../services/subtabel";
 import { UploadImage, uploadImages } from "../services/upload.file";
@@ -116,6 +121,7 @@ const PostController = {
         level_insurance_id,
         //
         post_rent_data,
+        labels_data,
       } = req.body;
       const data = req.files;
       if (typeof car_insurance !== "boolean") {
@@ -177,6 +183,7 @@ const PostController = {
       post_driver_license_image = EnsureArray(post_driver_license_image);
 
       post_car_image = EnsureArray(post_car_image);
+      labels_data = EnsureArray(labels_data);
 
       if (car_insurance) {
         post_insurance_image = EnsureArray(post_insurance_image);
@@ -231,6 +238,19 @@ const PostController = {
         promiseList.push(FindInsurance_CompanysById(insurance_company_id));
         promiseList.push(FindLevel_InsurancesById(level_insurance_id));
       }
+
+      if (labels_data) {
+        const labelChecks = labels_data.map(async (id) => {
+          const label = await FindLablesById(id);
+          if (!label) {
+            SendError(res, `${EMessage.notFound} label with id: ${id}`);
+            return false; // Indicate a failure in finding a label
+          }
+          return true; // Indicate success in finding a label
+        });
+        await Promise.all(labelChecks);
+      }
+
       const [
         car_typeExists,
         userExists,
@@ -314,9 +334,11 @@ const PostController = {
         post_driver_license_image_url,
         post.id
       );
-      const add_post_rent_data = AddDataPost_rent_data(post_rent_data, post.id);
       const add_post_doc_image = AddPost_id_url(post_doc_images_url, post.id);
       const add_post_car_image = AddPost_id_url(post_car_images_url, post.id);
+
+      const add_post_rent_data = AddDataPost_rent_data(post_rent_data, post.id);
+      let label_data_as_post_id;
       const promiseAdd = [
         Post_driver_license_image.insert(add_post_driver_license_image),
         Post_doc_image.insert(add_post_doc_image),
@@ -329,8 +351,11 @@ const PostController = {
           post_insurance_image_url,
           post.id
         );
-
         promiseAdd.push(Post_insurance_image.insert(add_post_insurance_image));
+      }
+      if (labels_data) {
+        label_data_as_post_id = AddDataPostLable_data(labels_data, post.id);
+        promiseAdd.push(Post_label_data.insert(label_data_as_post_id));
       }
       await Promise.all(promiseAdd);
 
@@ -343,6 +368,99 @@ const PostController = {
       );
     }
   },
+
+  async Like_post(req, res) {
+    try {
+      const id = req.params.id;
+      const { user_id } = req.body;
+      const postExists = await FindPostById_for_edit(id);
+      if (!postExists) {
+        return SendError(res, `${EMessage.notFound}: post id`);
+      }
+      const userExists = await FindUserById_ID(user_id);
+      if (!userExists) {
+        return SendError(res, `${EMessage.notFound}: user id`);
+      }
+      const like = Post_like_posts.insertOne({ post_id: id, user_id });
+
+      return SendSuccess(
+        res,
+        `${EMessage.insertSuccess} :like post successfully`,
+        like
+      );
+    } catch (error) {
+      return SendErrorLog(
+        res,
+        `${EMessage.serverError} ${EMessage.insertFailed} post`,
+        error
+      );
+    }
+  },
+  async UnLike_post(req, res) {
+    try {
+      const id = req.params.id;
+      const { user_id } = req.body;
+      const postExists = await FindPostById_for_edit(id);
+      if (!postExists) {
+        return SendError(res, `${EMessage.notFound}: post id`);
+      }
+      const userExists = await FindUserById_ID(user_id);
+      if (!userExists) {
+        return SendError(res, `${EMessage.notFound}: user id`);
+      }
+      const like = Post_like_posts.deleteWhere({ post_id: id, user_id });
+
+      return SendSuccess(
+        res,
+        `${EMessage.insertSuccess} :unlike post successfully`,
+        like
+      );
+    } catch (error) {
+      return SendErrorLog(
+        res,
+        `${EMessage.serverError} ${EMessage.insertFailed} post`,
+        error
+      );
+    }
+  },
+  async Delete(req, res) {
+    try {
+      const id = req.params.id;
+      const postExists = await FindPostById_for_edit(id);
+      if (!postExists) {
+        return SendError(res, `${EMessage.notFound}: post id`);
+      }
+      const post = await prisma.posts.update({
+        where: { id },
+        data: { is_active: false },
+      });
+      return SendSuccess(res, `${EMessage.deleteSuccess}`, post);
+    } catch (error) {
+      return SendErrorLog(
+        res,
+        `${EMessage.serverError} ${EMessage.insertFailed} post`,
+        error
+      );
+    }
+  },
+
+  async SelectOne(req, res) {
+    try {
+      const id = req.params.id;
+      const post = await FindPostById(id);
+      if (!post) {
+        return SendError(res, `${EMessage.notFound}: post id`);
+      }
+      return SendSuccess(res, `${EMessage.fetchAllSuccess} post`, post);
+    } catch (error) {
+      return SendErrorLog(
+        res,
+        `${EMessage.serverError} ${EMessage.insertFailed} post`,
+        error
+      );
+    }
+  },
+
   async SelectAllPage(req, res) {
     try {
       let page = parseInt(req.query.page);
@@ -364,6 +482,50 @@ const PostController = {
       );
     }
   },
+  async SelectAllPageByCar_type_Id(req, res) {
+    try {
+      let page = parseInt(req.query.page);
+      const { car_type_id } = req.body;
+      page = !page || page < 0 ? 0 : page - 1;
+      const user = await CachDataLimit(
+        key + "-" + page,
+        model,
+        { car_type_id, is_active: true },
+        page,
+        select
+      );
+      CachDataLimit(key + "-" + (page + 1), model, where, page + 1, select);
+      return SendSuccess(res, `${EMessage.fetchOneSuccess} user`, user);
+    } catch (error) {
+      SendErrorLog(
+        res,
+        `${EMessage.serverError} ${EMessage.errorFetchingOne}`,
+        error
+      );
+    }
+  },
+  async SelectAllPageByType_of_fuals_Id(req, res) {
+    try {
+      let page = parseInt(req.query.page);
+      const { type_of_fual_id } = req.body;
+      page = !page || page < 0 ? 0 : page - 1;
+      const user = await CachDataLimit(
+        key + "-" + page,
+        model,
+        { type_of_fual_id, is_active: true },
+        page,
+        select
+      );
+      CachDataLimit(key + "-" + (page + 1), model, where, page + 1, select);
+      return SendSuccess(res, `${EMessage.fetchOneSuccess} user`, user);
+    } catch (error) {
+      SendErrorLog(
+        res,
+        `${EMessage.serverError} ${EMessage.errorFetchingOne}`,
+        error
+      );
+    }
+  },
 };
 export default PostController;
 
@@ -371,5 +533,13 @@ const AddDataPost_rent_data = (arr, id) => {
   return arr.map((data) => ({
     post_id: id,
     ...data,
+  }));
+};
+
+const AddDataPostLable_data = (arr, id) => {
+  return arr.map((data) => ({
+    post_id: id,
+    label_id,
+    data,
   }));
 };

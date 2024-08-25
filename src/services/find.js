@@ -2,6 +2,7 @@ import prisma from "../utils/prisma.client";
 import {
   CachDataFindById,
   CachDataFindByIdNoClear,
+  CachDataFindDataId_One,
   CachDataFindUserNoClear,
 } from "./cach.contro";
 
@@ -211,4 +212,71 @@ export const FindWalletById = (id) => {
     id,
     is_active: true,
   });
+};
+
+//--------------Post--------------------------
+export const FindPostById_for_edit = (id) => {
+  return CachDataFindDataId_One(id + "posts-edit", "posts", {
+    id,
+    where: true,
+  });
+};
+
+export const FindPostById = (id) => {
+  return CachDataFindDataId_One(
+    id + "posts",
+    "posts",
+    { id, where: true },
+    {
+      id: true,
+      is_active: true,
+      car_type_id: true,
+      user_id: true,
+      star: true,
+      frist_name: true,
+      last_name: true,
+      birth_day: true,
+      nationnality: true,
+      doc_type: true,
+      car_insurance: true,
+      insurance_company_id: true,
+      level_insurance_id: true,
+      car_brand_id: true,
+      car_version: true,
+      car_year: true,
+      car_resgistration: true,
+      type_of_fual_id: true,
+      driver_system: true,
+      seat: true,
+      car_color: true,
+      description: true,
+      address: true,
+      deposits_fee: true,
+      status_id: true,
+      created_at: true,
+      updated_at: true,
+      insurance_company: true,
+      level_insurance: true,
+      car_brands: true,
+      type_of_fual: true,
+      status: true,
+      users: {
+        select: {
+          username: true,
+          phone_number: true,
+        },
+      },
+      post_doc_image: true,
+      post_car_image: true,
+      post_driver_license_image: true,
+      post_insurance_image: true,
+      post_rent_data: true,
+      labels_data: true,
+      like_post: {
+        select: {
+          user_id: true,
+        },
+      },
+    }
+  );
 };

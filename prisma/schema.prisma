@@ -254,7 +254,7 @@ model posts {
   post_driver_license_image post_driver_license_image[]
   post_car_image            post_car_image[]
   post_insurance_image      post_insurance_image[]
-  post_rent_data             post_rent_data[]
+  post_rent_data            post_rent_data[]
   labels_data               labels_data[]
   car_rent                  car_rent[]
   like_post                 like_post[]

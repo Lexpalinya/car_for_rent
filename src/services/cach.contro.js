@@ -170,3 +170,15 @@ export const CachDataFindUserNoClear = async (
   });
   return result || null;
 };
+
+export const CachDataFindDataId_One = async (key, model, where, select) => {
+  let cachedData = await redis.get(key);
+  if (!cachedData) {
+    const results = await prisma[model].findUnique({ where, select });
+    await redis.set(key, JSON.stringify(results), "EX", 3600);
+    return results;
+  }
+  const result = JSON.parse(cachedData);
+
+  return result || null;
+};
