@@ -68,11 +68,23 @@ const createModelHandler = (modelName) => ({
       }
     });
   },
-  findMany(post_id) {
+  findMany(where) {
     return new Promise(async (resolve, reject) => {
       try {
         const result = await prisma[modelName].findMany({
-          where: { post_id },
+          where,
+        });
+        resolve(result);
+      } catch (error) {
+        reject(error);
+      }
+    });
+  },
+  findUnique(where) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const result = await prisma[modelName].findUnique({
+          where,
         });
         resolve(result);
       } catch (error) {

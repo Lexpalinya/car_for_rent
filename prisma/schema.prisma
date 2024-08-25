@@ -271,6 +271,7 @@ model post_doc_image {
   @@index([post_id])
 }
 
+//\\//\\
 model post_driver_license_image {
   id      Int    @id @default(autoincrement())
   post_id String @db.VarChar(36)
@@ -280,6 +281,7 @@ model post_driver_license_image {
   @@index([post_id])
 }
 
+//\\//\\
 model post_car_image {
   id      Int    @id @default(autoincrement())
   post_id String @db.VarChar(36)
@@ -289,6 +291,7 @@ model post_car_image {
   @@index([post_id])
 }
 
+//\\//\\//\\-
 model post_insurance_image {
   id      Int    @id @default(autoincrement())
   post_id String @db.VarChar(36)
@@ -298,6 +301,7 @@ model post_insurance_image {
   @@index([post_id])
 }
 
+//\\//\\//
 //-------------------------------
 model post_rent_data {
   id          Int    @id @default(autoincrement())
@@ -312,6 +316,7 @@ model post_rent_data {
   @@index([post_id])
 }
 
+//\\//
 //------------car_rent-------------------------------
 model car_rent_status {
   id         String     @id @default(uuid()) @db.VarChar(36)

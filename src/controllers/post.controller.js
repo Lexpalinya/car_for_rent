@@ -15,6 +15,7 @@ import {
 import {
   AddPost_id_url,
   EnsureArray,
+  SendCreate,
   SendError,
   SendErrorLog,
   SendSuccess,
@@ -29,7 +30,7 @@ import {
   Post_rent_data,
 } from "../services/subtabel";
 import { UploadImage, uploadImages } from "../services/upload.file";
-import { ValidatePost } from "../services/validate";
+import { DataExists, ValidatePost } from "../services/validate";
 import prisma from "../utils/prisma.client";
 let key = "posts";
 const model = "posts";
@@ -175,7 +176,9 @@ const PostController = {
           }`
         );
       //--------------------
-      post_rent_data = JSON.parse(post_rent_data);
+      if (typeof post_rent_data === "string") {
+        post_rent_data = JSON.parse(post_rent_data);
+      }
       post_rent_data = EnsureArray(post_rent_data);
 
       post_doc_image = EnsureArray(post_doc_image);
@@ -369,24 +372,90 @@ const PostController = {
     }
   },
 
-  async Like_post(req, res) {
+  async Update(req, res) {
     try {
       const id = req.params.id;
-      const { user_id } = req.body;
       const postExists = await FindPostById_for_edit(id);
+      if (typeof data.star !== "number") {
+        data.star = parseFloat(data.star);
+      }
+      if (typeof data.deposits_fee !== "number") {
+        data.deposits_fee = parseFloat(data.deposits_fee);
+      }
+      if (data.car_insurance && typeof data.car_insurance !== "boolean") {
+        data.car_insurance = data.car_insurance === "true";
+      }
+
       if (!postExists) {
         return SendError(res, `${EMessage.notFound}: post id`);
       }
-      const userExists = await FindUserById_ID(user_id);
-      if (!userExists) {
-        return SendError(res, `${EMessage.notFound}: user id`);
+      const data = DataExists(req.body);
+      let promiseFind = [];
+      if (data.user_id) {
+        promiseFind.push(FindUserById_ID(data.user_id));
       }
-      const like = Post_like_posts.insertOne({ post_id: id, user_id });
+      if (data.car_type_id) {
+        promiseFind.push(FindCar_typesById(data.car_type_id));
+      }
+      if (data.car_brand_id) {
+        promiseFind.push(FindCar_BrandsById(data.car_brand_id));
+      }
+      if (data.type_of_fual_id) {
+        promiseFind.push(FindType_of_FualsById(data.type_of_fual_id));
+      }
+      if (data.status_id) {
+        promiseFind.push(FindPost_StatusById(data.status_id));
+      }
+      if (data.insurance_company_id) {
+        promiseFind.push(FindInsurance_CompanysById(data.insurance_company_id));
+      }
+      if (data.level_insurance_id) {
+        promiseFind.push(FindLevel_InsurancesById(data.level_insurance_id));
+      }
+      let userExists,
+        car_typeExists,
+        car_brandExists,
+        type_of_fualExists,
+        post_statusExists,
+        insurance_companyExists,
+        level_insuranceExists;
 
+      if (
+        (data.user_id && !userExists) ||
+        (data.car_type_id && !car_typeExists) ||
+        (data.car_brand_id && !car_brandExists) ||
+        (data.type_of_fual_id && !type_of_fualExists) ||
+        (data.status_id && !post_statusExists) ||
+        (data.insurance_company_id && !insurance_companyExists) ||
+        (data.level_insurance_id && !level_insuranceExists)
+      ) {
+        const notFoundEntity =
+          data.user_id && !userExists
+            ? "user"
+            : data.car_type_id && !car_typeExists
+            ? "car_type"
+            : data.car_brand_id && !car_brandExists
+            ? "car_brand"
+            : data.type_of_fual_id && !type_of_fualExists
+            ? "type_of_fuals"
+            : data.status_id && !post_statusExists
+            ? "post_status"
+            : data.insurance_company_id && !insurance_companyExists
+            ? "insurance_company"
+            : "level_insurance";
+
+        return SendError(res, 404, `${EMessage.notFound}: ${notFoundEntity}`);
+      }
+      const post = await prisma.posts.update({
+        where: {
+          id,
+        },
+        data,
+      });
       return SendSuccess(
         res,
-        `${EMessage.insertSuccess} :like post successfully`,
-        like
+        `${EMessage.updateSuccess} post single data`,
+        post
       );
     } catch (error) {
       return SendErrorLog(
@@ -396,29 +465,291 @@ const PostController = {
       );
     }
   },
-  async UnLike_post(req, res) {
+
+  async UpdatePost_doc_image(req, res) {
     try {
       const id = req.params.id;
-      const { user_id } = req.body;
-      const postExists = await FindPostById_for_edit(id);
-      if (!postExists) {
-        return SendError(res, `${EMessage.notFound}: post id`);
+      let { post_doc_image_data } = req.body;
+      if (!post_doc_image_data) {
+        return SendError(res, 400, `${EMessage.pleaseInput}: post_doc_image `);
       }
-      const userExists = await FindUserById_ID(user_id);
-      if (!userExists) {
-        return SendError(res, `${EMessage.notFound}: user id`);
+      if (typeof post_doc_image_data === "string") {
+        post_doc_image_data = JSON.parse(post_doc_image_data);
       }
-      const like = Post_like_posts.deleteWhere({ post_id: id, user_id });
+      if (!post_doc_image_data.id || !post_doc_image_data.url) {
+        return SendError(
+          res,
+          400,
+          `${EMessage.pleaseInput}: post_doc_image type object {id,post_id,url}`
+        );
+      }
+      const data = req.files;
+      if (!data || !data.post_doc_image) {
+        return SendError(res, 400, `${EMessage.pleaseInput}: post_doc_image`);
+      }
+      const [postExists, post_doc_imageExists] = await Promise.all([
+        FindPostById_for_edit(id),
+        Post_doc_image.findUnique({ id: post_doc_image_data.id }),
+      ]);
 
+      if (!postExists || post_doc_imageExists) {
+        return SendError(
+          res,
+          `${EMessage.notFound}: ${!postExists ? "post" : "post_doc_image"}id`
+        );
+      }
+      const post_doc_image_url = await UploadImage(
+        data.post_doc_image.data,
+        post_doc_image_data.url
+      );
+      if (!post_doc_image_url) {
+        throw new Error("upload post_doc_image failed");
+      }
+      const post_doc_image_Update = await Post_doc_image.update(
+        post_doc_image_data.id
+      );
       return SendSuccess(
         res,
-        `${EMessage.insertSuccess} :unlike post successfully`,
-        like
+        `${EMessage.updateSuccess} update post_doc_image`,
+        post_doc_image_Update
       );
     } catch (error) {
       return SendErrorLog(
         res,
-        `${EMessage.serverError} ${EMessage.insertFailed} post`,
+        `${EMessage.serverError} ${EMessage.updateFailed} post`,
+        error
+      );
+    }
+  },
+  //----------------------------------------------
+
+  async UpdatePost_driver_license_image(req, res) {
+    try {
+      const id = req.params.id;
+      let { post_driver_license_image } = req.body;
+      if (!post_driver_license_image) {
+        return SendError(
+          res,
+          400,
+          `${EMessage.pleaseInput}: post_driver_license_image `
+        );
+      }
+      if (typeof post_driver_license_image === "string") {
+        post_driver_license_image = JSON.parse(post_driver_license_image);
+      }
+      if (!post_driver_license_image.id || !post_driver_license_image.url) {
+        return SendError(
+          res,
+          400,
+          `${EMessage.pleaseInput}: post_driver_license_image type object {id,post_id,url}`
+        );
+      }
+      const data = req.files;
+      if (!data || !data.post_driver_license_image) {
+        return SendError(
+          res,
+          400,
+          `${EMessage.pleaseInput}: post_driver_license_image`
+        );
+      }
+      const [postExists, post_car_imageExists] = await Promise.all([
+        FindPostById_for_edit(id),
+        Post_driver_license_image.findUnique({
+          id: post_driver_license_image.id,
+        }),
+      ]);
+
+      if (!postExists || post_car_imageExists) {
+        return SendError(
+          res,
+          `${EMessage.notFound}: ${!postExists ? "post" : "post_car_image"}id`
+        );
+      }
+      const post_driver_license_image_url = await UploadImage(
+        data.post_driver_license_image.data,
+        post_driver_license_image.url
+      );
+      if (!post_driver_license_image_url) {
+        throw new Error("upload post_driver_license_image failed");
+      }
+      const post_drvier_license_Update = await Post_driver_license_image.update(
+        post_driver_license_image.id
+      );
+      return SendSuccess(
+        res,
+        `${EMessage.updateSuccess} update post_drvier_license`,
+        post_drvier_license_Update
+      );
+    } catch (error) {
+      return SendErrorLog(
+        res,
+        `${EMessage.serverError} ${EMessage.updateFailed} post`,
+        error
+      );
+    }
+  },
+  async UpdatePost_car_image(req, res) {
+    try {
+      const id = req.params.id;
+      let { post_car_image_data } = req.body;
+      if (!post_car_image_data) {
+        return SendError(res, 400, `${EMessage.pleaseInput}: post_car_image `);
+      }
+      if (typeof post_car_image_data === "string") {
+        post_car_image_data = JSON.parse(post_car_image_data);
+      }
+      if (!post_car_image_data.id || !post_car_image_data.url) {
+        return SendError(
+          res,
+          400,
+          `${EMessage.pleaseInput}: post_car_image type object {id,post_id,url}`
+        );
+      }
+      const data = req.files;
+      if (!data || !data.post_car_image) {
+        return SendError(res, 400, `${EMessage.pleaseInput}: post_car_image`);
+      }
+      const [postExists, post_car_imageExists] = await Promise.all([
+        FindPostById_for_edit(id),
+        Post_car_image.findUnique({ id: post_car_image_data.id }),
+      ]);
+
+      if (!postExists || post_car_imageExists) {
+        return SendError(
+          res,
+          `${EMessage.notFound}: ${!postExists ? "post" : "post_car_image"}id`
+        );
+      }
+      const post_car_image_url = await UploadImage(
+        data.post_car_image.data,
+        post_car_image_data.url
+      );
+      if (!post_car_image_url) {
+        throw new Error("upload post_car_image failed");
+      }
+      const post_car_image_Update = await Post_car_image.update(
+        post_car_image_data.id
+      );
+      return SendSuccess(
+        res,
+        `${EMessage.updateSuccess} update post_car_image`,
+        post_car_image_Update
+      );
+    } catch (error) {
+      return SendErrorLog(
+        res,
+        `${EMessage.serverError} ${EMessage.updateFailed} post`,
+        error
+      );
+    }
+  },
+  //---------------------------------------------
+  async UpdatePos_insurance_image(req, res) {
+    try {
+      const id = req.params.id;
+      let { post_insurance_image_data } = req.body;
+      if (!post_insurance_image_data) {
+        return SendError(
+          res,
+          400,
+          `${EMessage.pleaseInput}: post_insurance_image `
+        );
+      }
+      if (typeof post_insurance_image_data === "string") {
+        post_insurance_image_data = JSON.parse(post_insurance_image_data);
+      }
+      if (!post_insurance_image_data.id || !post_insurance_image_data.url) {
+        return SendError(
+          res,
+          400,
+          `${EMessage.pleaseInput}: post_insurance_image type object {id,post_id,url}`
+        );
+      }
+      const data = req.files;
+      if (!data || !data.post_insurance_image) {
+        return SendError(
+          res,
+          400,
+          `${EMessage.pleaseInput}: post_insurance_image`
+        );
+      }
+      const [postExists, post_insurance_imageExists] = await Promise.all([
+        FindPostById_for_edit(id),
+        Post_insurance_image.findUnique({ id: post_insurance_image_data.id }),
+      ]);
+
+      if (!postExists || post_insurance_imageExists) {
+        return SendError(
+          res,
+          `${EMessage.notFound}: ${
+            !postExists ? "post" : "post_insurance_image"
+          }id`
+        );
+      }
+      const post_insurance_image_url = await UploadImage(
+        data.post_insurance_image.data,
+        post_insurance_image_data.url
+      );
+      if (!post_insurance_image_url) {
+        throw new Error("upload post_insurance_image failed");
+      }
+      const post_insurance_image_Update = await post_insurance_image.update(
+        post_insurance_image_data.id
+      );
+      return SendSuccess(
+        res,
+        `${EMessage.updateSuccess} update post_insurance_image`,
+        post_insurance_image_Update
+      );
+    } catch (error) {
+      return SendErrorLog(
+        res,
+        `${EMessage.serverError} ${EMessage.updateFailed} post`,
+        error
+      );
+    }
+  },
+  async UpdatePost_rent_data(req, res) {
+    try {
+      const post_id = req.params.id;
+      let { id, title, price, deposit, system_cost, total } = req.body;
+      if (typeof price !== "number") {
+        price = parseFloat(price);
+      }
+      if (typeof deposit !== "number") {
+        deposit = parseFloat(deposit);
+      }
+      if (typeof system_cost !== "number") {
+        system_cost = parseFloat(system_cost);
+      }
+      if (typeof total !== "number") {
+        system_cost = parseFloat(system_cost);
+      }
+
+      const postExists = await FindPostById_for_edit(post_id);
+      if (!postExists) {
+        return SendError(res, `${EMessage.notFound}: post id`);
+      }
+      const post_rent_dataExists = await Post_rent_data.findUnique({ id });
+      if (!post_rent_dataExists) {
+        return SendError(res, `${EMessage.notFound}: post_rent_data id`);
+      }
+      const post_rent_data = await Post_rent_data.update(id, {
+        title,
+        price,
+        deposit,
+        system_cost,
+        total,
+      });
+      return SendSuccess(
+        res,
+        `${EMessage.updateSuccess} update post_insurance_image`,
+        post_rent_data
+      );
+    } catch (error) {
+      return SendErrorLog(
+        res,
+        `${EMessage.serverError} ${EMessage.updateFailed} post`,
         error
       );
     }
