@@ -28,6 +28,20 @@ export const UploadImage = (image, old_image) => {
   });
 };
 
+export const DeleteImage = (image) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const split_url = image.split("/");
+      const img_id = split_url[split_url.length - 1].split(".")[0];
+      const result = await cloudinary.uploader.destroy(img_id);
+
+      return resolve(result);
+    } catch (error) {
+      return reject(error);
+    }
+  });
+};
+
 export const uploadImages = (images) => {
   return Promise.all(
     images.map((img) =>

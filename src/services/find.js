@@ -218,7 +218,7 @@ export const FindWalletById = (id) => {
 export const FindPostById_for_edit = (id) => {
   return CachDataFindDataId_One(id + "posts-edit", "posts", {
     id,
-    where: true,
+    is_active: true,
   });
 };
 
@@ -226,7 +226,7 @@ export const FindPostById = (id) => {
   return CachDataFindDataId_One(
     id + "posts",
     "posts",
-    { id, where: true },
+    { id, is_active: true },
     {
       id: true,
       is_active: true,
@@ -271,7 +271,18 @@ export const FindPostById = (id) => {
       post_driver_license_image: true,
       post_insurance_image: true,
       post_rent_data: true,
-      labels_data: true,
+      labels_data: {
+        select: {
+          id: true,
+          label_id: true,
+          label: {
+            select: {
+              icon: true,
+              name: true,
+            },
+          },
+        },
+      },
       like_post: {
         select: {
           user_id: true,

@@ -113,6 +113,7 @@ export const ValidatePost = (data) => {
     status_id,
     //
     post_rent_data,
+    labels_data,
   } = data;
   return ValidateData({
     car_type_id,
@@ -137,5 +138,11 @@ export const ValidatePost = (data) => {
     status_id,
     //
     post_rent_data,
+    labels_data,
   });
+};
+
+export const ValidatePost_rent_data = (data) => {
+  let { title, price, deposit, system_cost, total } = data;
+  return ValidateData({ title, price, deposit, system_cost, total });
 };

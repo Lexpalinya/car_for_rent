@@ -12,6 +12,7 @@ import Car_Rent_StatusController from "../controllers/rent_status.controller";
 import UsersController from "../controllers/user.controller";
 import WalletController from "../controllers/wallet.controller";
 import PostController from "../controllers/post.controller";
+import Post_rent_dataController from "../controllers/post_rent_dataController";
 const route = express.Router();
 
 //-----------Promotion-------------------------
@@ -178,6 +179,32 @@ route.put(`${wallet}/update/:id`, WalletController.Update);
 route.delete(`${wallet}/delete/:id`, WalletController.Delete);
 //------------Post---------------------------------
 const post = "/post";
-route.post(`${post}/insert`, PostController.Insert);
 route.get(`${post}/selAllPage`, PostController.SelectAllPage);
+route.get(`${post}/selOne/:id`, PostController.SelectOne);
+route.get(
+  `${post}/selAllPageByType_of_fuals_id/:type_of_fual_id`,
+  PostController.SelectAllPageByType_of_fuals_Id
+);
+route.get(
+  `${post}/selAllPageByCar_type_id/:car_type_id`,
+  PostController.SelectAllPageByCar_type_Id
+);
+route.post(`${post}/insert`, PostController.Insert);
+route.put(`${post}/update/:id`, PostController.Update);
+route.delete(`${post}/delete/:id`, PostController.Delete);
+
+//-------Update Post Rent data------------
+route.put(
+  `${post}/updatePost_rent_data_insert/:id`,
+  Post_rent_dataController.InsertPost_rent_data
+);
+route.put(
+  `${post}/updatePost_rent_data_update/:id`,
+  Post_rent_dataController.UpdatePost_rent_data
+);
+route.put(
+  `${post}/updatePost_rent_data_delete/:id`,
+  Post_rent_dataController.DeletePost_rent_data
+);
+
 export default route;
