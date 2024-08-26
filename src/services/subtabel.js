@@ -92,6 +92,19 @@ const createModelHandler = (modelName) => ({
       }
     });
   },
+  findFirst(where) {
+    prisma.users.findFirst;
+    return new Promise(async (resolve, reject) => {
+      try {
+        const result = await prisma[modelName].findFirst({
+          where,
+        });
+        resolve(result);
+      } catch (error) {
+        reject(error);
+      }
+    });
+  },
 });
 
 // Creating handlers for each model

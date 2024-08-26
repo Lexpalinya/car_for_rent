@@ -1,9 +1,14 @@
+import redis from "../DB/redis";
 import { CachDataAll } from "../services/cach.contro";
 import { EMessage } from "../services/enum";
-import { FindLablesById } from "../services/find";
+import { FindLablesById, FindPostById_for_edit } from "../services/find";
 import { SendError, SendErrorLog, SendSuccess } from "../services/services";
+import { ValidateLabels_data } from "../services/validate";
 import prisma from "../utils/prisma.client";
 
+let key = "posts";
+let model = "labels_data";
+let select;
 const Labels_DataController = {
   async Insert(req, res) {
     try {
@@ -16,7 +21,7 @@ const Labels_DataController = {
         );
       const { post_id, label_id } = req.body;
       const [postExists, labelExists] = await Promise.all([
-        FindPostById_ID(post_id),
+        FindPostById_for_edit(post_id),
         FindLablesById(label_id),
       ]);
       if (!postExists || !labelExists)
@@ -31,8 +36,12 @@ const Labels_DataController = {
           label_id,
         },
       });
+      await redis.del(postExists.id + key, postExists.id + key);
       return SendSuccess(res, `${EMessage.insertSuccess}`, label_data);
     } catch (error) {
+      if (error.code === "P2002") {
+        return SendError(res, 400, `this post have label tag`);
+      }
       return SendErrorLog(
         res,
         `${EMessage.serverError} ${EMessage.insertFailed}`,
@@ -42,12 +51,17 @@ const Labels_DataController = {
   },
   async Delete(req, res) {
     try {
-      const id = req.params.id;
+      let id = parseInt(`${req.params.id}`, 10);
+
       const label_data = await prisma.labels_data.delete({
         where: { id },
       });
       return SendSuccess(res, `${EMessage.deleteSuccess}`, label_data);
     } catch (error) {
+      if (error.code === "P2025") {
+        return SendError(res, 400, `Record to delete does not exist`);
+      }
+      await redis.del(postExists.id + key, postExists.id + key);
       return SendErrorLog(
         res,
         `${EMessage.serverError} ${EMessage.deleteFailed}`,
@@ -57,13 +71,24 @@ const Labels_DataController = {
   },
   async SelectByPostID(req, res) {
     try {
-      const id = parseInt(`${req.params.id}`, 10);
+      const id = req.params.id;
 
       const label_data = await CachDataAll(
-        key,
+        id + key,
         model,
-        { post_id: id, is_active: true },
-        select
+        { post_id: id },
+        {
+          id: true,
+          label_id: true,
+          post_id: true,
+          label: {
+            select: {
+              name: true,
+              icon: true,
+            },
+          },
+        },
+        {}
       );
       return SendSuccess(res, `${EMessage.fetchAllSuccess}`, label_data);
     } catch (error) {

@@ -99,8 +99,11 @@ let select = {
     },
   },
 };
-
-const RecacheData = async ({ key, car_type_id_key, type_of_fual_id_key }) => {
+export const RecacheDataPost = async ({
+  key,
+  car_type_id_key,
+  type_of_fual_id_key,
+}) => {
   await Promise.all([
     DeleteCachedKey(key),
     DeleteCachedKey(car_type_id_key),
@@ -271,7 +274,12 @@ const PostController = {
         const labelChecks = labels_data.map(async (id) => {
           const label = await FindLablesById(id);
           if (!label) {
-            SendError(res, 404, `${EMessage.notFound} label with id: ${id}`);
+            SendError(
+              res,
+              404,
+              404,
+              `${EMessage.notFound} label with id: ${id}`
+            );
             return false; // Indicate a failure in finding a label
           }
           return true; // Indicate success in finding a label
@@ -386,11 +394,12 @@ const PostController = {
         promiseAdd.push(Post_label_data.insert(label_data_as_post_id));
       }
       await Promise.all(promiseAdd);
-      await RecacheData({
+      await RecacheDataPost({
         key,
         car_type_id_key: car_type_id + key,
         type_of_fual_id_key: type_of_fual_id + key,
       });
+      await redis.del(id + "posts-edit");
 
       return SendCreate(res, `${EMessage.insertSuccess}`, post);
     } catch (error) {
@@ -419,7 +428,7 @@ const PostController = {
       }
 
       if (!postExists) {
-        return SendError(res, `${EMessage.notFound}: post id`);
+        return SendError(res, 404, `${EMessage.notFound}: post id`);
       }
       console.log("data :>> ", data);
 
@@ -511,11 +520,12 @@ const PostController = {
         },
         data,
       });
-      await RecacheData({
+      await RecacheDataPost({
         key,
         car_type_id_key: postExists.car_type_id + key,
         type_of_fual_id_key: postExists.type_of_fual_id + key,
       });
+      await redis.del(postExists.id + key);
 
       return SendSuccess(
         res,
@@ -536,18 +546,18 @@ const PostController = {
       const id = req.params.id;
       const postExists = await FindPostById_for_edit(id);
       if (!postExists) {
-        return SendError(res, `${EMessage.notFound}: post id`);
+        return SendError(res, 404, `${EMessage.notFound}: post id`);
       }
       const post = await prisma.posts.update({
         where: { id },
         data: { is_active: false },
       });
-      await RecacheData({
+      await RecacheDataPost({
         key,
         car_type_id_key: postExists.car_type_id + key,
         type_of_fual_id_key: postExists.type_of_fual_id + key,
       });
-      await redis.del(id + "posts-edit");
+      await redis.del(id + "posts-edit", id + key);
       return SendSuccess(res, `${EMessage.deleteSuccess}`, post);
     } catch (error) {
       return SendErrorLog(
@@ -564,7 +574,7 @@ const PostController = {
       await redis.del(id + key);
       const post = await FindPostById(id);
       if (!post) {
-        return SendError(res, `${EMessage.notFound}: post id`);
+        return SendError(res, 404, `${EMessage.notFound}: post id`);
       }
       return SendSuccess(res, `${EMessage.fetchAllSuccess} post`, post);
     } catch (error) {

@@ -2,7 +2,13 @@ import { EMessage } from "../services/enum";
 import { FindPostById_for_edit } from "../services/find";
 import { SendError, SendErrorLog, SendSuccess } from "../services/services";
 import { Post_rent_data } from "../services/subtabel";
-import { ValidatePost_rent_data } from "../services/validate";
+import {
+  ValidatePost_rent_data,
+  ValidatePost_rent_dataUpdate,
+} from "../services/validate";
+import { RecacheDataPost } from "./post.controller";
+
+let key = "posts";
 
 const Post_rent_dataController = {
   async InsertPost_rent_data(req, res) {
@@ -31,7 +37,7 @@ const Post_rent_dataController = {
 
       const postExists = await FindPostById_for_edit(post_id);
       if (!postExists) {
-        return SendError(res, `${EMessage.notFound}: post id`);
+        return SendError(res, 404, `${EMessage.notFound}: post id`);
       }
       const post_rent_data = await Post_rent_data.insertOne({
         post_id,
@@ -41,6 +47,12 @@ const Post_rent_dataController = {
         system_cost,
         total,
       });
+      await RecacheDataPost({
+        key,
+        car_type_id_key: postExists.car_type_id + key,
+        type_of_fual_id_key: postExists.type_of_fual_id + key,
+      });
+
       return SendSuccess(
         res,
         `${EMessage.insertSuccess} post_rent_data`,
@@ -59,7 +71,11 @@ const Post_rent_dataController = {
     try {
       const post_id = req.params.id;
       let { id, title, price, deposit, system_cost, total } = req.body;
-      const validate = ValidatePost_rent_data(req.body);
+      const validate = ValidatePost_rent_dataUpdate(req.body);
+      if (typeof id !== "number") {
+        id = parseInt(id);
+      }
+
       if (validate.length > 0)
         return SendError(
           res,
@@ -76,23 +92,34 @@ const Post_rent_dataController = {
         system_cost = parseFloat(system_cost);
       }
       if (typeof total !== "number") {
-        system_cost = parseFloat(system_cost);
+        total = parseFloat(total);
       }
 
-      const postExists = await FindPostById_for_edit(post_id);
-      if (!postExists) {
-        return SendError(res, `${EMessage.notFound}: post id`);
+      const [postExists, post_rent_dataExists] = await Promise.all([
+        FindPostById_for_edit(post_id),
+        Post_rent_data.findUnique({ id }),
+      ]);
+      if (!postExists || !post_rent_dataExists) {
+        return SendError(
+          res,
+          404,
+          `${EMessage.notFound}: ${
+            !postExists ? "post id" : "post_rent_data id"
+          }`
+        );
       }
-      const post_rent_dataExists = await Post_rent_data.findUnique({ id });
-      if (!post_rent_dataExists) {
-        return SendError(res, `${EMessage.notFound}: post_rent_data id`);
-      }
+
       const post_rent_data = await Post_rent_data.update(id, {
         title,
         price,
         deposit,
         system_cost,
         total,
+      });
+      await RecacheDataPost({
+        key,
+        car_type_id_key: postExists.car_type_id + key,
+        type_of_fual_id_key: postExists.type_of_fual_id + key,
       });
       return SendSuccess(
         res,
@@ -111,7 +138,18 @@ const Post_rent_dataController = {
   async DeletePost_rent_data(req, res) {
     try {
       const post_id = req.params.id;
-      const id = req.params.id;
+      let id = req.body.post_rent_data_id;
+      if (!id) {
+        return SendError(
+          res,
+          404,
+          `${EMessage.pleaseInput}:post_rent_data_id `
+        );
+      }
+      if (typeof id !== "number") {
+        id = parseInt(id);
+      }
+
       const [post_rent_dataExists, postExists] = await Promise.all([
         Post_rent_data.findUnique({ id }),
         FindPostById_for_edit(post_id),
@@ -119,13 +157,19 @@ const Post_rent_dataController = {
       if (!post_rent_dataExists || !postExists) {
         return SendError(
           res,
+          404,
           `${EMessage.notFound}: ${
-            post_rent_dataExists ? "post_rent_data id" : "post id"
+            !post_rent_dataExists ? "post_rent_data id" : "post id"
           }`
         );
       }
 
       const post_rent_data = await Post_rent_data.delete(id);
+      await RecacheDataPost({
+        key,
+        car_type_id_key: postExists.car_type_id + key,
+        type_of_fual_id_key: postExists.type_of_fual_id + key,
+      });
       return SendSuccess(
         res,
         `${EMessage.deleteSuccess} post_rent_data`,

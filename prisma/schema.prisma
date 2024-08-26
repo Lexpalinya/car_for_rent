@@ -154,6 +154,7 @@ model labels_data {
   post     posts  @relation(fields: [post_id], references: [id])
   label    labels @relation(fields: [label_id], references: [id])
 
+  @@unique([post_id, label_id])
   @@index([post_id])
 }
 

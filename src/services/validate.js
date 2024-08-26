@@ -146,3 +146,13 @@ export const ValidatePost_rent_data = (data) => {
   let { title, price, deposit, system_cost, total } = data;
   return ValidateData({ title, price, deposit, system_cost, total });
 };
+
+export const ValidatePost_rent_dataUpdate = (data) => {
+  let { id, title, price, deposit, system_cost, total } = data;
+  return ValidateData({ id, title, price, deposit, system_cost, total });
+};
+
+export const ValidateLabels_data = (data) => {
+  const { post_id, label_id } = data;
+  return ValidateData({ post_id, label_id });
+};

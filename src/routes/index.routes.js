@@ -13,6 +13,14 @@ import UsersController from "../controllers/user.controller";
 import WalletController from "../controllers/wallet.controller";
 import PostController from "../controllers/post.controller";
 import Post_rent_dataController from "../controllers/post_rent_dataController";
+import {
+  Post_car_imageController,
+  Post_doc_imageController,
+  Post_driver_license_imageController,
+  Post_insurance_imageController,
+} from "../controllers/post_image.controller";
+import Like_postController from "../controllers/like_post.controller";
+import Labels_DataController from "../controllers/labels_data.controller";
 const route = express.Router();
 
 //-----------Promotion-------------------------
@@ -206,5 +214,69 @@ route.put(
   `${post}/updatePost_rent_data_delete/:id`,
   Post_rent_dataController.DeletePost_rent_data
 );
+
+//-------Update Post_doc_image data------------
+route.put(
+  `${post}/updatePost_doc_image_insert/:id`,
+  Post_doc_imageController.insertImage
+);
+route.put(
+  `${post}/updatePost_doc_image_update/:id`,
+  Post_doc_imageController.updateImage
+);
+route.put(
+  `${post}/updatePost_doc_image_delete/:id`,
+  Post_doc_imageController.deleteImage
+);
+//-------Update Post_doc_image data------------
+route.put(
+  `${post}/updatePost_driver_license_image_insert/:id`,
+  Post_driver_license_imageController.insertImage
+);
+route.put(
+  `${post}/updatePost_driver_license_image_update/:id`,
+  Post_driver_license_imageController.updateImage
+);
+route.put(
+  `${post}/updatePost_driver_license_image_delete/:id`,
+  Post_driver_license_imageController.deleteImage
+);
+
+//-------Update Post_car_image data------------
+route.put(
+  `${post}/updatePost_car_image_insert/:id`,
+  Post_car_imageController.insertImage
+);
+route.put(
+  `${post}/updatePost_car_image_update/:id`,
+  Post_car_imageController.updateImage
+);
+route.put(
+  `${post}/updatePost_car_image_delete/:id`,
+  Post_car_imageController.deleteImage
+);
+//-------Update Post_insurance_image data------------
+route.put(
+  `${post}/updatePost_insurance_image_insert/:id`,
+  Post_insurance_imageController.insertImage
+);
+route.put(
+  `${post}/updatePost_insurance_image_update/:id`,
+  Post_insurance_imageController.updateImage
+);
+route.put(
+  `${post}/updatePost_insurance_image_delete/:id`,
+  Post_insurance_imageController.deleteImage
+);
+
+//-----------Like_post---------------------------------
+route.put(`${post}/like_post/:id`, Like_postController.Like_post);
+route.put(`${post}/unlike_post/:id`, Like_postController.UnLike_post);
+
+//--------------Labels_post_data------------------------------------
+route.put(`${post}/labels_post_add`, Labels_DataController.Insert);
+route.put(`${post}/labels_post_remove/:id`, Labels_DataController.Delete);
+
+route.get(`${post}/labels_post/:id`, Labels_DataController.SelectByPostID);
 
 export default route;

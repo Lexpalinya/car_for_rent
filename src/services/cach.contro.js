@@ -110,7 +110,7 @@ export const CachDataNoClear = async (
       select,
       orderBy,
     });
-    await redis.set(key, JSON.stringify(data));
+    await redis.set(key, JSON.stringify(data), "EX", 3600);
   } else {
     data = JSON.parse(cachData);
   }

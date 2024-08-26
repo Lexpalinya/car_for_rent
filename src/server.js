@@ -43,7 +43,7 @@ const CheckConnectionDatabase = async () => {
   }
 };
 
-await redis.del("ID_user");
+await redis.flushdb();
 // const c = await CachDataAll("banners", "banners", { is_active: true });
 // console.log("object :>> ", c);
 app.listen(SERVER_PORT, async () => {
