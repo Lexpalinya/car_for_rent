@@ -91,6 +91,14 @@ const UsersController = {
         device_token,
       } = req.body;
 
+      const data = req.files;
+      if (!data || !data.profile) {
+        return SendError(
+          res,
+          400,
+          `${EMessage.pleaseInput}:profile is required`
+        );
+      }
       const [
         usernameAlreadyExists,
         emailAlreadyExists,
@@ -120,6 +128,8 @@ const UsersController = {
           }`
         );
 
+      const profile = await UploadImage(data.profile.data);
+
       const user = await prisma.users.create({
         data: {
           username,
@@ -129,6 +139,7 @@ const UsersController = {
           fackbook_id,
           google_id,
           device_token,
+          profile,
         },
         select,
       });
