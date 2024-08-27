@@ -7,8 +7,15 @@ import {
   FindPromotionById_ID,
   FindUserById_ID,
 } from "../services/find";
-import { EnsureArray, SendError, SendErrorLog } from "../services/services";
+import {
+  EnsureArray,
+  SendError,
+  SendErrorLog,
+  SendSuccess,
+} from "../services/services";
+import { UploadImage, uploadImages } from "../services/upload.file";
 import { ValidateCar_rent } from "../services/validate";
+import prisma from "../utils/prisma.client";
 
 const Car_rentController = {
   async Insert(req, res) {
@@ -40,6 +47,7 @@ const Car_rentController = {
         description,
         reason,
         promotion_id,
+        //-------------
         car_rent_visa,
       } = req.body;
       if (typeof booking_fee !== "number")
@@ -94,6 +102,32 @@ const Car_rentController = {
           }`
         );
       }
+      const promiseImage = await Promise.all([
+        uploadImages(data.car_rent_doc_image),
+        uploadImages(data.car_rent_payment_image),
+      ]);
+      const car_rent = await prisma.car_rent.create({
+        data: {
+          user_id,
+          post_id,
+          start_date,
+          end_date,
+          frist_name,
+          last_name,
+          email,
+          phone_number,
+          doc_type,
+          booking_fee,
+          pay_destination,
+          pay_type,
+          bank_no,
+          status_id,
+          description,
+          reason,
+          promotion_id,
+        },
+      });
+      return SendSuccess(res, `${EMessage.insertSuccess} car_rent`, car_rent);
     } catch (error) {
       return SendErrorLog(
         res,
