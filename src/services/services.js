@@ -21,7 +21,7 @@ export const SendCreate = (res, message, data) => {
 };
 export const SendError = (res, statuscode = 400, message, err) => {
   return res.status(statuscode).json({
-    status: true,
+    status: false,
     message: message || "Operation failed",
     err,
   });

@@ -4,9 +4,10 @@ import {
   FindPost_StatusById,
   FindPostById,
   FindPostById_for_edit,
+  FindPromotionById_ID,
   FindUserById_ID,
 } from "../services/find";
-import { SendError, SendErrorLog } from "../services/services";
+import { EnsureArray, SendError, SendErrorLog } from "../services/services";
 import { ValidateCar_rent } from "../services/validate";
 
 const Car_rentController = {
@@ -29,11 +30,10 @@ const Car_rentController = {
         email,
         phone_number,
         doc_type,
-        booking_fee,
-        pay_destination,
+        booking_fee, //number
+        pay_destination, //number
         pay_type,
         bank_no,
-        pay_status,
         status_id,
 
         //------
@@ -42,12 +42,11 @@ const Car_rentController = {
         promotion_id,
         car_rent_visa,
       } = req.body;
+      if (typeof booking_fee !== "number")
+        booking_fee = parseFloat(booking_fee);
+      if (typeof pay_destination !== "number")
+        pay_destination = parseFloat(pay_destination);
 
-      let promiseFind = [
-        FindUserById_ID(user_id),
-        FindPostById_for_edit(post_id),
-        FindCar_Rent_StatusById(status_id),
-      ];
       const data = req.files;
       if (!data || !data.car_rent_doc_image || !data.car_rent_payment_image) {
         return SendError(
@@ -59,6 +58,39 @@ const Car_rentController = {
               : !data.car_rent_doc_image
               ? "car_rent_doc_image"
               : "car_rent_payment_image"
+          }`
+        );
+      }
+
+      data.car_rent_doc_image = EnsureArray(data.car_rent_doc_image);
+      data.car_rent_payment_image = EnsureArray(data.car_rent_payment_image);
+      let promiseFind = [
+        FindUserById_ID(user_id),
+        FindPostById_for_edit(post_id),
+        FindCar_Rent_StatusById(status_id),
+      ];
+      if (!promotion_id) {
+        promiseFind.push(FindPromotionById_ID(promotion_id));
+      }
+      const [userExists, postExists, car_Rent_StatusExists, promotionExists] =
+        Promise.all(promiseFind);
+      if (
+        !userExists ||
+        !postExists ||
+        !car_Rent_StatusExists ||
+        (promotion_id && !promotionExists)
+      ) {
+        return SendError(
+          res,
+          404,
+          `${EMessage.notFound}:${
+            !userExists
+              ? "user"
+              : !postExists
+              ? "post"
+              : !car_Rent_StatusExists
+              ? "car_Rent_status"
+              : "promotion"
           }`
         );
       }
