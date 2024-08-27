@@ -11,6 +11,26 @@ const Car_rentController = {
           400,
           `${EMessage.pleaseInput}: ${validate.join(", ")}`
         );
+      let {
+        user_id,
+        post_id,
+        start_date,
+        end_date,
+        frist_name,
+        last_name,
+        email,
+        phone_number,
+        doc_type,
+        description,
+        promotion_id,
+        booking_fee,
+        pay_destination,
+        pay_type,
+        bank_no,
+        pay_status,
+        reason,
+        status_id,
+      } = req.body;
 
       const data = req.files;
       if (!data || !data.car_rent_doc_image || !data.car_rent_payment_image) {

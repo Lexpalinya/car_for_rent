@@ -92,13 +92,13 @@ const UsersController = {
       } = req.body;
 
       const data = req.files;
-      if (!data || !data.profile) {
-        return SendError(
-          res,
-          400,
-          `${EMessage.pleaseInput}:profile is required`
-        );
-      }
+      // if (!data || !data.profile) {
+      //   return SendError(
+      //     res,
+      //     400,
+      //     `${EMessage.pleaseInput}:profile is required`
+      //   );
+      // }
       const [
         usernameAlreadyExists,
         emailAlreadyExists,
