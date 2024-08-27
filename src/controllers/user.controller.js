@@ -13,6 +13,7 @@ import prisma from "../utils/prisma.client";
 import {
   DataExists,
   ValidateChangePassword,
+  ValidateCheckUsernameAndPhone_number,
   ValidateForgotPassword,
   ValidateLogin,
   ValidateLoginPhoneNumber,
@@ -39,13 +40,11 @@ let select = {
   username: true,
   email: true,
   phone_number: true,
-  password: true,
   profile: true,
   fackbook_id: true,
   google_id: true,
   device_token: true,
   login_version: true,
-  role: true,
   created_at: true,
   updated_at: true,
 };
@@ -106,7 +105,7 @@ const UsersController = {
         FindUserPhone_NumberAlready(phone_number),
         Encrypt(password),
       ]);
-      console.log("object :>> ", usernameAlreadyExists);
+
       if (
         usernameAlreadyExists ||
         emailAlreadyExists ||
@@ -529,6 +528,39 @@ const UsersController = {
       SendErrorLog(
         res,
         `${EMessage.serverError} ${EMessage.refreshTokenunSuccess}`,
+        error
+      );
+    }
+  },
+  async CheckUsernameandPhone_number(req, res) {
+    try {
+      const validate = ValidateCheckUsernameAndPhone_number(req.body);
+      if (validate.length > 0)
+        return SendError(
+          res,
+          400,
+          `${EMessage.pleaseInput}: ${validate.join(", ")}`
+        );
+      const { username, phone_number } = req.body;
+      const [usernameAlreadyExists, phone_numberAlreadyExists] =
+        await Promise.all([
+          FindUserUserNameAlready(username),
+          FindUserPhone_NumberAlready(phone_number),
+        ]);
+
+      if (usernameAlreadyExists || phone_numberAlreadyExists)
+        return SendError(
+          res,
+          400,
+          `${EMessage.userAlreadyExists}:with ${
+            usernameAlreadyExists ? "username" : "phone_number"
+          }`
+        );
+      return SendSuccess(res, `ready to register`);
+    } catch (error) {
+      SendErrorLog(
+        res,
+        `${EMessage.serverError} Check Username and Phone number failed`,
         error
       );
     }

@@ -1,5 +1,13 @@
 import { EMessage } from "../services/enum";
+import {
+  FindCar_Rent_StatusById,
+  FindPost_StatusById,
+  FindPostById,
+  FindPostById_for_edit,
+  FindUserById_ID,
+} from "../services/find";
 import { SendError, SendErrorLog } from "../services/services";
+import { ValidateCar_rent } from "../services/validate";
 
 const Car_rentController = {
   async Insert(req, res) {
@@ -21,17 +29,25 @@ const Car_rentController = {
         email,
         phone_number,
         doc_type,
-        description,
-        promotion_id,
         booking_fee,
         pay_destination,
         pay_type,
         bank_no,
         pay_status,
-        reason,
         status_id,
+
+        //------
+        description,
+        reason,
+        promotion_id,
+        car_rent_visa,
       } = req.body;
 
+      let promiseFind = [
+        FindUserById_ID(user_id),
+        FindPostById_for_edit(post_id),
+        FindCar_Rent_StatusById(status_id),
+      ];
       const data = req.files;
       if (!data || !data.car_rent_doc_image || !data.car_rent_payment_image) {
         return SendError(

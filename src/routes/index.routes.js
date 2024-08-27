@@ -162,7 +162,12 @@ const user = "/users";
 route.get(`${user}/selAllPage`, UsersController.SelectAllPage);
 route.get(`${user}/selOne/:id`, UsersController.SelectOne);
 
+route.post(
+  `${user}/check_username_phone_number`,
+  UsersController.CheckUsernameandPhone_number
+);
 route.post(`${user}/refrechToken`, UsersController.RefrechToken);
+
 route.post(`${user}/registor`, UsersController.Registor);
 route.post(`${user}/login`, UsersController.Login);
 route.post(`${user}/loginPhoneNumber`, UsersController.LoginPhoneNumber);

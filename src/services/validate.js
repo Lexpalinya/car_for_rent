@@ -86,6 +86,10 @@ export const ValidateWallet = (data) => {
   const { user_id, promotion_id } = data;
   return ValidateData({ user_id, promotion_id });
 };
+export const ValidateCheckUsernameAndPhone_number = (data) => {
+  const { username, phone_number } = data;
+  return ValidateData({ username, phone_number });
+};
 
 //--------Post---------------------------------
 
@@ -160,4 +164,41 @@ export const ValidateLabels_data = (data) => {
 export const ValidateReveiw = (data) => {
   const { post_id, user_id, star, comment } = data;
   return ValidateData({ post_id, user_id, star, comment });
+};
+
+export const ValidateCar_rent = (data) => {
+  const {
+    user_id,
+    post_id,
+    start_date,
+    end_date,
+    frist_name,
+    last_name,
+    email,
+    phone_number,
+    doc_type,
+    booking_fee,
+    pay_destination,
+    pay_type,
+    bank_no,
+    pay_status,
+    status_id,
+  } = data;
+  return ValidateData({
+    user_id,
+    post_id,
+    start_date,
+    end_date,
+    frist_name,
+    last_name,
+    email,
+    phone_number,
+    doc_type,
+    booking_fee,
+    pay_destination,
+    pay_type,
+    bank_no,
+    pay_status,
+    status_id,
+  });
 };
