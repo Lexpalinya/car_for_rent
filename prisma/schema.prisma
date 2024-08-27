@@ -46,6 +46,7 @@ model users {
   car_rent      car_rent[]
   replys        replys[]
   like_post     like_post[]
+  review        review[]
 
   @@index([username])
   @@index([email])
@@ -106,6 +107,8 @@ model review {
   comment    String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+  user       users    @relation(fields: [user_id], references: [id])
+  post       posts    @relation(fields: [post_id], references: [id])
 
   @@index([post_id])
 }
@@ -259,6 +262,7 @@ model posts {
   labels_data               labels_data[]
   car_rent                  car_rent[]
   like_post                 like_post[]
+  review                    review[]
 
   @@index([car_type_id])
 }

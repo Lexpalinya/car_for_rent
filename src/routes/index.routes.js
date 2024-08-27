@@ -21,6 +21,7 @@ import {
 } from "../controllers/post_image.controller";
 import Like_postController from "../controllers/like_post.controller";
 import Labels_DataController from "../controllers/labels_data.controller";
+import ReviewController from "../controllers/review.controller";
 const route = express.Router();
 
 //-----------Promotion-------------------------
@@ -278,5 +279,13 @@ route.put(`${post}/labels_post_add`, Labels_DataController.Insert);
 route.put(`${post}/labels_post_remove/:id`, Labels_DataController.Delete);
 
 route.get(`${post}/labels_post/:id`, Labels_DataController.SelectByPostID);
+
+//-------Review------------------------------------------------
+const review = "/reviews";
+route.get(`${review}/selByPostId/:id`, ReviewController.SelectByPostId);
+
+route.post(`${review}/insert`, ReviewController.Insert);
+
+route.delete(`${review}/delete/:id`, ReviewController.Delete);
 
 export default route;

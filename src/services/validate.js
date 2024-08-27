@@ -156,3 +156,8 @@ export const ValidateLabels_data = (data) => {
   const { post_id, label_id } = data;
   return ValidateData({ post_id, label_id });
 };
+
+export const ValidateReveiw = (data) => {
+  const { post_id, user_id, star, comment } = data;
+  return ValidateData({ post_id, user_id, star, comment });
+};

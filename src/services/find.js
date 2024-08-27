@@ -291,3 +291,10 @@ export const FindPostById = (id) => {
     }
   );
 };
+
+export const FindReviewById_ID = (id) => {
+  return CachDataFindDataId_One(id + "reviews", "review", {
+    id,
+    is_active: true,
+  });
+};
