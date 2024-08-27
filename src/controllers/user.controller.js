@@ -91,14 +91,10 @@ const UsersController = {
         device_token,
       } = req.body;
 
-      const data = req.files;
-      // if (!data || !data.profile) {
-      //   return SendError(
-      //     res,
-      //     400,
-      //     `${EMessage.pleaseInput}:profile is required`
-      //   );
-      // }
+      let data = req.files;
+      if (!data) {
+        data = { profile: "" };
+      }
       const [
         usernameAlreadyExists,
         emailAlreadyExists,
@@ -127,8 +123,10 @@ const UsersController = {
               : "phone_number"
           }`
         );
-
-      const profile = await UploadImage(data.profile.data);
+      let profile;
+      if (data.profile !== "") {
+        profile = await UploadImage(data.profile.data);
+      }
 
       const user = await prisma.users.create({
         data: {
