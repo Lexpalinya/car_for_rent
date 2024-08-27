@@ -51,7 +51,7 @@ let select = {
 };
 
 const RecacheData = async (id = "", { page = true }) => {
-  let promise = [redis.del(id + key, "ID_user")];
+  let promise = [redis.del([id + key, "ID_user"])];
   if (page === true) {
     promise.push(DeleteCachedKey(key));
   }
@@ -266,13 +266,13 @@ const UsersController = {
           400,
           `${EMessage.pleaseInput}: ${validate.join(", ")}`
         );
-      const { email, password } = req.body;
-      const userExists = await FindUserEmailAlready(email);
+      const { username, password } = req.body;
+      const userExists = await FindUserUserNameAlready(username);
       // console.log("userExists :>> ", userExists);
       if (!userExists)
-        return SendError(res, 404, `${EMessage.notFound}: user by email`);
+        return SendError(res, 404, `${EMessage.notFound}: user by username`);
       const decrypassword = await Decrypt(userExists.password);
-      console.log("decrypassword :>> ", decrypassword);
+      // console.log("decrypassword :>> ", decrypassword);
       if (decrypassword !== password)
         return SendError(
           res,
@@ -314,11 +314,15 @@ const UsersController = {
           400,
           `${EMessage.pleaseInput}: ${validate.join(", ")}`
         );
-      const { username, password } = req.body;
-      const userExists = await FindUserUserNameAlready(username);
+      const { phone_number, password } = req.body;
+      const userExists = await FindUserPhone_NumberAlready(phone_number);
       console.log("userExists :>> ", userExists);
       if (!userExists)
-        return SendError(res, 404, `${EMessage.notFound}: user by username`);
+        return SendError(
+          res,
+          404,
+          `${EMessage.notFound}: user by phone_number`
+        );
       const decrypassword = await Decrypt(userExists.password);
       console.log("decrypassword :>> ", decrypassword);
       if (decrypassword !== password)
