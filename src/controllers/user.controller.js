@@ -94,32 +94,19 @@ const UsersController = {
       if (!data) {
         data = { profile: "" };
       }
-      const [
-        usernameAlreadyExists,
-        emailAlreadyExists,
-        phone_numberAlreadyExists,
-        hashpassword,
-      ] = await Promise.all([
-        FindUserUserNameAlready(username),
-        FindUserEmailAlready(email),
-        FindUserPhone_NumberAlready(phone_number),
-        Encrypt(password),
-      ]);
+      const [usernameAlreadyExists, phone_numberAlreadyExists, hashpassword] =
+        await Promise.all([
+          FindUserUserNameAlready(username),
+          FindUserPhone_NumberAlready(phone_number),
+          Encrypt(password),
+        ]);
 
-      if (
-        usernameAlreadyExists ||
-        emailAlreadyExists ||
-        phone_numberAlreadyExists
-      )
+      if (usernameAlreadyExists || phone_numberAlreadyExists)
         return SendError(
           res,
           400,
           `${EMessage.userAlreadyExists}:with ${
-            usernameAlreadyExists
-              ? "username"
-              : emailAlreadyExists
-              ? "email"
-              : "phone_number"
+            usernameAlreadyExists ? "username" : "phone_number"
           }`
         );
       let profile;
