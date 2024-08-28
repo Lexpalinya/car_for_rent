@@ -298,3 +298,10 @@ export const FindReviewById_ID = (id) => {
     is_active: true,
   });
 };
+
+export const FindCar_rentById_for_edit = (id) => {
+  return CachDataFindDataId_One(id + "car_rent-edit", "car_rent", {
+    id,
+    is_active: true,
+  });
+};

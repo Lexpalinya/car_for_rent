@@ -58,8 +58,8 @@ export const ValidateCar_Rent_Status = (data) => {
 //---------------User----------------------------
 
 export const ValidateUserRegistor = (data) => {
-  const { username, email, password, phone_number } = data;
-  return ValidateData({ username, email, password, phone_number });
+  const { username, password, phone_number } = data;
+  return ValidateData({ username, password, phone_number });
 };
 
 export const ValidateLogin = (data) => {
@@ -181,7 +181,7 @@ export const ValidateCar_rent = (data) => {
     pay_destination,
     pay_type,
     bank_no,
-    pay_status,
+    // pay_status,
     status_id,
   } = data;
   return ValidateData({
@@ -198,7 +198,7 @@ export const ValidateCar_rent = (data) => {
     pay_destination,
     pay_type,
     bank_no,
-    pay_status,
+    // pay_status,
     status_id,
   });
 };

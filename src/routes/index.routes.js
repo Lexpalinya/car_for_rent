@@ -22,6 +22,7 @@ import {
 import Like_postController from "../controllers/like_post.controller";
 import Labels_DataController from "../controllers/labels_data.controller";
 import ReviewController from "../controllers/review.controller";
+import Car_rentController from "../controllers/car_rent.controller";
 const route = express.Router();
 
 //-----------Promotion-------------------------
@@ -293,4 +294,46 @@ route.post(`${review}/insert`, ReviewController.Insert);
 
 route.delete(`${review}/delete/:id`, ReviewController.Delete);
 
+//----------Car_rent--------------------------------------------------
+const car_rent = "/car_rent";
+route.get("${car_rent}/selOne/:id", Car_rentController.SelectOne);
+route.get("${car_rent}/selAllPage", Car_rentController.SelectAllPage);
+route.get(
+  `${car_rent}/selAllPageByPost/:id`,
+  Car_rentController.SelectAllPageByPost_id
+);
+route.get(
+  `${car_rent}/selAllPageByUser/:id`,
+  Car_rentController.SelectAllPageByUser_id
+);
+route.get(
+  `${car_rent}/selAllPageUser_status`,
+  Car_rentController.SelectAllPageByUser_idandStatus_id
+);
+route.get(
+  `${car_rent}/selAllPagePay_status`,
+  Car_rentController.SelectAllPagePay_status
+);
+
+route.post(`${car_rent}/insert`, Car_rentController.Insert);
+
+route.put(`${car_rent}/update/:id`, Car_rentController.Update);
+route.put(
+  `${car_rent}/update_visa/:id`,
+  Car_rentController.UpdateCar_rent_visa
+);
+route.put(
+  `${car_rent}/updatedoc_image/:id`,
+  Car_rentController.UpdateDoc_image
+);
+route.put(
+  `${car_rent}/updatePayment_image/:id`,
+  Car_rentController.UpdatePayment_image
+);
+route.put(
+  `${car_rent}/updatePayment_status/:id`,
+  Car_rentController.UpdatePayment_status
+);
+
+route.delete(`${car_rent}/delete/:id`, Car_rentController.Delete);
 export default route;

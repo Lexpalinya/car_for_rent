@@ -134,6 +134,12 @@ export const AddPost_id_url = (arr, id) => {
     url,
   }));
 };
+export const AddCar_rent_id_url = (arr, id) => {
+  return arr.map((url) => ({
+    car_rent_id: id,
+    url,
+  }));
+};
 
 export const EnsureArray = (arr) => {
   return Array.isArray(arr) ? arr : [arr];

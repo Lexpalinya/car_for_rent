@@ -99,6 +99,11 @@ const UpdatePostImage = async (
     const imageUpdate = await updateImage(image_data_update.id, {
       url: imageUrl,
     });
+    await RecacheDataPost({
+      key,
+      car_type_id_key: postExists.car_type_id + key,
+      type_of_fual_id_key: postExists.type_of_fual_id + key,
+    });
 
     return SendSuccess(
       res,
@@ -155,6 +160,11 @@ const DeletePostImage = async (
     const delImage = await DeleteImage(image_data_delete.url);
     console.log("delImage :>> ", delImage);
     const imageUpdate = await deleteImage({ id: image_data_delete.id });
+    await RecacheDataPost({
+      key,
+      car_type_id_key: postExists.car_type_id + key,
+      type_of_fual_id_key: postExists.type_of_fual_id + key,
+    });
     return SendSuccess(
       res,
       `${EMessage.deleteSuccess} update ${imageType}`,

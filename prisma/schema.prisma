@@ -25,7 +25,7 @@ model users {
   id            String         @id @default(uuid()) @db.VarChar(36)
   is_active     Boolean        @default(true)
   username      String
-  email         String
+  email         String?
   phone_number  String
   password      String
   profile       String         @default("")
@@ -365,20 +365,20 @@ model car_rent {
 
 model car_rent_doc_image {
   id          Int      @id @default(autoincrement())
-  car_rend_id String   @db.VarChar(36)
+  car_rent_id String   @db.VarChar(36)
   url         String
-  car_rend    car_rent @relation(fields: [car_rend_id], references: [id])
+  car_rend    car_rent @relation(fields: [car_rent_id], references: [id])
 
-  @@index([car_rend_id])
+  @@index([car_rent_id])
 }
 
 model car_rent_payment_image {
   id          Int      @id @default(autoincrement())
-  car_rend_id String   @db.VarChar(36)
+  car_rent_id String   @db.VarChar(36)
   url         String
-  car_rend    car_rent @relation(fields: [car_rend_id], references: [id])
+  car_rent    car_rent @relation(fields: [car_rent_id], references: [id])
 
-  @@index([car_rend_id])
+  @@index([car_rent_id])
 }
 
 model car_rent_visa {
