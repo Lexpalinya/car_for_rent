@@ -31,6 +31,10 @@ export const EMessage = {
 
   notAllow: "You are not allow",
   userAlreadyExists: "User already exists",
+  changePasswordfailed: "change password failed",
+  changePasswordsuccess: "Change password successful",
+  forgotpassowordfailure: "Forgot password failed",
+  forgotpassowordsuccess: "Forgot password success",
 
   passwordnotmatch: "Password not match",
 };

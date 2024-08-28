@@ -37,28 +37,31 @@ const WalletController = {
     try {
       const validate = ValidateWallet(req.body);
       if (validate.length > 0)
-        return SendError(
+        return SendError({
           res,
-          400,
-          `${EMessage.pleaseInput}: ${validate.join(", ")}`
-        );
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: validate.join(", "),
+        });
       const { user_id, promotion_id } = req.body;
       const [userExists, promotionExists] = await Promise.all([
         FindUserById_ID(user_id),
         FindPromotionById_ID(promotion_id),
       ]);
       if (!userExists || !promotionExists)
-        return SendError(
+        return SendError({
           res,
-          400,
-          `${EMessage.notFound} :${!userExists ? "user id" : "promotion id"}`
-        );
+          statuscode: 400,
+          message: `${EMessage.notFound} `,
+          err: `:${!userExists ? "user id" : "promotion id"}`,
+        });
       if (promotionExists.amount < 1) {
-        return SendError(
+        return SendError({
           res,
-          400,
-          `The promotion code:${promotionExists.code} is over `
-        );
+          statuscode: 400,
+          message: `The promotion code:${promotionExists.code} is over `,
+          err: "promotion out",
+        });
       }
       const wallet = await prisma.wallet.create({
         data: {
@@ -78,13 +81,17 @@ const WalletController = {
       await DeleteCachedKey(key);
       await CachDataAll(key, model, where, select);
 
-      SendCreate(res, `${EMessage.insertSuccess}`, wallet);
-    } catch (error) {
-      return SendErrorLog(
+      return SendCreate({
         res,
-        `${EMessage.serverError} ${EMessage.insertFailed} wallet`,
-        error
-      );
+        message: `${EMessage.insertSuccess}`,
+        data: wallet,
+      });
+    } catch (error) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.insertFailed} wallet`,
+        err,
+      });
     }
   },
   async Update(req, res) {
@@ -116,7 +123,12 @@ const WalletController = {
           : data.user_id && !userExists
           ? "user"
           : "promotion";
-        return SendError(res, 404, `${EMessage.notFound}: ${missingEntity} id`);
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}`,
+          err: ` ${missingEntity} id`,
+        });
       }
 
       // Proceed with updating the wallet
@@ -126,14 +138,18 @@ const WalletController = {
       });
 
       // Send success response with the updated wallet data
-      return SendSuccess(res, EMessage.updateSuccess, updatedWallet);
-    } catch (error) {
-      // Log the error and send an appropriate response
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.updateFailed} wallet`,
-        error
-      );
+        message: EMessage.updateSuccess,
+        data: updatedWallet,
+      });
+    } catch (err) {
+      // Log the error and send an appropriate response
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.updateFailed} wallet`,
+        err,
+      });
     }
   },
   async Delete(req, res) {
@@ -141,7 +157,12 @@ const WalletController = {
       const id = req.params.id;
       const walletExists = await FindWalletById(id);
       if (!walletExists) {
-        return SendError(res, 404, `${EMessage.notFound}:wallet id`);
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}:wallet`,
+          err: "id",
+        });
       }
       const wallet = await prisma.wallet.update({
         where: { id },
@@ -157,32 +178,40 @@ const WalletController = {
 
       await DeleteCachedKey(key);
       await CachDataAll(key, model, where, select);
-      return SendSuccess(res, `${EMessage.deleteSuccess}`, wallet);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.deleteFailed} wallet`,
-        error
-      );
+        message: `${EMessage.deleteSuccess}`,
+        data: wallet,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.deleteFailed} wallet`,
+        err,
+      });
     }
   },
 
   async SelectByUserID(req, res) {
     try {
-      const id = req.params.id;
+      const id = req.user;
       const wallet = await CachDataAll(
         id + key,
         model,
         { is_active: true, user_id: id },
         select
       );
-      return SendSuccess(res, `${EMessage.fetchAllSuccess}`, wallet);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.errorFetchingAll} wallet by user id`,
-        error
-      );
+        message: `${EMessage.fetchAllSuccess}`,
+        data: wallet,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll} wallet by user`,
+        err,
+      });
     }
   },
   async SelectByPromotionID(req, res) {
@@ -194,13 +223,17 @@ const WalletController = {
         { is_active: true, promotion_id: id },
         select
       );
-      return SendSuccess(res, `${EMessage.fetchAllSuccess}`, wallet);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.errorFetchingAll} wallet by user id`,
-        error
-      );
+        message: `${EMessage.fetchAllSuccess}`,
+        data: wallet,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll} wallet by promotion id`,
+        err,
+      });
     }
   },
   async SelectAllPage(req, res) {
@@ -215,13 +248,17 @@ const WalletController = {
         select
       );
       CachDataLimit(key + "-" + (page + 1), model, where, page + 1, select);
-      return SendSuccess(res, `${EMessage.fetchOneSuccess} wallet`, wallet);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.errorFetchingAll} wallet by user id`,
-        error
-      );
+        message: `${EMessage.fetchAllSuccess} wallet`,
+        data: wallet,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll} wallet page`,
+        err,
+      });
     }
   },
 };

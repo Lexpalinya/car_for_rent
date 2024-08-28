@@ -24,11 +24,12 @@ const Post_StatusController = {
     try {
       const validate = ValidatePost_Status(req.body);
       if (validate.length > 0)
-        return SendError(
+        return SendError({
           res,
-          400,
-          `${EMessage.pleaseInput}:${validate.Join(", ")}`
-        );
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: validate.join(", "),
+        });
       const { name } = req.body;
       const post_status = await prisma.post_status.create({
         data: {
@@ -36,13 +37,17 @@ const Post_StatusController = {
         },
       });
       await RecacheData();
-      return SendCreate(res, `${EMessage.insertSuccess}`, post_status);
-    } catch (error) {
-      return SendErrorLog(
+      return SendCreate({
         res,
-        `${EMessage.serverError} ${EMessage.insertFailed}`,
-        error
-      );
+        message: `${EMessage.insertSuccess}`,
+        data: post_status,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.insertFailed} post_status`,
+        err,
+      });
     }
   },
   async Update(req, res) {
@@ -51,19 +56,28 @@ const Post_StatusController = {
       const data = DataExists(req.body);
       const statusExists = await FindPost_StatusById(id);
       if (!statusExists)
-        return SendError(res, 404, `${EMessage.notFound}:post_status id`);
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}:post_status`,
+          err: "id",
+        });
       const status = await prisma.post_status.update({
         where: { id },
         data,
       });
       await RecacheData();
-      return SendSuccess(res, `${EMessage.updateSuccess}`, status);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.updateFailed}`,
-        error
-      );
+        message: `${EMessage.updateSuccess}`,
+        data: status,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.updateFailed}`,
+        err,
+      });
     }
   },
   async Delete(req, res) {
@@ -71,31 +85,44 @@ const Post_StatusController = {
       const id = req.params.id;
       const statusExists = await FindPost_StatusById(id);
       if (!statusExists)
-        return SendError(res, 404, `${EMessage.notFound}:post_status id`);
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}:post_status`,
+          err: "id",
+        });
       const status = await prisma.post_status.update({
         where: { id },
         data: { is_active: false },
       });
       await RecacheData();
-      return SendSuccess(res, `${EMessage.deleteSuccess}`, status);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.deleteFailed}`,
-        error
-      );
+        message: `${EMessage.deleteSuccess}`,
+        data: status,
+      });
+    } catch (error) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.deleteFailed} post_status`,
+        err,
+      });
     }
   },
   async SelectAll(req, res) {
     try {
       const status = await CachDataNoClear(key, model, where, select);
-      return SendSuccess(res, `${EMessage.fetchAllSuccess}`, status);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.errorFetchingAll} `,
-        error
-      );
+        message: `${EMessage.fetchAllSuccess}`,
+        data: status,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll} post_status `,
+        err,
+      });
     }
   },
   async SelectOne(req, res) {
@@ -103,12 +130,21 @@ const Post_StatusController = {
       const id = req.params.id;
       const status = await FindPost_StatusById(id);
       if (!status)
-        return SendError(res, 404, `${EMessage.notFound}:post_status id`);
-      return SendSuccess(res, `${EMessage.fetchOneSuccess}`, status);
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}:post_status`,
+          err: "id",
+        });
+      return SendSuccess({
+        res,
+        message: `${EMessage.fetchOneSuccess}`,
+        data: status,
+      });
     } catch (error) {
       return SendErrorLog(
         res,
-        `${EMessage.serverError} ${EMessage.errorFetchingOne}`,
+        `${EMessage.serverError} ${EMessage.errorFetchingOne} post_status`,
         error
       );
     }

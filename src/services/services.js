@@ -5,32 +5,42 @@ import { generateToken } from "../config/generate.token";
 import prisma from "../utils/prisma.client";
 import { FindUserById_ID } from "./find";
 
-export const SendSuccess = (res, message, data) => {
+export const SendSuccess = ({ res, message = {}, data = {}, err = {} }) => {
   return res.status(200).json({
     status: true,
     message: message || "Operation Successful",
     data,
+    err,
   });
 };
-export const SendCreate = (res, message, data) => {
+export const SendCreate = ({ res, message = {}, data = {}, err = {} }) => {
   return res.status(201).json({
     status: true,
     message: message || "Operation Successful",
     data,
-  });
-};
-export const SendError = (res, statuscode = 400, message, err) => {
-  return res.status(statuscode).json({
-    status: false,
-    message: message || "Operation failed",
     err,
   });
 };
-export const SendErrorLog = (res, message, err) => {
+export const SendError = ({
+  res,
+  statuscode = 400,
+  message,
+  data = {},
+  err = {},
+}) => {
+  return res.status(statuscode).json({
+    status: false,
+    message: message || "Operation failed",
+    data,
+    err,
+  });
+};
+export const SendErrorLog = ({ res, message = {}, data = {}, err = {} }) => {
   console.error(`Erro ${message}:${err}`);
   return res.status(500).json({
     status: false,
     message: message || "Operation Error Iternal Server",
+    data,
     err,
   });
 };
@@ -94,10 +104,10 @@ export const verify_refresh_token = (token) => {
             "JWT verification error:Refresh Token has expired",
             err
           );
-          return reject(new Error("Refresh Token has expired"));
+          return reject("Refresh Token has expired");
         } else {
           console.error("Jwt verification error:" + err);
-          return reject(new Error("Invalid Refresh Token"));
+          return reject("Invalid Refresh Token");
         }
       }
       try {

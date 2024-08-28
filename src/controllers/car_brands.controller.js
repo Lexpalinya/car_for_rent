@@ -25,14 +25,20 @@ const Car_BrandsController = {
     try {
       const validate = ValidateCar_Brands(req.body);
       if (validate.length > 0)
-        return SendError(
+        return SendError({
           res,
-          400,
-          `${EMessage.pleaseInput}: ${validate.join(", ")}`
-        );
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: validate.join(", "),
+        });
       const data = req.files;
       if (!data || !data.icon)
-        return SendError(res, 400, `${EMessage.pleaseInput}:icon`);
+        return SendError({
+          res,
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: "icon",
+        });
       const { name } = req.body;
       const icon = await UploadImage(data.icon.data);
       if (!icon) {
@@ -45,13 +51,17 @@ const Car_BrandsController = {
         },
       });
       await RecacheData();
-      return SendCreate(res, `${EMessage.insertSuccess}`, car_brands);
-    } catch (error) {
-      return SendErrorLog(
+      return SendCreate({
         res,
-        `${EMessage.serverError} ${EMessage.insertFailed}`,
-        error
-      );
+        message: `${EMessage.insertSuccess}`,
+        data: car_brands,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.insertFailed} car_brands`,
+        err,
+      });
     }
   },
   async Update(req, res) {
@@ -60,7 +70,12 @@ const Car_BrandsController = {
       const data = DataExists(req.body);
       const car_brandsExists = await FindCar_BrandsById(id);
       if (!car_brandsExists)
-        return SendError(res, 404, `${EMessage.notFound}: car_brands id`);
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}: car_brands`,
+          err: "id",
+        });
       const car_brands = await prisma.car_brands.update({
         where: {
           id,
@@ -68,13 +83,17 @@ const Car_BrandsController = {
         data,
       });
       await RecacheData();
-      return SendSuccess(res, `${EMessage.updateSuccess}`, car_brands);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.updateFailed}`,
-        error
-      );
+        message: `${EMessage.updateSuccess}`,
+        data: car_brands,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.updateFailed} car_brands data`,
+        err,
+      });
     }
   },
   async UpdateIcon(req, res) {
@@ -82,13 +101,28 @@ const Car_BrandsController = {
       const id = req.params.id;
       const { old_icon } = req.body;
       if (!old_icon)
-        return SendError(res, 400, `${EMessage.pleaseInput}:old_icon`);
+        return SendError({
+          res,
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: "old_icon",
+        });
       const data = req.files;
       if (!data || !data.icon)
-        return SendError(res, 400, `${EMessage.pleaseInput}: icon`);
+        return SendError({
+          res,
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: "icon",
+        });
       const car_brandsExists = await FindCar_BrandsById(id);
       if (!car_brandsExists)
-        return SendError(res, 404, `${EMessage.notFound}: car_brands id`);
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}: car_brands`,
+          err: "id",
+        });
       const icon = await UploadImage(data.icon.data, old_icon);
       if (!icon) {
         throw new Error("upload image failed");
@@ -102,13 +136,17 @@ const Car_BrandsController = {
         },
       });
       await RecacheData();
-      return SendSuccess(res, `${EMessage.updateSuccess}`, car_brands);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.updateFailed}`,
-        error
-      );
+        message: `${EMessage.updateSuccess}`,
+        data: car_brands,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.updateFailed} car_brands icon`,
+        err,
+      });
     }
   },
   async Delete(req, res) {
@@ -117,7 +155,12 @@ const Car_BrandsController = {
 
       const car_brandsExists = await FindCar_BrandsById(id);
       if (!car_brandsExists)
-        return SendError(res, 404, `${EMessage.notFound}: car_brands id`);
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}: car_brands`,
+          err: "id",
+        });
       const car_brands = await prisma.car_brands.update({
         where: {
           id,
@@ -125,25 +168,33 @@ const Car_BrandsController = {
         data: { is_active: false },
       });
       await RecacheData();
-      return SendSuccess(res, `${EMessage.deleteSuccess}`, car_brands);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.deleteFailed}`,
-        error
-      );
+        message: `${EMessage.deleteSuccess}`,
+        data: car_brands,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.deleteFailed} car_brands`,
+        err,
+      });
     }
   },
   async SelectAll(req, res) {
     try {
       const car_brands = await CachDataNoClear(key, model, where, select);
-      return SendSuccess(res, `${EMessage.fetchAllSuccess}`, car_brands);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.fetchAllSuccess}`,
-        error
-      );
+        message: `${EMessage.fetchAllSuccess}`,
+        data: car_brands,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll} car_brands`,
+        err,
+      });
     }
   },
   async SelectOne(req, res) {
@@ -152,14 +203,23 @@ const Car_BrandsController = {
 
       const car_brands = await FindCar_BrandsById(id);
       if (!car_brands)
-        return SendError(res, 404, `${EMessage.notFound}: car_brands id`);
-      return SendSuccess(res, `${EMessage.deleteSuccess}`, car_brands);
-    } catch (error) {
-      return SendErrorLog(
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}: car_brands`,
+          err: "id",
+        });
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.deleteFailed}`,
-        error
-      );
+        message: `${EMessage.deleteSuccess}`,
+        data: car_brands,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingOne} car_brands`,
+        err,
+      });
     }
   },
 };

@@ -202,3 +202,8 @@ export const ValidateCar_rent = (data) => {
     status_id,
   });
 };
+
+export const ValidateLocation = (data) => {
+  const { address, text, detail } = data;
+  return ValidateData({ address, text, detail });
+};

@@ -47,6 +47,7 @@ model users {
   replys        replys[]
   like_post     like_post[]
   review        review[]
+  location      location[]
 
   @@index([username])
   @@index([email])
@@ -54,6 +55,19 @@ model users {
 }
 
 //
+
+model location {
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  is_active  Boolean  @default(true)
+  user_id    String
+  address    String
+  text       String
+  detail     String
+  user       users    @relation(fields: [user_id], references: [id])
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
 //----------banner--------------------------
 model banners {
   id         String   @id @default(uuid()) @db.VarChar(36)
@@ -233,7 +247,8 @@ model posts {
   car_insurance             Boolean
   insurance_company_id      String?                     @db.VarChar(36)
   level_insurance_id        String?                     @db.VarChar(36)
-  car_brand_id              String                      @db.VarChar(36)
+  car_brand_id              String?                     @db.VarChar(36)
+  car_brand                 String?
   car_version               String
   car_year                  String
   car_resgistration         String
@@ -243,6 +258,8 @@ model posts {
   car_color                 String
   description               String                      @db.Text
   address                   String
+  text_address              String?
+  detail_address            String?
   deposits_fee              Float                       @db.Double
   status_id                 String                      @db.VarChar(36)
   created_at                DateTime                    @default(now())
@@ -251,7 +268,7 @@ model posts {
   users                     users                       @relation(fields: [user_id], references: [id])
   insurance_company         insurance_companies?        @relation(fields: [insurance_company_id], references: [id])
   level_insurance           level_insurances?           @relation(fields: [level_insurance_id], references: [id])
-  car_brands                car_brands                  @relation(fields: [car_brand_id], references: [id])
+  car_brands                car_brands?                 @relation(fields: [car_brand_id], references: [id])
   type_of_fual              type_of_fuals               @relation(fields: [type_of_fual_id], references: [id])
   status                    post_status                 @relation(fields: [status_id], references: [id])
   post_doc_image            post_doc_image[]
@@ -352,6 +369,7 @@ model car_rent {
   pay_status             Boolean                  @default(false)
   reason                 String?                  @db.LongText
   status_id              String                   @db.VarChar(36)
+  is_success             Boolean                  @default(true)
   created_at             DateTime                 @default(now())
   updated_at             DateTime                 @updatedAt
   user                   users                    @relation(fields: [user_id], references: [id])
@@ -383,13 +401,13 @@ model car_rent_payment_image {
 
 model car_rent_visa {
   id          Int      @id @default(autoincrement())
-  car_rend_id String   @unique @db.VarChar(36)
+  car_rent_id String   @unique @db.VarChar(36)
   name        String
   exp_date    DateTime @db.Date
   cvv         String   @db.VarChar(3)
-  car_rend    car_rent @relation(fields: [car_rend_id], references: [id])
+  car_rend    car_rent @relation(fields: [car_rent_id], references: [id])
 
-  @@index([car_rend_id])
+  @@index([car_rent_id])
 }
 
 //----------------reels----------------------------

@@ -25,15 +25,21 @@ const Type_of_FualsController = {
     try {
       const validate = ValidateType_of_Fuals(req.body);
       if (validate.length > 0)
-        return SendError(
+        return SendError({
           res,
-          400,
-          `${EMessage.pleaseInput}:${validate.Join(", ")}`
-        );
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: validate.join(", "),
+        });
       const { name } = req.body;
       const data = req.files;
       if (!data || !data.icon)
-        return SendError(res, 400, `${EMessage.pleaseInput}: icon`);
+        return SendError({
+          res,
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: "icon",
+        });
       const icon = await UploadImage(data.icon.data);
       if (!icon) {
         throw new Error("upload image failed");
@@ -46,13 +52,17 @@ const Type_of_FualsController = {
         },
       });
       await RecacheData();
-      return SendCreate(res, `${EMessage.insertSuccess}`, type_of_fuals);
-    } catch (error) {
-      return SendErrorLog(
+      return SendCreate({
         res,
-        `${EMessage.serverError} ${EMessage.insertFailed}`,
-        error
-      );
+        message: `${EMessage.insertSuccess}`,
+        data: type_of_fuals,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.insertFailed} type_of_fuals`,
+        err,
+      });
     }
   },
   async Update(req, res) {
@@ -61,19 +71,28 @@ const Type_of_FualsController = {
       const data = DataExists(req.body);
       const type_of_fualsExists = await FindType_of_FualsById(id);
       if (!type_of_fualsExists)
-        return SendError(res, 404, `${EMessage.notFound}:type_of_fuals id`);
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}:type_of_fuals`,
+          err: "id",
+        });
       const type_of_fuals = await prisma.type_of_fuals.update({
         where: { id },
         data,
       });
       await RecacheData();
-      return SendSuccess(res, `${EMessage.updateSuccess}`, type_of_fuals);
-    } catch (error) {
-      return SendErrorLog(
+      return SendCreate({
         res,
-        `${EMessage.serverError} ${EMessage.updateFailed}`,
-        error
-      );
+        message: `${EMessage.updateSuccess}`,
+        data: type_of_fuals,
+      });
+    } catch (error) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.updateFailed} type_of_fuals`,
+        err,
+      });
     }
   },
   async UpdateIcon(req, res) {
@@ -81,13 +100,28 @@ const Type_of_FualsController = {
       const id = req.params.id;
       const { old_icon } = req.body;
       if (!old_icon)
-        return SendError(res, 400, `${EMessage.pleaseInput}:old_icon`);
+        return SendError({
+          res,
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: "old_icon",
+        });
       const data = req.files;
       if (!data || !data.icon)
-        return SendError(res, 400, `${EMessage.pleaseInput}: icon`);
+        return SendError({
+          res,
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: "icon",
+        });
       const type_of_fualsExists = await FindType_of_FualsById(id);
       if (!type_of_fualsExists)
-        return SendError(res, 404, `${EMessage.notFound}:type_of_fuals id`);
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}:type_of_fuals`,
+          err: "id",
+        });
       const icon = await UploadImage(data.icon.data, old_icon);
       if (!icon) {
         throw new Error("upload image failed");
@@ -99,13 +133,17 @@ const Type_of_FualsController = {
         },
       });
       await RecacheData();
-      return SendSuccess(res, `${EMessage.updateSuccess}`, type_of_fuals);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.updateFailed}`,
-        error
-      );
+        message: `${EMessage.updateSuccess}`,
+        data: type_of_fuals,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.updateFailed} type_of_fuals`,
+        err,
+      });
     }
   },
 
@@ -114,31 +152,44 @@ const Type_of_FualsController = {
       const id = req.params.id;
       const type_of_fualsExists = await FindType_of_FualsById(id);
       if (!type_of_fualsExists)
-        return SendError(res, 404, `${EMessage.notFound}:type_of_fuals id`);
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}:type_of_fuals`,
+          err: "id",
+        });
       const type_of_fuals = await prisma.type_of_fuals.update({
         where: { id },
         data: { is_active: false },
       });
       await RecacheData();
-      return SendSuccess(res, `${EMessage.deleteSuccess}`, type_of_fuals);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.deleteFailed}`,
-        error
-      );
+        message: `${EMessage.deleteSuccess}`,
+        data: type_of_fuals,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.deleteFailed} type_of_fuals`,
+        err,
+      });
     }
   },
   async SelectAll(req, res) {
     try {
       const type_of_fuals = await CachDataNoClear(key, model, where, select);
-      return SendSuccess(res, `${EMessage.fetchAllSuccess}`, type_of_fuals);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.errorFetchingAll} }`,
-        error
-      );
+        message: `${EMessage.fetchAllSuccess}`,
+        data: type_of_fuals,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll} type_of_fuals`,
+        err,
+      });
     }
   },
   async SelectOne(req, res) {
@@ -146,14 +197,23 @@ const Type_of_FualsController = {
       const id = req.params.id;
       const type_of_fuals = await FindType_of_FualsById(id);
       if (!type_of_fuals)
-        return SendError(res, 404, `${EMessage.notFound}:type_of_fuals id`);
-      return SendSuccess(res, `${EMessage.fetchOneSuccess}`, type_of_fuals);
-    } catch (error) {
-      return SendErrorLog(
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}:type_of_fuals`,
+          err: "id",
+        });
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.errorFetchingOne}`,
-        error
-      );
+        message: `${EMessage.fetchOneSuccess}`,
+        data: type_of_fuals,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingOne} type_of_fuals`,
+        err,
+      });
     }
   },
 };

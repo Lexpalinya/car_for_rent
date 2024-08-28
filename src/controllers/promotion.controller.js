@@ -29,11 +29,12 @@ const PromotionController = {
     try {
       const validate = ValidatePromotion(req.body);
       if (validate.length > 0)
-        return SendError(
+        return SendError({
           res,
-          400,
-          `${EMessage.pleaseInput}: ${validate.join(", ")}`
-        );
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: validate.join(", "),
+        });
       let { price, amount } = req.body;
       if (typeof price !== "number") {
         price = parseFloat(price);
@@ -42,7 +43,7 @@ const PromotionController = {
         amount = parseInt(amount);
       }
       const code = shortid.generate().toUpperCase();
-      console.log("code :>> ", code);
+
       const promotion = await prisma.promotions.create({
         data: {
           code,
@@ -52,13 +53,17 @@ const PromotionController = {
         },
       });
       await RecacheData();
-      return SendCreate(res, `${EMessage.insertSuccess} promotion`, promotion);
-    } catch (error) {
-      SendErrorLog(
+      return SendCreate({
         res,
-        `${EMessage.serverError} ${EMessage.insertFailed}`,
-        error
-      );
+        message: `${EMessage.insertSuccess} promotion`,
+        data: promotion,
+      });
+    } catch (err) {
+      SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.insertFailed} promotion`,
+        err,
+      });
     }
   },
   async Update(req, res) {
@@ -78,30 +83,42 @@ const PromotionController = {
         data.count_use = parseInt(data.count_use);
       }
       const promotionExists = await FindPromotionById_ID(id);
-      if (!promotionExists) {
-        return SendError(res, 404, `${EMessage.notFound} promotion not found`);
-      }
+      if (!promotionExists)
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}: promotion`,
+          err: "id",
+        });
       const promotion = await prisma.promotions.update({
         where: { id },
         data,
       });
       await RecacheData();
-      return SendSuccess(res, `${EMessage.updateSuccess} promotion`, promotion);
-    } catch (error) {
-      SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.deleteFailed}`,
-        error
-      );
+        message: `${EMessage.updateSuccess}`,
+        data: promotion,
+      });
+    } catch (err) {
+      SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.updateFailed} promtion`,
+        err,
+      });
     }
   },
   async Delete(req, res) {
     try {
       const id = req.params.id;
       const promotionExists = await FindPromotionById_ID(id);
-      if (!promotionExists) {
-        return SendError(res, 404, `${EMessage.notFound} promotion not found`);
-      }
+      if (!promotionExists)
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}: promotion`,
+          err: "id",
+        });
       const promotion = await prisma.promotions.update({
         where: { id },
         data: {
@@ -109,30 +126,34 @@ const PromotionController = {
         },
       });
       await RecacheData();
-      return SendSuccess(res, `${EMessage.deleteSuccess} promotion`, promotion);
-    } catch (error) {
-      SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.deleteFailed}`,
-        error
-      );
+        message: `${EMessage.deleteSuccess}`,
+        data: promotion,
+      });
+    } catch (err) {
+      SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.deleteFailed} promotion`,
+        err,
+      });
     }
   },
 
   async SelectAll(req, res) {
     try {
       const promotion = await CachDataAll(key, model, where, select);
-      return SendSuccess(
+      return SendSuccess({
         res,
-        `${EMessage.fetchAllSuccess} promotion`,
-        promotion
-      );
+        message: `${EMessage.fetchAllSuccess} promotion`,
+        data: promotion,
+      });
     } catch (error) {
-      SendErrorLog(
+      SendErrorLog({
         res,
-        `${EMessage.serverError} ${EMessage.fetchAllSuccess}`,
-        error
-      );
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll} promotion`,
+        err,
+      });
     }
   },
   async SelecOne(req, res) {
@@ -140,20 +161,24 @@ const PromotionController = {
       const id = req.params.id;
       const promotionData = await CachDataAll(key, model, where, select);
       let promotion = promotionData.find((item) => item.id === id);
-      if (!promotion) {
-        return SendError(res, 404, `${EMessage.notFound} promotion not found`);
-      }
-      return SendSuccess(
+      if (!promotion)
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}: promotion`,
+          err: "id",
+        });
+      return SendSuccess({
         res,
-        `${EMessage.fetchOneSuccess} promotion`,
-        promotion
-      );
-    } catch (error) {
-      SendErrorLog(
+        message: `${EMessage.fetchOneSuccess} promotion`,
+        data: promotion,
+      });
+    } catch (err) {
+      SendErrorLog({
         res,
-        `${EMessage.serverError} ${EMessage.errorFetchingOne}`,
-        error
-      );
+        message: `${EMessage.serverError} ${EMessage.errorFetchingOne}`,
+        err,
+      });
     }
   },
 
@@ -161,16 +186,16 @@ const PromotionController = {
     try {
       const promotionData = await CachDataAll(key, model, where, select);
       let promotion = promotionData.filter((item) => item.is_public === true);
-      return SendSuccess(
+      return SendSuccess({
         res,
-        `${EMessage.fetchOneSuccess} promotion`,
-        promotion
-      );
-    } catch (error) {
+        message: `${EMessage.fetchAllSuccess} by isPublic`,
+        data: promotion,
+      });
+    } catch (err) {
       SendErrorLog(
         res,
-        `${EMessage.serverError} ${EMessage.errorFetchingOne}`,
-        error
+        `${EMessage.serverError} ${EMessage.errorFetchingOne} promotion by isPublic`,
+        err
       );
     }
   },
@@ -186,17 +211,17 @@ const PromotionController = {
         select
       );
       CachDataLimit(key + "-" + (page + 1), model, where, page + 1, select);
-      return SendSuccess(
+      return SendSuccess({
         res,
-        `${EMessage.fetchOneSuccess} promotion`,
-        promotion
-      );
-    } catch (error) {
-      SendErrorLog(
+        message: `${EMessage.fetchOneSuccess} promotion`,
+        data: promotion,
+      });
+    } catch (err) {
+      SendErrorLog({
         res,
-        `${EMessage.serverError} ${EMessage.errorFetchingOne}`,
-        error
-      );
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll} promotion page`,
+        err,
+      });
     }
   },
 };

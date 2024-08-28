@@ -24,10 +24,14 @@ const BannerController = {
     try {
       const data = req.files;
       if (!data || !data.image) {
-        return SendError(res, 400, `${EMessage.pleaseInput}:image`);
+        return SendError({
+          res,
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: "image",
+        });
       }
       const url = await UploadImage(data.image.data);
-      console.log("url :>> ", url);
       if (!url) {
         throw new Error("upload image failed");
       }
@@ -37,13 +41,17 @@ const BannerController = {
         },
       });
       await RecacheData();
-      return SendCreate(res, `${EMessage.insertSuccess}`, banner);
-    } catch (error) {
-      SendErrorLog(
+      return SendCreate({
         res,
-        `${EMessage.serverError} ${EMessage.insertFailed} bannner insert`,
-        error
-      );
+        message: `${EMessage.insertSuccess}`,
+        data: banner,
+      });
+    } catch (err) {
+      SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.insertFailed} bannner`,
+        err,
+      });
     }
   },
   async Update(req, res) {
@@ -51,17 +59,31 @@ const BannerController = {
       const id = req.params.id;
       const { old_image } = req.body;
       if (!old_image)
-        return SendError(res, 400, `${EMessage.pleaseInput} :old_image`);
+        return SendError({
+          res,
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: "old_image",
+        });
       const data = req.files;
-      if (!data || !data.image) {
-        return SendError(res, 400, `${EMessage.pleaseInput}:image`);
-      }
+      if (!data || !data.image)
+        return SendError({
+          res,
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: "image",
+        });
       const bannerExists = await FindBannerById(id);
-      if (!bannerExists) {
-        return SendError(res, `${EMessage.notFound}: banner id`);
-      }
+      if (!bannerExists)
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}: banner`,
+          err: "id",
+        });
+
       const url = await UploadImage(data.image.data);
-      console.log("url :>> ", url);
+
       if (!url) {
         throw new Error("upload image failed");
       }
@@ -72,60 +94,120 @@ const BannerController = {
         },
       });
       await RecacheData();
-      return SendSuccess(res, `${EMessage.updateSuccess}`, banner);
-    } catch (error) {
-      SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.updateFailed} bannner update`,
-        error
-      );
+        message: `${EMessage.updateSuccess}`,
+        data: banner,
+      });
+    } catch (err) {
+      SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.updateFailed} banner`,
+        err,
+      });
     }
   },
   async Delete(req, res) {
     try {
       const id = req.params.id;
       const bannerExists = await FindBannerById(id);
-      if (!bannerExists) {
-        return SendError(res, `${EMessage.notFound}: banner id`);
-      }
+      if (!bannerExists)
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}: banner`,
+          err: "id",
+        });
       const banner = await prisma.banners.update({
         where: { id },
         data: { is_active: false },
       });
       await RecacheData();
       await CachDataAll(key, model, where, select);
-      return SendSuccess(res, `${EMessage.updateSuccess}`, banner);
-    } catch (error) {
-      SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.deleteFailed} bannner delete`,
-        error
-      );
+        message: `${EMessage.deleteSuccess}`,
+        data: banner,
+      });
+    } catch (err) {
+      SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.deleteFailed} bannner`,
+        err,
+      });
+    }
+  },
+  async Update_Is_public(req, res) {
+    try {
+      const id = req.params.id;
+      let { is_public } = req.body;
+
+      if (!is_public)
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.pleaseInput}`,
+          err: "is_public",
+        });
+      if (typeof is_public !== "boolean") is_public = is_public === "true";
+      const bannerExists = await FindBannerById(id);
+      if (!bannerExists)
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}: banner`,
+          err: "id",
+        });
+      const banner = await prisma.banners.update({
+        where: { id },
+        data: { is_public },
+      });
+      await RecacheData();
+      await CachDataAll(key, model, where, select);
+      return SendSuccess({
+        res,
+        message: `${EMessage.updateSuccess}`,
+        data: banner,
+      });
+    } catch (err) {
+      SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.deleteFailed} bannner`,
+        err,
+      });
     }
   },
   async SelectAll(req, res) {
     try {
       const banner = await CachDataAll(key, model, where, select);
-      SendSuccess(res, `${EMessage.fetchAllSuccess}`, banner);
-    } catch (error) {
-      SendErrorLog(
+      SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.errorFetchingAll} bannner select all`,
-        error
-      );
+        message: `${EMessage.fetchAllSuccess}`,
+        data: banner,
+      });
+    } catch (err) {
+      SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll} bannner`,
+        err,
+      });
     }
   },
   async SelectIsPublic(req, res) {
     try {
       const bannerData = await CachDataAll(key, model, where, select);
       let banner = bannerData.filter((item) => item.is_public === true);
-      SendSuccess(res, `${EMessage.fetchAllSuccess}`, banner);
-    } catch (error) {
-      SendErrorLog(
+      SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.errorFetchingAll} bannner is public`,
-        error
-      );
+        message: `${EMessage.fetchAllSuccess} is Public`,
+        data: banner,
+      });
+    } catch (err) {
+      SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll} bannner is public`,
+        err,
+      });
     }
   },
 };

@@ -24,11 +24,12 @@ const Level_InsurancesController = {
     try {
       const validate = ValidateLevel_Insurances(req.body);
       if (validate.length > 0)
-        return SendError(
+        return SendError({
           res,
-          400,
-          `${EMessage.pleaseInput}:${validate.join(", ")}`
-        );
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: validate.join(", "),
+        });
       const { name } = req.body;
       const level_insurances = await prisma.level_insurances.create({
         data: {
@@ -36,13 +37,17 @@ const Level_InsurancesController = {
         },
       });
       await RecacheData();
-      return SendCreate(res, `${EMessage.insertSuccess}`, level_insurances);
-    } catch (error) {
-      return SendErrorLog(
+      return SendCreate({
         res,
-        `${EMessage.serverError} ${EMessage.insertFailed}`,
-        error
-      );
+        message: `${EMessage.insertSuccess}`,
+        data: level_insurances,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.insertFailed} level insurance`,
+        err,
+      });
     }
   },
   async Update(req, res) {
@@ -51,19 +56,28 @@ const Level_InsurancesController = {
       const data = DataExists(req.body);
       const level_insuranceExists = await FindLevel_InsurancesById(id);
       if (!level_insuranceExists)
-        return SendError(res, 404, `${EMessage.notFound}:level_insurances id`);
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}: level insurance`,
+          err: "id",
+        });
       const level_insurance = await prisma.level_insurances.update({
         where: { id },
         data,
       });
       await RecacheData();
-      return SendSuccess(res, `${EMessage.updateSuccess}`, level_insurance);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.updateFailed}`,
-        error
-      );
+        message: `${EMessage.updateSuccess}`,
+        data: level_insurance,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.updateFailed}`,
+        err,
+      });
     }
   },
   async Delete(req, res) {
@@ -71,31 +85,44 @@ const Level_InsurancesController = {
       const id = req.params.id;
       const level_insuranceExists = await FindLevel_InsurancesById(id);
       if (!level_insuranceExists)
-        return SendError(res, 404, `${EMessage.notFound}:level_insurances id`);
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}: level insurance`,
+          err: "id",
+        });
       const level_insurance = await prisma.level_insurances.update({
         where: { id },
         data: { is_active: false },
       });
       await RecacheData();
-      return SendSuccess(res, `${EMessage.deleteSuccess}`, level_insurance);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.deleteFailed}`,
-        error
-      );
+        message: `${EMessage.deleteSuccess}`,
+        data: level_insurance,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.deleteFailed} level insurance`,
+        err,
+      });
     }
   },
   async SelectAll(req, res) {
     try {
       const level_insurance = await CachDataNoClear(key, model, where, select);
-      return SendSuccess(res, `${EMessage.fetchAllSuccess}`, level_insurance);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.errorFetchingAll}`,
-        error
-      );
+        message: `${EMessage.fetchAllSuccess}`,
+        data: level_insurance,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll} level insurance`,
+        err,
+      });
     }
   },
   async SelectOne(req, res) {
@@ -103,14 +130,23 @@ const Level_InsurancesController = {
       const id = req.params.id;
       const level_insurance = await FindLevel_InsurancesById(id);
       if (!level_insurance)
-        return SendError(res, 404, `${EMessage.notFound}:level_insurances id`);
-      return SendSuccess(res, `${EMessage.fetchOneSuccess}`, level_insurance);
-    } catch (error) {
-      return SendErrorLog(
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}: level insurance`,
+          err: "id",
+        });
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.errorFetchingOne}`,
-        error
-      );
+        message: `${EMessage.fetchOneSuccess}`,
+        data: level_insurance,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingOne} level insurance`,
+        err,
+      });
     }
   },
 };

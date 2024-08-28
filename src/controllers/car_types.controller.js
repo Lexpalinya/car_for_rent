@@ -25,14 +25,20 @@ const Car_typesController = {
     try {
       const validate = ValidateCar_Types(req.body);
       if (validate.length > 0)
-        return SendError(
+        return SendError({
           res,
-          400,
-          `${EMessage.pleaseInput}: ${validate.join(", ")}`
-        );
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: validate.join(", "),
+        });
       const data = req.files;
       if (!data || !data.icon)
-        return SendError(res, 400, `${EMessage.pleaseInput}: icon`);
+        return SendError({
+          res,
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: "icon",
+        });
       const { name, detail } = req.body;
       const icon = await UploadImage(data.icon.data);
       if (!icon) {
@@ -46,13 +52,17 @@ const Car_typesController = {
         },
       });
       await RecacheData();
-      return SendCreate(res, `${EMessage.insertSuccess}`, car_type);
-    } catch (error) {
-      return SendErrorLog(
+      return SendCreate({
         res,
-        `${EMessage.serverError} ${EMessage.insertFailed}`,
-        error
-      );
+        message: `${EMessage.insertSuccess}`,
+        data: car_type,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.insertFailed} car_type`,
+        err,
+      });
     }
   },
   async Update(req, res) {
@@ -61,7 +71,12 @@ const Car_typesController = {
       const data = DataExists(req.body);
       const car_typeExists = await FindCar_typesById(id);
       if (!car_typeExists)
-        return SendError(res, 404, `${EMessage.notFound}: car_type id`);
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}: car_type`,
+          err: "id",
+        });
       const car_type = await prisma.car_types.update({
         where: {
           id,
@@ -69,13 +84,17 @@ const Car_typesController = {
         data,
       });
       await RecacheData();
-      return SendSuccess(res, `${EMessage.updateSuccess}`, car_type);
-    } catch (error) {
-      return SendErrorLog(
+      return SendCreate({
         res,
-        `${EMessage.serverError} ${EMessage.updateFailed}`,
-        error
-      );
+        message: `${EMessage.updateSuccess}`,
+        data: car_type,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.updateFailed} car_type data`,
+        err,
+      });
     }
   },
   async UpdateIcon(req, res) {
@@ -83,13 +102,28 @@ const Car_typesController = {
       const id = req.params.id;
       const { old_icon } = req.body;
       if (!old_icon)
-        return SendError(res, 400, `${EMessage.pleaseInput}:old_icon`);
+        return SendError({
+          res,
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: "old_icon",
+        });
       const data = req.files;
       if (!data || !data.icon)
-        return SendError(res, 400, `${EMessage.pleaseInput}: icon`);
+        return SendError({
+          res,
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: "icon",
+        });
       const car_typeExists = await FindCar_typesById(id);
       if (!car_typeExists)
-        return SendError(res, 404, `${EMessage.notFound}: car_type id`);
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}: car_type`,
+          err: "id",
+        });
       const icon = await UploadImage(data.icon.data, old_icon);
       if (!icon) {
         throw new Error("upload image failed");
@@ -103,13 +137,17 @@ const Car_typesController = {
         },
       });
       await RecacheData();
-      return SendSuccess(res, `${EMessage.updateSuccess}`, car_type);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.updateFailed}`,
-        error
-      );
+        message: `${EMessage.updateSuccess}`,
+        data: car_type,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.updateFailed} car_type icon`,
+        err,
+      });
     }
   },
   async Delete(req, res) {
@@ -118,7 +156,12 @@ const Car_typesController = {
 
       const car_typeExists = await FindCar_typesById(id);
       if (!car_typeExists)
-        return SendError(res, 404, `${EMessage.notFound}: car_type id`);
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}: car_type`,
+          err: "id",
+        });
       const car_type = await prisma.car_types.update({
         where: {
           id,
@@ -126,25 +169,33 @@ const Car_typesController = {
         data: { is_active: false },
       });
       await RecacheData();
-      return SendSuccess(res, `${EMessage.deleteSuccess}`, car_type);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.deleteFailed}`,
-        error
-      );
+        message: `${EMessage.deleteSuccess}`,
+        data: car_type,
+      });
+    } catch (error) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.deleteFailed} car_type`,
+        err,
+      });
     }
   },
   async SelectAll(req, res) {
     try {
       const car_type = await CachDataNoClear(key, model, where, select);
-      return SendSuccess(res, `${EMessage.fetchAllSuccess}`, car_type);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.fetchAllSuccess}`,
-        error
-      );
+        message: `${EMessage.fetchAllSuccess}`,
+        data: car_type,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.fetchAllSuccess}`,
+        err,
+      });
     }
   },
   async SelectOne(req, res) {
@@ -153,13 +204,22 @@ const Car_typesController = {
 
       const car_type = await FindCar_typesById(id);
       if (!car_type)
-        return SendError(res, 404, `${EMessage.notFound}: car_type id`);
-      return SendSuccess(res, `${EMessage.deleteSuccess}`, car_type);
-    } catch (error) {
-      return SendErrorLog(
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}: car_type`,
+          err: "id",
+        });
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.deleteFailed}`,
-        error
+        message: `${EMessage.deleteSuccess}`,
+        data: car_type,
+      });
+    } catch (err) {
+      return SendErrorLog(
+     {   res,
+       message: `${EMessage.serverError} ${EMessage.deleteFailed}`,
+        err}
       );
     }
   },

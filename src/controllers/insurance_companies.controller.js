@@ -25,14 +25,20 @@ const Insurance_companysController = {
     try {
       const validate = ValidateInsurances_Companies(req.body);
       if (validate.length > 0)
-        return SendError(
+        return SendError({
           res,
-          400,
-          `${EMessage.pleaseInput}: ${validate.join(", ")}`
-        );
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: validate.join(", "),
+        });
       const data = req.files;
       if (!data || !data.icon)
-        return SendError(res, 400, `${EMessage.pleaseInput}: icon`);
+        return SendError({
+          res,
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: "icon",
+        });
       const { name } = req.body;
       const icon = await UploadImage(data.icon.data);
       if (!icon) {
@@ -45,13 +51,17 @@ const Insurance_companysController = {
         },
       });
       await RecacheData();
-      return SendCreate(res, `${EMessage.insertSuccess}`, companies);
-    } catch (error) {
-      return SendErrorLog(
+      return SendCreate({
         res,
-        `${EMessage.serverError} ${EMessage.insertFailed}`,
-        error
-      );
+        message: `${EMessage.insertSuccess}`,
+        data: companies,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.insertFailed} insurance companies`,
+        err,
+      });
     }
   },
   async Update(req, res) {
@@ -60,7 +70,12 @@ const Insurance_companysController = {
       const data = DataExists(req.body);
       const insurance_companysExists = await FindInsurance_CompanysById(id);
       if (!insurance_companysExists)
-        return SendError(res, 404, `${EMessage.notFound}: companies id`);
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}: companies`,
+          err: "id",
+        });
       const companies = await prisma.insurance_companies.update({
         where: {
           id,
@@ -68,13 +83,17 @@ const Insurance_companysController = {
         data,
       });
       await RecacheData();
-      return SendSuccess(res, `${EMessage.updateSuccess}`, companies);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.updateFailed}`,
-        error
-      );
+        message: `${EMessage.updateSuccess}`,
+        data: companies,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.insertFailed} insurance companies`,
+        err,
+      });
     }
   },
   async UpdateIcon(req, res) {
@@ -82,17 +101,28 @@ const Insurance_companysController = {
       const id = req.params.id;
       const { old_icon } = req.body;
       if (!old_icon)
-        return SendError(res, 400, `${EMessage.pleaseInput}:old_icon`);
+        return SendError({
+          res,
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: "old_icon",
+        });
       const data = req.files;
       if (!data || !data.icon)
-        return SendError(
+        return SendError({
           res,
-          400,
-          `${EMessage.pleaseInput}: icon`
-        );
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: "icon",
+        });
       const insurance_companysExists = await FindInsurance_CompanysById(id);
       if (!insurance_companysExists)
-        return SendError(res, 404, `${EMessage.notFound}: companies id`);
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}: companies`,
+          err: "id",
+        });
       const icon = await UploadImage(data.icon.data, old_icon);
       if (!icon) {
         throw new Error("upload image failed");
@@ -106,13 +136,17 @@ const Insurance_companysController = {
         },
       });
       await RecacheData();
-      return SendSuccess(res, `${EMessage.updateSuccess}`, companies);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.updateFailed}`,
-        error
-      );
+        message: `${EMessage.updateSuccess}`,
+        data: companies,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.updateFailed} insurance_companies`,
+        err,
+      });
     }
   },
   async Delete(req, res) {
@@ -121,7 +155,12 @@ const Insurance_companysController = {
 
       const insurance_companysExists = await FindInsurance_CompanysById(id);
       if (!insurance_companysExists)
-        return SendError(res, 404, `${EMessage.notFound}: companies id`);
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}: companies`,
+          err: "id",
+        });
       const companies = await prisma.insurance_companies.update({
         where: {
           id,
@@ -129,25 +168,33 @@ const Insurance_companysController = {
         data: { is_active: false },
       });
       await RecacheData();
-      return SendSuccess(res, `${EMessage.deleteSuccess}`, companies);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.deleteFailed}`,
-        error
-      );
+        message: `${EMessage.deleteSuccess}`,
+        data: companies,
+      });
+    } catch (error) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.deleteFailed} insurance_companies`,
+        err,
+      });
     }
   },
   async SelectAll(req, res) {
     try {
       const companies = await CachDataNoClear(key, model, where, select);
-      return SendSuccess(res, `${EMessage.fetchAllSuccess}`, companies);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.fetchAllSuccess}`,
-        error
-      );
+        message: `${EMessage.fetchAllSuccess}`,
+        data: companies,
+      });
+    } catch (error) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll} insurance_companies`,
+        err,
+      });
     }
   },
   async SelectOne(req, res) {
@@ -156,14 +203,23 @@ const Insurance_companysController = {
 
       const companies = await FindInsurance_CompanysById(id);
       if (!companies)
-        return SendError(res, 404, `${EMessage.notFound}: companies id`);
-      return SendSuccess(res, `${EMessage.deleteSuccess}`, companies);
-    } catch (error) {
-      return SendErrorLog(
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}: companies`,
+          err: "id",
+        });
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.deleteFailed}`,
-        error
-      );
+        message: `${EMessage.fetchOneSuccess}`,
+        data: companies,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingOne} insurance_companies`,
+        err,
+      });
     }
   },
 };

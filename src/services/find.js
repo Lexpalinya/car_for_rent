@@ -16,6 +16,7 @@ const findUnique = (model, id, select) => {
         },
         select,
       });
+      resolve(result);
     } catch (error) {
       reject(error);
     }
@@ -304,4 +305,53 @@ export const FindCar_rentById_for_edit = (id) => {
     id,
     is_active: true,
   });
+};
+
+export const FindCar_rentById = (id) => {
+  return CachDataFindDataId_One(
+    id + "car_rent",
+    "car_rent",
+    {
+      id,
+      is_active: true,
+    },
+    {
+      id: true,
+      post_id: true,
+      user_id: true,
+      start_date: true,
+      end_date: true,
+      frist_name: true,
+      last_name: true,
+      email: true,
+      phone_number: true,
+      doc_type: true,
+      booking_fee: true,
+      pay_destination: true,
+      description: true,
+      reason: true,
+      promotion_id: true,
+      post: {
+        select: {
+          star: true,
+          car_brands: {
+            select: {
+              name: true,
+            },
+          },
+          car_version: true,
+          car_year: true,
+          post_car_image: {
+            select: {
+              url: true,
+            },
+          },
+        },
+      },
+    }
+  );
+};
+
+export const FindLocationById = (id) => {
+  return findUnique("location", id, );
 };
