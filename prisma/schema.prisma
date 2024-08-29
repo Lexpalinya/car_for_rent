@@ -230,6 +230,7 @@ model like_post {
   posts   posts  @relation(fields: [post_id], references: [id])
 
   @@id([user_id, post_id])
+  @@index([post_id])
 }
 
 //------------main table----------------------------------------------------------

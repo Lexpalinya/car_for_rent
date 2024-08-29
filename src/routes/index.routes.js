@@ -211,17 +211,24 @@ route.get(
 route.get(
   `${car_rent_status}/selOne/:id`,
   auth,
+
   Car_Rent_StatusController.SelectOne
 );
-route.post(`${car_rent_status}/insert`, auth, Car_Rent_StatusController.Insert);
+route.post(
+  `${car_rent_status}/insert`,
+  auth,
+  admin,
+  Car_Rent_StatusController.Insert
+);
 route.put(
   `${car_rent_status}/update/:id`,
   auth,
+  admin,
   Car_Rent_StatusController.Update
 );
 route.delete(
   `${car_rent_status}/delete/:id`,
-  auth,
+  auth,admin,
   Car_Rent_StatusController.Delete
 );
 

@@ -52,6 +52,7 @@ let select = {
   insurance_company_id: true,
   level_insurance_id: true,
   car_brand_id: true,
+  car_brand: true,
   car_version: true,
   car_year: true,
   car_resgistration: true,
@@ -61,6 +62,8 @@ let select = {
   car_color: true,
   description: true,
   address: true,
+  text_address: true,
+  detail_address: true,
   deposits_fee: true,
   status_id: true,
   created_at: true,
@@ -81,18 +84,6 @@ let select = {
   post_driver_license_image: true,
   post_insurance_image: true,
   post_rent_data: true,
-  labels_data: {
-    select: {
-      id: true,
-      label_id: true,
-      label: {
-        select: {
-          icon: true,
-          name: true,
-        },
-      },
-    },
-  },
   like_post: {
     select: {
       user_id: true,
@@ -115,21 +106,21 @@ const PostController = {
     try {
       const validate = ValidatePost(req.body);
       if (validate.length > 0)
-        return SendError(
+        return SendError({
           res,
-          400,
-          `${EMessage.pleaseInput}: ${validate.join(", ")}`
-        );
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: validate.join(", "),
+        });
       let {
         car_type_id,
-        user_id,
         frist_name,
         last_name,
         birth_day,
         nationnality,
         doc_type,
         car_insurance,
-        car_brand_id,
+        car_brand,
         car_version,
         car_year,
         car_resgistration,
@@ -139,15 +130,18 @@ const PostController = {
         car_color,
         description,
         address,
+        text_address,
+        detail_address,
         deposits_fee,
         status_id,
         //
+        post_rent_data,
+        //
+        car_brand_id,
         insurance_company_id,
         level_insurance_id,
-        //
-        post_rent_data,
-        labels_data,
       } = req.body;
+      const user_id = req.user;
       const data = req.files;
       if (typeof car_insurance !== "boolean") {
         car_insurance = car_insurance === "true";
@@ -160,21 +154,23 @@ const PostController = {
         (car_insurance && !insurance_company_id) ||
         (car_insurance && !level_insurance_id)
       )
-        return SendError(
+        return SendError({
           res,
-          400,
-          `${EMessage.pleaseInput}: ${
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: ` ${
             !insurance_company_id
               ? "insurance_company_id"
               : "level_insurance_id"
-          }`
-        );
+          }`,
+        });
       if (!data)
-        return SendError(
+        return SendError({
           res,
-          400,
-          `${EMessage.pleaseInput}:post_doc_image,post_driver_license_image,post_car_image`
-        );
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: "post_doc_image,post_driver_license_image,post_car_image",
+        });
 
       let post_doc_image = data.post_doc_image;
       let post_driver_license_image = data.post_driver_license_image;
@@ -186,10 +182,11 @@ const PostController = {
         !post_car_image ||
         (car_insurance && !post_insurance_image)
       )
-        return SendError(
+        return SendError({
           res,
-          400,
-          `${EMessage.pleaseInput}:${
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: `${
             !post_doc_image
               ? "post_doc_image"
               : !post_driver_license_image
@@ -197,15 +194,13 @@ const PostController = {
               : !post_car_image
               ? "post_car_image"
               : "post_insurance_image"
-          }`
-        );
+          } id`,
+        });
       //--------------------
       if (typeof post_rent_data === "string") {
         post_rent_data = JSON.parse(post_rent_data);
       }
-      if (typeof labels_data === "string") {
-        labels_data = labels_data.slice(1, -1).split(",");
-      }
+
       post_rent_data = EnsureArray(post_rent_data);
 
       post_doc_image = EnsureArray(post_doc_image);
@@ -213,49 +208,52 @@ const PostController = {
       post_driver_license_image = EnsureArray(post_driver_license_image);
 
       post_car_image = EnsureArray(post_car_image);
-      console.log("object :>> ", labels_data);
-      labels_data = EnsureArray(labels_data);
-      console.log("object :>> ", labels_data);
+
       if (car_insurance) {
         post_insurance_image = EnsureArray(post_insurance_image);
       }
       for (const i of post_rent_data) {
         if (!i.title) {
-          return SendError(
+          return SendError({
             res,
-            400,
-            `${EMessage.pleaseInput}: post_rent_data title`
-          );
+            statuscode: 400,
+            message: `${EMessage.pleaseInput}: `,
+            err: " post_rent_data{title}",
+          });
         }
         if (!i.system_cost || typeof i.system_cost != "number") {
-          return SendError(
+          return SendError({
             res,
-            400,
-            `${EMessage.pleaseInput}: post_rent_data system_cost and type number`
-          );
+            statuscode: 400,
+            message: `${EMessage.pleaseInput}:`,
+            err: "post_rent_data system_cost and type number",
+          });
         }
         if (!i.price || typeof i.price !== "number") {
-          return SendError(
+          return SendError({
             res,
-            400,
-            `${EMessage.pleaseInput}: post_rent_data price and type number`
-          );
+            statuscode: 400,
+            message: `${EMessage.pleaseInput}`,
+            err: "post_rent_data price and type number",
+          });
         }
 
         if (!i.deposit || typeof i.deposit !== "number") {
-          return SendError(
+          return SendError({
             res,
-            400,
-            `${EMessage.pleaseInput}: post_rent_data deposit and type number`
-          );
+            statuscode: 400,
+            message: `${EMessage.pleaseInput}`,
+            err: "post_rent_data deposit and type number",
+          });
         }
 
         if (!i.total || typeof i.total !== "number") {
-          return SendError(
+          return SendError({
             res,
-            400,
-            `${EMessage.pleaseInput}: post_rent_data total and type number`
-          );
+            statuscode: 400,
+            message: `${EMessage.pleaseInput}`,
+            err: " post_rent_data total and type number",
+          });
         }
       }
       let promiseList = [
@@ -268,22 +266,6 @@ const PostController = {
       if (car_insurance) {
         promiseList.push(FindInsurance_CompanysById(insurance_company_id));
         promiseList.push(FindLevel_InsurancesById(level_insurance_id));
-      }
-
-      if (labels_data) {
-        const labelChecks = labels_data.map(async (id) => {
-          const label = await FindLablesById(id);
-          if (!label) {
-            SendError(
-              res,
-              404,
-              404,
-              `${EMessage.notFound} label with id: ${id}`
-            );
-            return false; // Indicate a failure in finding a label
-          }
-          return true; // Indicate success in finding a label
-        });
       }
 
       const [
@@ -304,10 +286,11 @@ const PostController = {
         (car_insurance && !insurance_companyExists) ||
         (car_insurance && !level_insuranceExists)
       )
-        return SendError(
+        return SendError({
           res,
-          404,
-          `${EMessage.notFound}:${
+          statuscode: 404,
+          message: `${EMessage.notFound}`,
+          err: `${
             !car_typeExists
               ? "car_types"
               : !userExists
@@ -321,8 +304,8 @@ const PostController = {
               : car_insurance && !insurance_companyExists
               ? "insurance_companys"
               : "level_insurances"
-          } id`
-        );
+          } id`,
+        });
       const promiseImageList = [
         uploadImages(post_driver_license_image),
         uploadImages(post_doc_image),
@@ -350,7 +333,7 @@ const PostController = {
           car_insurance,
           insurance_company_id,
           level_insurance_id,
-          car_brand_id,
+          car_brand,
           car_version,
           car_year,
           car_resgistration,
@@ -360,6 +343,8 @@ const PostController = {
           car_color,
           description,
           address,
+          text_address,
+          detail_address,
           deposits_fee,
           status_id,
         },
@@ -373,7 +358,7 @@ const PostController = {
       const add_post_car_image = AddPost_id_url(post_car_images_url, post.id);
 
       const add_post_rent_data = AddDataPost_rent_data(post_rent_data, post.id);
-      let label_data_as_post_id;
+
       const promiseAdd = [
         Post_driver_license_image.insert(add_post_driver_license_image),
         Post_doc_image.insert(add_post_doc_image),
@@ -388,11 +373,7 @@ const PostController = {
         );
         promiseAdd.push(Post_insurance_image.insert(add_post_insurance_image));
       }
-      if (labels_data) {
-        label_data_as_post_id = AddDataPostLable_data(labels_data, post.id);
-        console.log("object :>> ", label_data_as_post_id);
-        promiseAdd.push(Post_label_data.insert(label_data_as_post_id));
-      }
+
       await Promise.all(promiseAdd);
       await RecacheDataPost({
         key,
@@ -401,13 +382,17 @@ const PostController = {
       });
       await redis.del(id + "posts-edit");
 
-      return SendCreate(res, `${EMessage.insertSuccess}`, post);
-    } catch (error) {
-      return SendErrorLog(
+      return SendCreate({
         res,
-        `${EMessage.serverError} ${EMessage.insertFailed} post`,
-        error
-      );
+        message: `${EMessage.insertSuccess}`,
+        data: post,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.insertFailed} post`,
+        err,
+      });
     }
   },
 
@@ -674,12 +659,5 @@ const AddDataPost_rent_data = (arr, id) => {
   return arr.map((data) => ({
     post_id: id,
     ...data,
-  }));
-};
-
-const AddDataPostLable_data = (arr, id) => {
-  return arr.map((data) => ({
-    post_id: id,
-    label_id: data,
   }));
 };

@@ -24,11 +24,12 @@ const Car_Rent_StatusController = {
     try {
       const validate = ValidateCar_Rent_Status(req.body);
       if (validate.length > 0)
-        return SendError(
+        return SendError({
           res,
-          400,
-          `${EMessage.pleaseInput}:${validate.join(", ")}`
-        );
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: validate.join(", "),
+        });
       const { name } = req.body;
       const car_rent_status = await prisma.car_rent_status.create({
         data: {
@@ -36,13 +37,17 @@ const Car_Rent_StatusController = {
         },
       });
       await RecacheData();
-      return SendCreate(res, `${EMessage.insertSuccess}`, car_rent_status);
-    } catch (error) {
-      return SendErrorLog(
+      return SendCreate({
         res,
-        `${EMessage.serverError} ${EMessage.insertFailed}`,
-        error
-      );
+        message: `${EMessage.insertSuccess}`,
+        data: car_rent_status,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.insertFailed} car_rent_status`,
+        err,
+      });
     }
   },
   async Update(req, res) {
@@ -51,19 +56,28 @@ const Car_Rent_StatusController = {
       const data = DataExists(req.body);
       const statusExists = await FindCar_Rent_StatusById(id);
       if (!statusExists)
-        return SendError(res, 404, `${EMessage.notFound}:car_rent_status id`);
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}:car_rent_status`,
+          err: "id",
+        });
       const status = await prisma.car_rent_status.update({
         where: { id },
         data,
       });
       await RecacheData();
-      return SendSuccess(res, `${EMessage.updateSuccess}`, status);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.updateFailed}`,
-        error
-      );
+        message: `${EMessage.updateSuccess}`,
+        data: status,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.updateFailed} car_rent_status`,
+        err,
+      });
     }
   },
   async Delete(req, res) {
@@ -71,31 +85,44 @@ const Car_Rent_StatusController = {
       const id = req.params.id;
       const statusExists = await FindCar_Rent_StatusById(id);
       if (!statusExists)
-        return SendError(res, 404, `${EMessage.notFound}:car_rent_status id`);
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}:car_rent_status`,
+          err: "id",
+        });
       const status = await prisma.car_rent_status.update({
         where: { id },
         data: { is_active: false },
       });
       await RecacheData();
-      return SendSuccess(res, `${EMessage.deleteSuccess}`, status);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.deleteFailed}`,
-        error
-      );
+        message: `${EMessage.deleteSuccess}`,
+        data: status,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.deleteFailed} car_rent_status`,
+        err,
+      });
     }
   },
   async SelectAll(req, res) {
     try {
       const status = await CachDataNoClear(key, model, where, select);
-      return SendSuccess(res, `${EMessage.fetchAllSuccess}`, status);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.errorFetchingAll} `,
-        error
-      );
+        message: `${EMessage.fetchAllSuccess}`,
+        data: status,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll} car_rent_status `,
+        err,
+      });
     }
   },
   async SelectOne(req, res) {
@@ -103,13 +130,22 @@ const Car_Rent_StatusController = {
       const id = req.params.id;
       const status = await FindCar_Rent_StatusById(id);
       if (!status)
-        return SendError(res, 404, `${EMessage.notFound}:car_rent_status id`);
-      return SendSuccess(res, `${EMessage.fetchOneSuccess}`, status);
-    } catch (error) {
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}:car_rent_status`,
+          err: "id",
+        });
+      return SendSuccess({
+        res,
+        message: `${EMessage.fetchOneSuccess}`,
+        data: status,
+      });
+    } catch (err) {
       return SendErrorLog(
         res,
-        `${EMessage.serverError} ${EMessage.errorFetchingOne}`,
-        error
+        `${EMessage.serverError} ${EMessage.errorFetchingOne} car_rent_status`,
+        err
       );
     }
   },

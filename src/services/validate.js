@@ -96,14 +96,13 @@ export const ValidateCheckUsernameAndPhone_number = (data) => {
 export const ValidatePost = (data) => {
   const {
     car_type_id,
-    user_id,
     frist_name,
     last_name,
     birth_day,
     nationnality,
     doc_type,
     car_insurance,
-    car_brand_id,
+    car_brand,
     car_version,
     car_year,
     car_resgistration,
@@ -113,22 +112,22 @@ export const ValidatePost = (data) => {
     car_color,
     description,
     address,
+    text_address,
+    detail_address,
     deposits_fee,
     status_id,
     //
     post_rent_data,
-    labels_data,
   } = data;
   return ValidateData({
     car_type_id,
-    user_id,
     frist_name,
     last_name,
     birth_day: new Date(birth_day).toString(),
     nationnality,
     doc_type,
     car_insurance,
-    car_brand_id,
+    car_brand,
     car_version,
     car_year,
     car_resgistration,
@@ -138,11 +137,12 @@ export const ValidatePost = (data) => {
     car_color,
     description,
     address,
+    text_address,
+    detail_address,
     deposits_fee,
     status_id,
     //
     post_rent_data,
-    labels_data,
   });
 };
 
