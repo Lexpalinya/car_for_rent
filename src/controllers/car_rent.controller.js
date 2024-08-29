@@ -456,8 +456,17 @@ const Car_rentController = {
       const id = req.params.id;
       const car_rent = await FindCar_rentById(id);
       if (!car_rent)
-        return SendError(res, 404, `${EMessage.notFound}: car_rent id`);
-      return SendSuccess(res, `${EMessage.fetchOneSuccess}`, car_rent);
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}`,
+          err: "car_rent id",
+        });
+      return SendSuccess({
+        res,
+        message: `${EMessage.fetchOneSuccess}`,
+        data: car_rent,
+      });
     } catch (err) {
       return SendErrorLog({
         res,
@@ -571,13 +580,17 @@ const Car_rentController = {
         page + 1,
         select
       );
-      return SendSuccess(res, `${EMessage.fetchOneSuccess} user`, car_rent);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.errorFetchingAll} car_rent all page `,
-        error
-      );
+        message: `${EMessage.fetchOneSuccess} user`,
+        data: car_rent,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll} car_rent all page `,
+        err,
+      });
     }
   },
   async SelectAllPageByUser_id(req, res) {
@@ -608,13 +621,17 @@ const Car_rentController = {
         page + 1,
         select
       );
-      return SendSuccess(res, `${EMessage.fetchOneSuccess} user`, car_rent);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.errorFetchingAll} car_rent by user_id `,
-        error
-      );
+        message: `${EMessage.fetchOneSuccess} user`,
+        data: car_rent,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll} car_rent by user_id `,
+        err,
+      });
     }
   },
   async SelectAllPageByPost_id(req, res) {
@@ -645,13 +662,17 @@ const Car_rentController = {
         page + 1,
         select
       );
-      return SendSuccess(res, `${EMessage.fetchOneSuccess} user`, car_rent);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.errorFetchingAll}car_rent by post id `,
-        error
-      );
+        message: `${EMessage.fetchOneSuccess} user`,
+        data: car_rent,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll}car_rent by post id `,
+        err,
+      });
     }
   },
   async SelectAllPageByUser_idandStatus_id(req, res) {
@@ -665,20 +686,22 @@ const Car_rentController = {
         model,
         {
           user_id,
-
-          // pay_status: true,
           is_active: true,
         },
         page + 1,
         select
       );
-      return SendSuccess(res, `${EMessage.fetchOneSuccess} user`, car_rent);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.errorFetchingAll}car_rent by user id and status id `,
-        error
-      );
+        message: `${EMessage.fetchOneSuccess} user`,
+        data: car_rent,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll}car_rent by user id and status id `,
+        err,
+      });
     }
   },
 };

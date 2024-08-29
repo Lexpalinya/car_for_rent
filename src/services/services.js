@@ -72,7 +72,11 @@ export const verify_token = (token) => {
   return new Promise(async (resolve, reject) => {
     Jwt.verify(token, JWT_SECRET_KEY, async (err, decode) => {
       if (err) {
-        if (err.message === "TokenExpiredError") {
+        console.log("err :>> ", err);
+        if (
+          err.message === "TokenExpiredError" ||
+          err.message === "jwt expired"
+        ) {
           console.error("JWT verification error: Token has expired");
           return reject(new Error("Token has expired"));
         } else {

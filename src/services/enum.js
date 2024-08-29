@@ -23,7 +23,7 @@ export const EMessage = {
 
   notFound: "Resource not found",
   tokenNotFound: "Token not found",
-  tokenExpired: "Token has expired",
+  tokenExpired: "Token expired",
   invalidToken: "Invalid token",
   refreshTokenSuccess: "Token refreshed successfully",
   refreshTokenunSuccess: "Token refreshed unsuccess",

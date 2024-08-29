@@ -24,7 +24,12 @@ export const auth = async (req, res, next) => {
     next();
   } catch (err) {
     if (err.message == "Token has expired") {
-      return SendError({ res, status: 401, message: EMessage.tokenExpired });
+      return SendError({
+        res,
+        status: 401,
+        message: EMessage.tokenExpired,
+        err: EMessage.tokenExpired,
+      });
     }
     return SendError({
       res,
