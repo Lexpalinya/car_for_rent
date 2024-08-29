@@ -71,8 +71,8 @@ const Car_rentController = {
           message: `${EMessage.pleaseInput}`,
           err: validate.join(", "),
         });
+      const user_id = req.user;
       let {
-        user_id,
         post_id,
         start_date,
         end_date,
@@ -708,17 +708,23 @@ const UpdateCar_rentImage = async (
       !image_data_update.url ||
       !image_data_update.car_rent_id
     ) {
-      return SendError(
+      return SendError({
         res,
-        400,
-        `${EMessage.pleaseInput}: ${imageType} type object {id,car_rent_id,url}`
-      );
+        statuscode: 400,
+        message: `${EMessage.pleaseInput}`,
+        err: ` ${imageType} type object {id,car_rent_id,url}`,
+      });
     }
 
     const data = req.files;
 
     if (!data || !data[imageType]) {
-      return SendError(res, 400, `${EMessage.pleaseInput}: ${imageType}`);
+      return SendError({
+        res,
+        statuscode: 400,
+        message: `${EMessage.pleaseInput}`,
+        err: ` ${imageType}`,
+      });
     }
 
     const [car_rentExists, imageExists] = await Promise.all([
@@ -727,13 +733,20 @@ const UpdateCar_rentImage = async (
     ]);
 
     if (!car_rentExists || !imageExists) {
-      return SendError(
+      return SendError({
         res,
-        404,
-        `${EMessage.notFound}: ${!car_rentExists ? "car_rent" : imageType} id`
-      );
+        statuscode: 404,
+        message: `${EMessage.notFound}`,
+        err: ` ${!car_rentExists ? "car_rent" : imageType} id`,
+      });
     }
-
+    if (id !== imageExists.car_rent_id)
+      return SendError({
+        res,
+        statuscode: 400,
+        message: `you not own car_rent`,
+        err: `you not own car_rent`,
+      });
     const imageUrl = await UploadImage(
       data[imageType].data,
       image_data_update.url
@@ -747,16 +760,16 @@ const UpdateCar_rentImage = async (
       url: imageUrl,
     });
 
-    return SendSuccess(
+    return SendSuccess({
       res,
-      `${EMessage.updateSuccess} update ${imageType}`,
-      imageUpdate
-    );
-  } catch (error) {
-    return SendErrorLog(
+      message: `${EMessage.updateSuccess} update ${imageType}`,
+      data: imageUpdate,
+    });
+  } catch (err) {
+    return SendErrorLog({
       res,
-      `${EMessage.serverError} ${EMessage.updateFailed} car_rent ${imageType}`,
-      error
-    );
+      message: `${EMessage.serverError} ${EMessage.updateFailed} car_rent ${imageType}`,
+      err,
+    });
   }
 };

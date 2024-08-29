@@ -33,6 +33,7 @@ model users {
   google_id     String         @default("")
   device_token  String         @default("")
   login_version Int            @default(0)
+  is_vertified  Boolean        @default(false)
   role          userRoles      @default(customer)
   created_at    DateTime       @default(now())
   updated_at    DateTime       @updatedAt

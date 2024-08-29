@@ -45,6 +45,7 @@ let select = {
   google_id: true,
   device_token: true,
   login_version: true,
+  is_vertified: true,
   created_at: true,
   updated_at: true,
 };
@@ -414,7 +415,9 @@ const UsersController = {
       // Prepare the list of promises to execute concurrently
       const promiseList = [FindUserById_ID(id)];
       const checks = {}; // Store whether checks were made
-
+      if (data.is_vertified && typeof data.is_vertified !== "bigint") {
+        data.is_vertified = data.is_vertified === "true";
+      }
       if (data.username) {
         promiseList.push(FindUserUserNameAlready(data.username));
         checks.username = true;

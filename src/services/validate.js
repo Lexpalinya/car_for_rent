@@ -170,7 +170,6 @@ export const ValidateReveiw = (data) => {
 
 export const ValidateCar_rent = (data) => {
   const {
-    user_id,
     post_id,
     start_date,
     end_date,
@@ -187,7 +186,6 @@ export const ValidateCar_rent = (data) => {
     status_id,
   } = data;
   return ValidateData({
-    user_id,
     post_id,
     start_date,
     end_date,
