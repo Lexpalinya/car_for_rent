@@ -1,5 +1,5 @@
 import redis from "../DB/redis";
-import { CachDataLimit } from "../services/cach.contro";
+import { CachDataAll, CachDataLimit } from "../services/cach.contro";
 import { DeleteCachedKey } from "../services/cach.deletekey";
 import { EMessage } from "../services/enum";
 import {
@@ -94,12 +94,13 @@ export const RecacheDataPost = async ({
   key,
   car_type_id_key,
   type_of_fual_id_key,
+  user_id_key,
 }) => {
-  await Promise.all([
-    DeleteCachedKey(key),
-    DeleteCachedKey(car_type_id_key),
-    DeleteCachedKey(type_of_fual_id_key),
-  ]);
+  let a = [DeleteCachedKey(key)];
+  if (car_type_id_key) a.push(DeleteCachedKey(car_type_id_key));
+  if (type_of_fual_id_key) a.push(DeleteCachedKey(type_of_fual_id_key));
+  if (user_id_key) a.push(DeleteCachedKey(user_id_key));
+  await Promise.all(a);
 };
 const PostController = {
   async Insert(req, res) {
@@ -379,6 +380,7 @@ const PostController = {
         key,
         car_type_id_key: car_type_id + key,
         type_of_fual_id_key: type_of_fual_id + key,
+        user_id_key: user_id + key,
       });
       await redis.del(post.id + "posts-edit");
 
@@ -513,6 +515,7 @@ const PostController = {
         key,
         car_type_id_key: postExists.car_type_id + key,
         type_of_fual_id_key: postExists.type_of_fual_id + key,
+        user_id_key: postExists.user_id + key,
       });
       await redis.del(postExists.id + key);
 
@@ -524,7 +527,7 @@ const PostController = {
     } catch (err) {
       return SendErrorLog({
         res,
-        message: `${EMessage.serverError} ${EMessage.insertFailed} post`,
+        message: `${EMessage.serverError} ${EMessage.updateFailed} post`,
         err,
       });
     }
@@ -549,6 +552,7 @@ const PostController = {
         key,
         car_type_id_key: postExists.car_type_id + key,
         type_of_fual_id_key: postExists.type_of_fual_id + key,
+        user_id_key: postExists.user_id,
       });
       await redis.del(id + "posts-edit", id + key);
       return SendSuccess({
@@ -559,7 +563,7 @@ const PostController = {
     } catch (err) {
       return SendErrorLog({
         res,
-        message: `${EMessage.serverError} ${EMessage.insertFailed} post`,
+        message: `${EMessage.serverError} ${EMessage.deleteFailed} post`,
         err,
       });
     }
@@ -568,7 +572,7 @@ const PostController = {
   async SelectOne(req, res) {
     try {
       const id = req.params.id;
-      await redis.del(id + key);
+      // await redis.del(id + key);
       const post = await FindPostById(id);
       if (!post)
         return SendError({
@@ -580,13 +584,13 @@ const PostController = {
 
       return SendSuccess({
         res,
-        message: `${EMessage.fetchAllSuccess} post`,
+        message: `${EMessage.fetchOneSuccess} post`,
         data: post,
       });
     } catch (err) {
       return SendErrorLog({
         res,
-        message: `${EMessage.serverError} ${EMessage.insertFailed} post`,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingOne} post`,
         err,
       });
     }
@@ -607,13 +611,13 @@ const PostController = {
       CachDataLimit(key + "-" + (page + 1), model, where, page + 1, select);
       return SendSuccess({
         res,
-        message: `${EMessage.fetchOneSuccess} user`,
+        message: `${EMessage.fetchAllSuccess} user`,
         data: user,
       });
     } catch (err) {
       SendErrorLog({
         res,
-        message: `${EMessage.serverError} ${EMessage.errorFetchingOne}`,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll} post select allpage`,
         err,
       });
     }
@@ -623,7 +627,6 @@ const PostController = {
       // await DeleteCachedKey(key);
       let page = parseInt(req.query.page);
       const { car_type_id } = req.params;
-      console.log("object :>> ", { car_type_id, is_active: true });
       page = !page || page < 0 ? 0 : page - 1;
       const user = await CachDataLimit(
         car_type_id + key + "-" + page,
@@ -635,19 +638,19 @@ const PostController = {
       CachDataLimit(
         car_type_id + key + "-" + (page + 1),
         model,
-        { car_type_id, is_active: true },
+        { car_type_id: car_type_id, is_active: true },
         page + 1,
         select
       );
       return SendSuccess({
         res,
-        message: `${EMessage.fetchOneSuccess} user`,
+        message: `${EMessage.fetchAllSuccess} `,
         data: user,
       });
     } catch (err) {
       SendErrorLog({
         res,
-        message: `${EMessage.serverError} ${EMessage.errorFetchingOne}`,
+        message: `${EMessage.serverError} ${EMessage.fetchAllSuccess}post select by car_type`,
         err,
       });
     }
@@ -674,13 +677,44 @@ const PostController = {
       );
       return SendSuccess({
         res,
-        message: `${EMessage.fetchOneSuccess} user`,
+        message: `${EMessage.fetchAllSuccess}`,
         data: user,
       });
     } catch (err) {
       SendErrorLog({
         res,
-        message: `${EMessage.serverError} ${EMessage.errorFetchingOne}`,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll} post select Page by typ_of fual`,
+        err,
+      });
+    }
+  },
+  async SelectAllByUser(req, res) {
+    try {
+      // await DeleteCachedKey(key);
+      let page = parseInt(req.query.page);
+      const user_id = req.user;
+      page = !page || page < 0 ? 0 : page - 1;
+      const user = await CachDataAll(
+        user_id + key + "-" + page,
+        model,
+        { user_id, is_active: true },
+        select
+      );
+      CachDataAll(
+        user_id + key + "-" + (page + 1),
+        model,
+        { user_id, is_active: true },
+        select
+      );
+      return SendSuccess({
+        res,
+        message: `${EMessage.fetchAllSuccess}`,
+        data: user,
+      });
+    } catch (err) {
+      SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingOne} post select All by user`,
         err,
       });
     }

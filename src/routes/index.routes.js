@@ -228,7 +228,8 @@ route.put(
 );
 route.delete(
   `${car_rent_status}/delete/:id`,
-  auth,admin,
+  auth,
+  admin,
   Car_Rent_StatusController.Delete
 );
 
@@ -282,6 +283,8 @@ route.get(
   auth,
   PostController.SelectAllPageByCar_type_Id
 );
+route.get(`${post}/selAllByUser`, auth, PostController.SelectAllByUser);
+
 route.post(`${post}/insert`, auth, PostController.Insert);
 route.put(`${post}/update/:id`, auth, PostController.Update);
 route.delete(`${post}/delete/:id`, auth, PostController.Delete);

@@ -16,11 +16,12 @@ const Post_rent_dataController = {
       const post_id = req.params.id;
       const validate = ValidatePost_rent_data(req.body);
       if (validate.length > 0)
-        return SendError(
+        return SendError({
           res,
-          400,
-          `${EMessage.pleaseInput}: ${validate.join(", ")}`
-        );
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: validate.join(", "),
+        });
       let { title, price, deposit, system_cost, total } = req.body;
       if (typeof price !== "number") {
         price = parseFloat(price);
@@ -36,9 +37,14 @@ const Post_rent_dataController = {
       }
 
       const postExists = await FindPostById_for_edit(post_id);
-      if (!postExists) {
-        return SendError(res, 404, `${EMessage.notFound}: post id`);
-      }
+      if (!postExists)
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}: post id`,
+          err: "post_id",
+        });
+
       const post_rent_data = await Post_rent_data.insertOne({
         post_id,
         title,
@@ -51,19 +57,20 @@ const Post_rent_dataController = {
         key,
         car_type_id_key: postExists.car_type_id + key,
         type_of_fual_id_key: postExists.type_of_fual_id + key,
+        user_id_key: postExists.user_id + key,
       });
 
-      return SendSuccess(
+      return SendSuccess({
         res,
-        `${EMessage.insertSuccess} post_rent_data`,
-        post_rent_data
-      );
-    } catch (error) {
-      return SendErrorLog(
+        message: `${EMessage.insertSuccess} post_rent_data`,
+        data: post_rent_data,
+      });
+    } catch (err) {
+      return SendErrorLog({
         res,
-        `${EMessage.serverError} ${EMessage.updateFailed} post`,
-        error
-      );
+        message: `${EMessage.serverError} ${EMessage.updateFailed} post_rent_data`,
+        err,
+      });
     }
   },
 
@@ -77,11 +84,12 @@ const Post_rent_dataController = {
       }
 
       if (validate.length > 0)
-        return SendError(
+        return SendError({
           res,
-          400,
-          `${EMessage.pleaseInput}: ${validate.join(", ")}`
-        );
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: validate.join(", "),
+        });
       if (typeof price !== "number") {
         price = parseFloat(price);
       }
@@ -100,13 +108,12 @@ const Post_rent_dataController = {
         Post_rent_data.findUnique({ id }),
       ]);
       if (!postExists || !post_rent_dataExists) {
-        return SendError(
+        return SendError({
           res,
-          404,
-          `${EMessage.notFound}: ${
-            !postExists ? "post id" : "post_rent_data id"
-          }`
-        );
+          statuscode: 404,
+          message: `${EMessage.notFound}`,
+          err: `${!postExists ? "post id" : "post_rent_data id"}`,
+        });
       }
 
       const post_rent_data = await Post_rent_data.update(id, {
@@ -120,18 +127,19 @@ const Post_rent_dataController = {
         key,
         car_type_id_key: postExists.car_type_id + key,
         type_of_fual_id_key: postExists.type_of_fual_id + key,
+        user_id_key: postExists.user_id + key,
       });
-      return SendSuccess(
+      return SendSuccess({
         res,
-        `${EMessage.updateSuccess}  post_insurance_image`,
-        post_rent_data
-      );
-    } catch (error) {
-      return SendErrorLog(
+        message: `${EMessage.updateSuccess}  post_insurance_image`,
+        data: post_rent_data,
+      });
+    } catch (err) {
+      return SendErrorLog({
         res,
-        `${EMessage.serverError} ${EMessage.updateFailed} post`,
-        error
-      );
+        message: `${EMessage.serverError} ${EMessage.updateFailed} post_rent_data`,
+        err,
+      });
     }
   },
 
@@ -139,13 +147,13 @@ const Post_rent_dataController = {
     try {
       const post_id = req.params.id;
       let id = req.body.post_rent_data_id;
-      if (!id) {
-        return SendError(
+      if (!id)
+        return SendError({
           res,
-          404,
-          `${EMessage.pleaseInput}:post_rent_data_id `
-        );
-      }
+          statuscode: 404,
+          message: `${EMessage.pleaseInput}: post id`,
+          err: "post_rent_data_id",
+        });
       if (typeof id !== "number") {
         id = parseInt(id);
       }
@@ -155,13 +163,12 @@ const Post_rent_dataController = {
         FindPostById_for_edit(post_id),
       ]);
       if (!post_rent_dataExists || !postExists) {
-        return SendError(
+        return SendError({
           res,
-          404,
-          `${EMessage.notFound}: ${
-            !post_rent_dataExists ? "post_rent_data id" : "post id"
-          }`
-        );
+          statuscode: 404,
+          message: `${EMessage.notFound}`,
+          err: ` ${!post_rent_dataExists ? "post_rent_data id" : "post id"}`,
+        });
       }
 
       const post_rent_data = await Post_rent_data.delete(id);
@@ -170,17 +177,17 @@ const Post_rent_dataController = {
         car_type_id_key: postExists.car_type_id + key,
         type_of_fual_id_key: postExists.type_of_fual_id + key,
       });
-      return SendSuccess(
+      return SendSuccess({
         res,
-        `${EMessage.deleteSuccess} post_rent_data`,
-        post_rent_data
-      );
-    } catch (error) {
-      return SendErrorLog(
+        message: `${EMessage.deleteSuccess} post_rent_data`,
+        err: post_rent_data,
+      });
+    } catch (err) {
+      return SendErrorLog({
         res,
-        `${EMessage.serverError} ${EMessage.deleteFailed} post`,
-        error
-      );
+        message: `${EMessage.serverError} ${EMessage.deleteFailed} post`,
+        err,
+      });
     }
   },
 };
