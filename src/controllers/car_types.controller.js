@@ -39,7 +39,7 @@ const Car_typesController = {
           message: `${EMessage.pleaseInput}`,
           err: "icon",
         });
-      const { name, detail } = req.body;
+      const { name, detail, wheel } = req.body;
       const icon = await UploadImage(data.icon.data);
       if (!icon) {
         throw new Error("upload image failed");
@@ -47,6 +47,7 @@ const Car_typesController = {
       const car_type = await prisma.car_types.create({
         data: {
           detail,
+          wheel,
           name,
           icon,
         },
@@ -216,11 +217,11 @@ const Car_typesController = {
         data: car_type,
       });
     } catch (err) {
-      return SendErrorLog(
-     {   res,
-       message: `${EMessage.serverError} ${EMessage.deleteFailed}`,
-        err}
-      );
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.deleteFailed}`,
+        err,
+      });
     }
   },
 };

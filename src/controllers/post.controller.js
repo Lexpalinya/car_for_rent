@@ -152,7 +152,8 @@ const PostController = {
       }
       if (
         (car_insurance && !insurance_company_id) ||
-        (car_insurance && !level_insurance_id)
+        (car_insurance && !level_insurance_id) ||
+        (car_insurance && !car_brand_id)
       )
         return SendError({
           res,
@@ -161,7 +162,9 @@ const PostController = {
           err: ` ${
             !insurance_company_id
               ? "insurance_company_id"
-              : "level_insurance_id"
+              : !level_insurance_id
+              ? "level_insurance_id"
+              : "car_brand_id"
           }`,
         });
       if (!data)
@@ -259,53 +262,49 @@ const PostController = {
       let promiseList = [
         FindCar_typesById(car_type_id),
         FindUserById_ID(user_id),
-        FindCar_BrandsById(car_brand_id),
         FindType_of_FualsById(type_of_fual_id),
         FindPost_StatusById(status_id),
       ];
       if (car_insurance) {
         promiseList.push(FindInsurance_CompanysById(insurance_company_id));
         promiseList.push(FindLevel_InsurancesById(level_insurance_id));
+        promiseList.push(FindCar_BrandsById(car_brand_id));
       }
 
       const [
         car_typeExists,
         userExists,
-        car_brandExists,
         type_of_fualExists,
         post_statusExists,
         insurance_companyExists,
         level_insuranceExists,
+        car_brandExists,
       ] = await Promise.all(promiseList);
-      if (
-        !car_typeExists ||
-        !userExists ||
-        !car_brandExists ||
-        !type_of_fualExists ||
-        !post_statusExists ||
-        (car_insurance && !insurance_companyExists) ||
-        (car_insurance && !level_insuranceExists)
-      )
+      const notFoundEntity = !car_typeExists
+        ? "car_types"
+        : !userExists
+        ? "users"
+        : !type_of_fualExists
+        ? "type_of_fuals"
+        : !post_statusExists
+        ? "post_status"
+        : car_insurance && !car_brandExists
+        ? "car_brands"
+        : car_insurance && !insurance_companyExists
+        ? "insurance_companys"
+        : car_insurance && !level_insuranceExists
+        ? "level_insurances"
+        : null;
+
+      if (notFoundEntity) {
         return SendError({
           res,
           statuscode: 404,
           message: `${EMessage.notFound}`,
-          err: `${
-            !car_typeExists
-              ? "car_types"
-              : !userExists
-              ? "users"
-              : !car_brandExists
-              ? "car_brands"
-              : !type_of_fualExists
-              ? "type_of_fuals"
-              : !post_statusExists
-              ? "post_status"
-              : car_insurance && !insurance_companyExists
-              ? "insurance_companys"
-              : "level_insurances"
-          } id`,
+          err: `${notFoundEntity} id`,
         });
+      }
+
       const promiseImageList = [
         uploadImages(post_driver_license_image),
         uploadImages(post_doc_image),
@@ -333,6 +332,7 @@ const PostController = {
           car_insurance,
           insurance_company_id,
           level_insurance_id,
+          car_brand_id,
           car_brand,
           car_version,
           car_year,
@@ -380,7 +380,7 @@ const PostController = {
         car_type_id_key: car_type_id + key,
         type_of_fual_id_key: type_of_fual_id + key,
       });
-      await redis.del(id + "posts-edit");
+      await redis.del(post.id + "posts-edit");
 
       return SendCreate({
         res,
@@ -412,10 +412,13 @@ const PostController = {
         data.car_insurance = data.car_insurance === "true";
       }
 
-      if (!postExists) {
-        return SendError(res, 404, `${EMessage.notFound}: post id`);
-      }
-      console.log("data :>> ", data);
+      if (!postExists)
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}: post id`,
+          err: "post_id",
+        });
 
       let promiseFind = [];
       if (data.user_id) {
@@ -493,11 +496,12 @@ const PostController = {
             ? "insurance_company"
             : "level_insurance";
 
-        return SendError(
+        return SendError({
           res,
-          404,
-          `${EMessage.notFound}: ${notFoundEntity} id`
-        );
+          statuscode: 404,
+          message: `${EMessage.notFound}`,
+          err: `${notFoundEntity} id`,
+        });
       }
       const post = await prisma.posts.update({
         where: {
@@ -512,17 +516,17 @@ const PostController = {
       });
       await redis.del(postExists.id + key);
 
-      return SendSuccess(
+      return SendSuccess({
         res,
-        `${EMessage.updateSuccess} post single data`,
-        post
-      );
-    } catch (error) {
-      return SendErrorLog(
+        message: `${EMessage.updateSuccess} post single data`,
+        data: post,
+      });
+    } catch (err) {
+      return SendErrorLog({
         res,
-        `${EMessage.serverError} ${EMessage.insertFailed} post`,
-        error
-      );
+        message: `${EMessage.serverError} ${EMessage.insertFailed} post`,
+        err,
+      });
     }
   },
 
@@ -530,9 +534,13 @@ const PostController = {
     try {
       const id = req.params.id;
       const postExists = await FindPostById_for_edit(id);
-      if (!postExists) {
-        return SendError(res, 404, `${EMessage.notFound}: post id`);
-      }
+      if (!postExists)
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}: post id`,
+          err: "post_id",
+        });
       const post = await prisma.posts.update({
         where: { id },
         data: { is_active: false },
@@ -543,13 +551,17 @@ const PostController = {
         type_of_fual_id_key: postExists.type_of_fual_id + key,
       });
       await redis.del(id + "posts-edit", id + key);
-      return SendSuccess(res, `${EMessage.deleteSuccess}`, post);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.insertFailed} post`,
-        error
-      );
+        message: `${EMessage.deleteSuccess}`,
+        data: post,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.insertFailed} post`,
+        err,
+      });
     }
   },
 
@@ -558,16 +570,25 @@ const PostController = {
       const id = req.params.id;
       await redis.del(id + key);
       const post = await FindPostById(id);
-      if (!post) {
-        return SendError(res, 404, `${EMessage.notFound}: post id`);
-      }
-      return SendSuccess(res, `${EMessage.fetchAllSuccess} post`, post);
-    } catch (error) {
-      return SendErrorLog(
+      if (!post)
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}: post id`,
+          err: "post_id",
+        });
+
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.insertFailed} post`,
-        error
-      );
+        message: `${EMessage.fetchAllSuccess} post`,
+        data: post,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.insertFailed} post`,
+        err,
+      });
     }
   },
 
@@ -584,13 +605,17 @@ const PostController = {
         select
       );
       CachDataLimit(key + "-" + (page + 1), model, where, page + 1, select);
-      return SendSuccess(res, `${EMessage.fetchOneSuccess} user`, user);
-    } catch (error) {
-      SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.errorFetchingOne}`,
-        error
-      );
+        message: `${EMessage.fetchOneSuccess} user`,
+        data: user,
+      });
+    } catch (err) {
+      SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingOne}`,
+        err,
+      });
     }
   },
   async SelectAllPageByCar_type_Id(req, res) {
@@ -614,13 +639,17 @@ const PostController = {
         page + 1,
         select
       );
-      return SendSuccess(res, `${EMessage.fetchOneSuccess} user`, user);
-    } catch (error) {
-      SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.errorFetchingOne}`,
-        error
-      );
+        message: `${EMessage.fetchOneSuccess} user`,
+        data: user,
+      });
+    } catch (err) {
+      SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingOne}`,
+        err,
+      });
     }
   },
   async SelectAllPageByType_of_fuals_Id(req, res) {
@@ -643,13 +672,17 @@ const PostController = {
         page + 1,
         select
       );
-      return SendSuccess(res, `${EMessage.fetchOneSuccess} user`, user);
-    } catch (error) {
-      SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.errorFetchingOne}`,
-        error
-      );
+        message: `${EMessage.fetchOneSuccess} user`,
+        data: user,
+      });
+    } catch (err) {
+      SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingOne}`,
+        err,
+      });
     }
   },
 };

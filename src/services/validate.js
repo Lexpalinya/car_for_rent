@@ -23,8 +23,8 @@ export const ValidatePost_Status = (data) => {
 
 //----------------------------------------------
 export const ValidateCar_Types = (data) => {
-  const { name, detail } = data;
-  return ValidateData({ name, detail });
+  const { name, detail, wheel } = data;
+  return ValidateData({ name, detail, wheel });
 };
 
 export const ValidateLabels = (data) => {
