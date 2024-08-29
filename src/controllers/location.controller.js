@@ -22,11 +22,13 @@ const LocationController = {
           err: validate.join(", "),
         });
       const user_id = req.user;
-      const { address, text, detail } = req.body;
+      const { tag, street, point, address, detail } = req.body;
       const location = await prisma.location.create({
         data: {
+          tag,
+          street,
+          point,
           address,
-          text,
           detail,
           user_id,
         },

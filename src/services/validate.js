@@ -111,8 +111,9 @@ export const ValidatePost = (data) => {
     seat,
     car_color,
     description,
+    street,
+    point,
     address,
-    text_address,
     detail_address,
     deposits_fee,
     status_id,
@@ -136,8 +137,9 @@ export const ValidatePost = (data) => {
     seat,
     car_color,
     description,
+    street,
+    point,
     address,
-    text_address,
     detail_address,
     deposits_fee,
     status_id,
@@ -204,6 +206,12 @@ export const ValidateCar_rent = (data) => {
 };
 
 export const ValidateLocation = (data) => {
-  const { address, text, detail } = data;
-  return ValidateData({ address, text, detail });
+  const { tag, street, point, address, detail } = data;
+  return ValidateData({
+    tag,
+    street,
+    point,
+    address,
+    detail,
+  });
 };

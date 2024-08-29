@@ -15,11 +15,21 @@ const InsertPostImage = async (req, res, imageType, InsertImage) => {
     const post_id = req.params.id;
     const data = req.files;
     if (!data || !data[imageType]) {
-      return SendError(res, 400, `${EMessage.pleaseInput}: ${imageType}`);
+      return SendError({
+        res,
+        statuscode: 400,
+        message: `${EMessage.pleaseInput}`,
+        err: ` ${imageType}`,
+      });
     }
     const [postExists] = await Promise.all([FindPostById_for_edit(post_id)]);
     if (!postExists) {
-      return SendError(res, 404, `${EMessage.notFound}:  post id`);
+      return SendError({
+        res,
+        statuscode: 404,
+        message: `${EMessage.notFound}`,
+        err: "post_id",
+      });
     }
     const imageUrl = await UploadImage(data[imageType].data);
     const post_image = await InsertImage({ post_id, url: imageUrl });
@@ -27,18 +37,19 @@ const InsertPostImage = async (req, res, imageType, InsertImage) => {
       key,
       car_type_id_key: postExists.car_type_id + key,
       type_of_fual_id_key: postExists.type_of_fual_id + key,
+      user_id_key: postExists.user_id + key,
     });
-    return SendSuccess(
+    return SendSuccess({
       res,
-      `${EMessage.insertSuccess} ${imageType}`,
-      post_image
-    );
-  } catch (error) {
-    return SendErrorLog(
+      message: `${EMessage.insertSuccess} ${imageType}`,
+      data: post_image,
+    });
+  } catch (err) {
+    return SendErrorLog({
       res,
-      `${EMessage.serverError} ${EMessage.insertFailed} ${imageType}`,
-      error
-    );
+      message: `${EMessage.serverError} ${EMessage.insertFailed} ${imageType}`,
+      err,
+    });
   }
 };
 const UpdatePostImage = async (
@@ -53,7 +64,12 @@ const UpdatePostImage = async (
     let { image_data_update } = req.body;
 
     if (!image_data_update) {
-      return SendError(res, 400, `${EMessage.pleaseInput}: image_data_update`);
+      return SendError({
+        res,
+        statuscode: 400,
+        message: `${EMessage.pleaseInput}`,
+        err: "image_data_update",
+      });
     }
 
     if (typeof image_data_update === "string") {
@@ -61,17 +77,23 @@ const UpdatePostImage = async (
     }
 
     if (!image_data_update.id || !image_data_update.url) {
-      return SendError(
+      return SendError({
         res,
-        400,
-        `${EMessage.pleaseInput}: ${imageType} type object {id,post_id,url}`
-      );
+        statuscode: 400,
+        message: `${EMessage.pleaseInput}`,
+        err: `${imageType} type object {id,post_id,url}`,
+      });
     }
 
     const data = req.files;
 
     if (!data || !data[imageType]) {
-      return SendError(res, 400, `${EMessage.pleaseInput}: ${imageType}`);
+      return SendError({
+        res,
+        statuscode: 400,
+        message: `${EMessage.pleaseInput}`,
+        err: `${imageType}`,
+      });
     }
 
     const [postExists, imageExists] = await Promise.all([
@@ -80,12 +102,19 @@ const UpdatePostImage = async (
     ]);
 
     if (!postExists || !imageExists) {
-      return SendError(
+      return SendError({
         res,
-        404,
-        `${EMessage.notFound}: ${!postExists ? "post" : imageType} id`
-      );
+        statuscode: 404,
+        message: `${EMessage.notFound}: `,
+        err: `${!postExists ? "post" : imageType} id`,
+      });
     }
+    if (id !== imageExists.post_id)
+      return SendError({
+        res,
+        statuscode: 400,
+        message: `you not own post_rent_dat`,
+      });
 
     const imageUrl = await UploadImage(
       data[imageType].data,
@@ -103,19 +132,20 @@ const UpdatePostImage = async (
       key,
       car_type_id_key: postExists.car_type_id + key,
       type_of_fual_id_key: postExists.type_of_fual_id + key,
+      user_id_key: postExists.user_id + key,
     });
 
-    return SendSuccess(
+    return SendSuccess({
       res,
-      `${EMessage.updateSuccess} update ${imageType}`,
-      imageUpdate
-    );
-  } catch (error) {
-    return SendErrorLog(
+      message: `${EMessage.updateSuccess} update ${imageType}`,
+      data: imageUpdate,
+    });
+  } catch (err) {
+    return SendErrorLog({
       res,
-      `${EMessage.serverError} ${EMessage.updateFailed} ${imageType}`,
-      error
-    );
+      message: `${EMessage.serverError} ${EMessage.updateFailed} ${imageType}`,
+      err,
+    });
   }
 };
 
@@ -131,18 +161,24 @@ const DeletePostImage = async (
     let { image_data_delete } = req.body;
 
     if (!image_data_delete) {
-      return SendError(res, 400, `${EMessage.pleaseInput}: image_data_delete`);
+      return SendError({
+        res,
+        statuscode: 400,
+        message: `${EMessage.pleaseInput}`,
+        err: " image_data_delete",
+      });
     }
     if (typeof image_data_delete === "string") {
       image_data_delete = JSON.parse(image_data_delete);
     }
 
     if (!image_data_delete.id || !image_data_delete.url) {
-      return SendError(
+      return SendError({
         res,
-        400,
-        `${EMessage.pleaseInput}: ${imageType} type object {id,post_id,url}`
-      );
+        statuscode: 400,
+        message: `${EMessage.pleaseInput}`,
+        err: ` ${imageType} type object {id,post_id,url}`,
+      });
     }
 
     const [postExists, imageExists] = await Promise.all([
@@ -151,12 +187,19 @@ const DeletePostImage = async (
     ]);
 
     if (!postExists || !imageExists) {
-      return SendError(
+      return SendError({
         res,
-        404,
-        `${EMessage.notFound}: ${!postExists ? "post" : imageType} id`
-      );
+        statuscode: 404,
+        message: `${EMessage.notFound}`,
+        err: `${!postExists ? "post" : imageType} id`,
+      });
     }
+    if (id !== imageExists.post_id)
+      return SendError({
+        res,
+        statuscode: 400,
+        message: `you not own post_rent_dat`,
+      });
     const delImage = await DeleteImage(image_data_delete.url);
     console.log("delImage :>> ", delImage);
     const imageUpdate = await deleteImage({ id: image_data_delete.id });
@@ -164,18 +207,19 @@ const DeletePostImage = async (
       key,
       car_type_id_key: postExists.car_type_id + key,
       type_of_fual_id_key: postExists.type_of_fual_id + key,
+      user_id_key: postExists.user_id + key,
     });
-    return SendSuccess(
+    return SendSuccess({
       res,
-      `${EMessage.deleteSuccess} update ${imageType}`,
-      imageUpdate
-    );
-  } catch (error) {
-    return SendErrorLog(
+      message: `${EMessage.deleteSuccess} update ${imageType}`,
+      data: imageUpdate,
+    });
+  } catch (err) {
+    return SendErrorLog({
       res,
-      `${EMessage.serverError} ${EMessage.deleteFailed} ${imageType}`,
-      error
-    );
+      message: `${EMessage.serverError} ${EMessage.deleteFailed} ${imageType}`,
+      err,
+    });
   }
 };
 

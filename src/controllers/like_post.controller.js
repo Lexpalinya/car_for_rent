@@ -4,6 +4,7 @@ import { FindPostById_for_edit, FindUserById_ID } from "../services/find";
 import { SendError, SendErrorLog, SendSuccess } from "../services/services";
 import { Post_like_posts } from "../services/subtabel";
 import prisma from "../utils/prisma.client";
+import { RecacheDataPost } from "./post.controller";
 
 let key = "post";
 
@@ -11,15 +12,7 @@ const Like_postController = {
   async Like_post(req, res) {
     try {
       const id = req.params.id;
-      const { user_id } = req.body;
-
-      if (!user_id) {
-        return SendError(
-          res,
-          400,
-          `${EMessage.pleaseInput}: user_id is required`
-        );
-      }
+      const user_id = req.user;
 
       const [postExists, userExists, likeExists] = await Promise.all([
         FindPostById_for_edit(id),
@@ -29,48 +22,54 @@ const Like_postController = {
           user_id,
         }),
       ]);
-      if (!postExists) {
-        return SendError(res, 404, `${EMessage.notFound}: post id`);
-      }
+      if (!postExists || !userExists)
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}`,
+          err: `${!postExists ? "post_id" : "user_id"}`,
+        });
 
-      if (!userExists) {
-        return SendError(res, 404, `${EMessage.notFound}: user id`);
-      }
-
-      if (likeExists) {
-        return SendError(res, 400, "User has already liked the post");
-      }
+      if (likeExists)
+        return SendError({
+          res,
+          statuscode: 400,
+          message: "User has already liked the post",
+          err: "user liked",
+        });
 
       const like = await Post_like_posts.insertOne({ post_id: id, user_id });
+      await RecacheDataPost({
+        key,
+        car_type_id_key: postExists.car_type_id + key,
+        type_of_fual_id_key: postExists.type_of_fual_id + key,
+        user_id_key: postExists.user_id + key,
+      });
       await redis.del(postExists.id + key);
-      return SendSuccess(
+      return SendSuccess({
         res,
-        `${EMessage.insertSuccess}: like post successfully`,
-        like
-      );
-    } catch (error) {
-      if (error.code === "P2002") {
-        return SendError(res, 400, "User has already liked the post");
-      }
-      return SendErrorLog(
+        message: `${EMessage.insertSuccess}: like post successfully`,
+        data: like,
+      });
+    } catch (err) {
+      if (err.code === "P2002")
+        return SendError({
+          res,
+          statuscode: 400,
+          message: "User has already liked the post",
+          err: "user liked",
+        });
+      return SendErrorLog({
         res,
-        `${EMessage.serverError} ${EMessage.insertFailed} post`,
-        error
-      );
+        message: `${EMessage.serverError} ${EMessage.insertFailed} post`,
+        err,
+      });
     }
   },
   async UnLike_post(req, res) {
     try {
       const id = req.params.id;
-      const { user_id } = req.body;
-
-      if (!user_id) {
-        return SendError(
-          res,
-          400,
-          `${EMessage.pleaseInput}: user_id is required`
-        );
-      }
+      const user_id = req.user;
       const [postExists, likeExists] = await Promise.all([
         FindPostById_for_edit(id),
         Post_like_posts.findFirst({
@@ -79,11 +78,21 @@ const Like_postController = {
         }),
       ]);
       if (!postExists) {
-        return SendError(res, 404, `${EMessage.notFound}: post id`);
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}`,
+          err: "post_id",
+        });
       }
 
       if (!likeExists) {
-        return SendError(res, 400, "user cannot like this post");
+        return SendError({
+          res,
+          statuscode: 400,
+          message: "user cannot like this post",
+          err: "user cannot like this post",
+        });
       }
       const like = await prisma.like_post.delete({
         where: {
@@ -93,18 +102,24 @@ const Like_postController = {
           },
         },
       });
+      await RecacheDataPost({
+        key,
+        car_type_id_key: postExists.car_type_id + key,
+        type_of_fual_id_key: postExists.type_of_fual_id + key,
+        user_id_key: postExists.user_id + key,
+      });
       await redis.del(postExists.id + key);
-      return SendSuccess(
+      return SendSuccess({
         res,
-        `${EMessage.insertSuccess} :unlike post successfully`,
-        like
-      );
-    } catch (error) {
-      return SendErrorLog(
+        message: `${EMessage.insertSuccess} :unlike post successfully`,
+        data: like,
+      });
+    } catch (err) {
+      return SendErrorLog({
         res,
-        `${EMessage.serverError} ${EMessage.insertFailed} post`,
-        error
-      );
+        message: `${EMessage.serverError} ${EMessage.insertFailed} post`,
+        err,
+      });
     }
   },
 };

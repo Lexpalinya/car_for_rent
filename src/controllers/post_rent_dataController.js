@@ -115,6 +115,12 @@ const Post_rent_dataController = {
           err: `${!postExists ? "post id" : "post_rent_data id"}`,
         });
       }
+      if (post_id !== post_rent_dataExists.post_id)
+        return SendError({
+          res,
+          statuscode: 400,
+          message: `you not own post_rent_dat`,
+        });
 
       const post_rent_data = await Post_rent_data.update(id, {
         title,
@@ -171,6 +177,12 @@ const Post_rent_dataController = {
         });
       }
 
+      if (post_id !== post_rent_dataExists.post_id)
+        return SendError({
+          res,
+          statuscode: 400,
+          message: `you not own post_rent_dat`,
+        });
       const post_rent_data = await Post_rent_data.delete(id);
       await RecacheDataPost({
         key,

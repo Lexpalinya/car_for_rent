@@ -65,11 +65,12 @@ const Car_rentController = {
     try {
       const validate = ValidateCar_rent(req.body);
       if (validate.length > 0)
-        return SendError(
+        return SendError({
           res,
-          400,
-          `${EMessage.pleaseInput}: ${validate.join(", ")}`
-        );
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: validate.join(", "),
+        });
       let {
         user_id,
         post_id,
@@ -100,32 +101,33 @@ const Car_rentController = {
 
       const data = req.files;
       if (!data || !data.car_rent_doc_image || !data.car_rent_payment_image) {
-        return SendError(
+        return SendError({
           res,
-          400,
-          `${EMessage.pleaseInput}: ${
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: ` ${
             !data
               ? "car_rent_doc_image,car_rent_payment_image"
               : !data.car_rent_doc_image
               ? "car_rent_doc_image"
               : "car_rent_payment_image"
-          }`
-        );
+          }`,
+        });
       }
 
       if (car_rent_visa && typeof car_rent_visa === "string") {
-        console.log("car_rent_visa :>> ", car_rent_visa);
         car_rent_visa = JSON.parse(car_rent_visa);
         if (
           !car_rent_visa.name ||
           !car_rent_visa.exp_date ||
           !car_rent_visa.cvv
         ) {
-          return SendError(
+          return SendError({
             res,
-            400,
-            `${EMessage.pleaseInput} car_rent_visa type object {name,exp_date:DateTime,cvv}`
-          );
+            statuscode: 400,
+            message: `${EMessage.pleaseInput} `,
+            err: "car_rent_visa type object {name,exp_date:DateTime,cvv}",
+          });
         }
       }
 
@@ -147,10 +149,11 @@ const Car_rentController = {
         !car_Rent_StatusExists ||
         (promotion_id && !promotionExists)
       ) {
-        return SendError(
+        return SendError({
           res,
-          404,
-          `${EMessage.notFound}:${
+          statuscode: 404,
+          message: `${EMessage.notFound}`,
+          err: `${
             !userExists
               ? "user"
               : !postExists
@@ -158,8 +161,8 @@ const Car_rentController = {
               : !car_Rent_StatusExists
               ? "car_Rent_status"
               : "promotion"
-          }`
-        );
+          }`,
+        });
       }
       const [car_rent_doc_image_url, car_rent_payment_image_url] =
         await Promise.all([
@@ -211,13 +214,17 @@ const Car_rentController = {
         );
       }
       await Promise.all(promiseAdd);
-      return SendSuccess(res, `${EMessage.insertSuccess} car_rent`, car_rent);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.insertFailed} `,
-        error
-      );
+        message: `${EMessage.insertSuccess} car_rent`,
+        data: car_rent,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.insertFailed} car_rent`,
+        err,
+      });
     }
   },
   async Update(req, res) {
@@ -262,10 +269,11 @@ const Car_rentController = {
         (data.promotion_id && !promotionExists) ||
         (data.status_id && !car_rent_StatusExists)
       )
-        return SendError(
+        return SendError({
           res,
-          404,
-          `${EMessage.notFound}: ${
+          statuscode: 404,
+          message: `${EMessage.notFound}`,
+          err: `${
             !car_rentExists
               ? "car_rent"
               : data.user_id && !userExists
@@ -275,8 +283,8 @@ const Car_rentController = {
               : data.promotion_id && !promotionExists
               ? "promotion"
               : "car_rent_status"
-          }`
-        );
+          } id`,
+        });
 
       const car_rent = await prisma.car_rent.update({
         where: {
@@ -284,13 +292,17 @@ const Car_rentController = {
         },
         data,
       });
-      return SendSuccess(res, `${EMessage.deleteSuccess}`, car_rent);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.deleteFailed} `,
-        error
-      );
+        message: `${EMessage.deleteSuccess}`,
+        data: car_rent,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.deleteFailed} `,
+        err,
+      });
     }
   },
   async UpdatePayment_status(req, res) {
@@ -298,11 +310,21 @@ const Car_rentController = {
       const id = req.params.id;
       let { pay_status } = req.body;
       if (!pay_status)
-        return SendSuccess(res, `${EMessage.pleaseInput}:pay_status`);
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.pleaseInput}`,
+          err: `pay_status`,
+        });
       if (typeof pay_status !== "boolean") pay_status = pay_status === "true";
       const car_rentExists = await FindCar_rentById_for_edit(id);
       if (!car_rentExists)
-        return SendError(res, `${EMessage.notFound}: car_rent id`);
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}`,
+          err: `car_rent id`,
+        });
 
       const car_rent = await prisma.car_rent.update({
         where: {
@@ -310,13 +332,17 @@ const Car_rentController = {
         },
         data: { pay_status },
       });
-      return SendSuccess(res, `${EMessage.deleteSuccess}`, car_rent);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.updateFailed}car_rent pay_status`,
-        error
-      );
+        message: `${EMessage.deleteSuccess}`,
+        data: car_rent,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.updateFailed}car_rent pay_status`,
+        err,
+      });
     }
   },
   async UpdateCar_rent_visa(req, res) {
@@ -324,11 +350,12 @@ const Car_rentController = {
       const id = req.params.id;
       let { car_rent_visa } = req.body;
       if (!car_rent_visa)
-        return SendError(
+        return SendError({
           res,
-          400,
-          `${EMessage.pleaseInput} car_rent_visa type object {id:number,name,exp_date:DateTime,cvv}`
-        );
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: `car_rent_visa type object {id:number,name,exp_date:DateTime,cvv}`,
+        });
       if (typeof car_rent_visa === "string") {
         // console.log("object :>> ", object);
         car_rent_visa = JSON.parse(car_rent_visa);
@@ -338,11 +365,12 @@ const Car_rentController = {
           !car_rent_visa.exp_date ||
           !car_rent_visa.cvv
         ) {
-          return SendError(
+          return SendError({
             res,
-            400,
-            `${EMessage.pleaseInput} car_rent_visa type object {id:number,name,exp_date:DateTime,cvv}`
-          );
+            statuscode: 400,
+            message: `${EMessage.pleaseInput}`,
+            err: "car_rent_visa type object {id:number,name,exp_date:DateTime,cvv}",
+          });
         }
       }
       const [car_rentExists, car_rent_visaExists] = await Promise.all([
@@ -351,23 +379,26 @@ const Car_rentController = {
       ]);
 
       if (!car_rentExists || !car_rent_visaExists)
-        return SendError(
+        return SendError({
           res,
-          `${EMessage.notFound}:${
-            !car_rentExists ? "car_rent" : "car_rent_visa"
-          } id`
-        );
+          message: `${EMessage.notFound}`,
+          err: `${!car_rentExists ? "car_rent" : "car_rent_visa"} id`,
+        });
       const car_rent_visas = await Car_rent_visa.update(
         car_rent_visa.id,
         car_rent_visa
       );
-      return SendSuccess(res, `${EMessage.updateSuccess}`, car_rent_visas);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.updateFailed}car_rent car_rent_visa `,
-        error
-      );
+        message: `${EMessage.updateSuccess}`,
+        data: car_rent_visas,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.updateFailed}car_rent car_rent_visa `,
+        err,
+      });
     }
   },
   async UpdateDoc_image(req, res) {
@@ -394,7 +425,12 @@ const Car_rentController = {
       const id = req.params.id;
       const car_rentExists = await FindCar_rentById_for_edit(id);
       if (!car_rentExists)
-        return SendError(res, `${EMessage.notFound}: car_rent id`);
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}`,
+          err: `car_rent id`,
+        });
 
       const car_rent = await prisma.car_rent.update({
         where: {
@@ -402,13 +438,17 @@ const Car_rentController = {
         },
         data: { is_active: false },
       });
-      return SendSuccess(res, `${EMessage.deleteSuccess}`, car_rent);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.deleteFailed} `,
-        error
-      );
+        message: `${EMessage.deleteSuccess}`,
+        data: car_rent,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.deleteFailed} `,
+        err,
+      });
     }
   },
   async SelectOne(req, res) {
@@ -418,12 +458,12 @@ const Car_rentController = {
       if (!car_rent)
         return SendError(res, 404, `${EMessage.notFound}: car_rent id`);
       return SendSuccess(res, `${EMessage.fetchOneSuccess}`, car_rent);
-    } catch (error) {
-      return SendErrorLog(
+    } catch (err) {
+      return SendErrorLog({
         res,
-        `${EMessage.serverError} ${EMessage.errorFetchingOne} `,
-        error
-      );
+        message: `${EMessage.serverError} ${EMessage.errorFetchingOne} `,
+        err,
+      });
     }
   },
   async SelectAllPage(req, res) {
@@ -488,13 +528,17 @@ const Car_rentController = {
         page + 1,
         select1
       );
-      return SendSuccess(res, `${EMessage.fetchOneSuccess} user`, car_rent);
-    } catch (error) {
-      return SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.errorFetchingAll} car_rent all page `,
-        error
-      );
+        message: `${EMessage.fetchOneSuccess} user`,
+        data: car_rent,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll} car_rent all page `,
+        err,
+      });
     }
   },
   async SelectAllPagePay_status(req, res) {
