@@ -1,3 +1,4 @@
+import redis from "../DB/redis";
 import { CachDataAll, CachDataLimit } from "../services/cach.contro";
 import { DeleteCachedKey } from "../services/cach.deletekey";
 import { EMessage } from "../services/enum";
@@ -59,6 +60,24 @@ let select = {
       },
     },
   },
+};
+const ResCachedDataCar_rent = async ({
+  id,
+  key,
+  post_key,
+  user_key,
+  pay_status,
+}) => {
+  let promise = [
+    DeleteCachedKey(key),
+    DeleteCachedKey(post_key + key),
+    DeleteCachedKey(user_key + key),
+    DeleteCachedKey(pay_status + key),
+  ];
+  if (id) {
+    promise.push(redis.del(id + key));
+  }
+  await Promise.all(promise);
 };
 const Car_rentController = {
   async Insert(req, res) {
@@ -214,6 +233,13 @@ const Car_rentController = {
         );
       }
       await Promise.all(promiseAdd);
+
+      await ResCachedDataCar_rent({
+        key,
+        post_key: post_id,
+        user_key: user_id,
+        pay_status: car_rent.pay_status,
+      });
       return SendSuccess({
         res,
         message: `${EMessage.insertSuccess} car_rent`,
@@ -292,6 +318,13 @@ const Car_rentController = {
         },
         data,
       });
+      await ResCachedDataCar_rent({
+        id,
+        key,
+        post_key: car_rentExists.post_id,
+        user_key: car_rentExists.user_id,
+        pay_status: car_rentExists.pay_status,
+      });
       return SendSuccess({
         res,
         message: `${EMessage.deleteSuccess}`,
@@ -331,6 +364,13 @@ const Car_rentController = {
           id,
         },
         data: { pay_status },
+      });
+      await ResCachedDataCar_rent({
+        id,
+        key,
+        post_key: car_rentExists.post_id,
+        user_key: car_rentExists.user_id,
+        pay_status: car_rentExists.pay_status,
       });
       return SendSuccess({
         res,
@@ -388,6 +428,13 @@ const Car_rentController = {
         car_rent_visa.id,
         car_rent_visa
       );
+      await ResCachedDataCar_rent({
+        id,
+        key,
+        post_key: car_rentExists.post_id,
+        user_key: car_rentExists.user_id,
+        pay_status: car_rentExists.pay_status,
+      });
       return SendSuccess({
         res,
         message: `${EMessage.updateSuccess}`,
@@ -437,6 +484,14 @@ const Car_rentController = {
           id,
         },
         data: { is_active: false },
+      });
+
+      await ResCachedDataCar_rent({
+        id,
+        key,
+        post_key: car_rentExists.post_id,
+        user_key: car_rentExists.user_id,
+        pay_status: car_rentExists.pay_status,
       });
       return SendSuccess({
         res,
@@ -556,7 +611,11 @@ const Car_rentController = {
       let page = parseInt(req.query.page);
       let { pay_status } = req.query;
       if (!pay_status) {
-        return SendError(res, `${EMessage.pleaseInput}:pay_status`);
+        return SendError({
+          res,
+          message: `${EMessage.pleaseInput}`,
+          err: "pay_status",
+        });
       }
       if (typeof pay_status !== "boolean") pay_status = pay_status === "true";
       page = !page || page < 0 ? 0 : page - 1;
@@ -593,47 +652,47 @@ const Car_rentController = {
       });
     }
   },
-  async SelectAllPageByUser_id(req, res) {
-    try {
-      // await DeleteCachedKey(key);
-      let page = parseInt(req.query.page);
-      const id = req.params.id;
-      page = !page || page < 0 ? 0 : page - 1;
-      const car_rent = await CachDataLimit(
-        id + key + "-" + page,
-        model,
-        {
-          user_id: id,
-          // pay_status: true,
-          is_active: true,
-        },
-        page,
-        select
-      );
-      CachDataLimit(
-        id + key + "-" + (page + 1),
-        model,
-        {
-          user_id: id,
-          // pay_status: true,
-          is_active: true,
-        },
-        page + 1,
-        select
-      );
-      return SendSuccess({
-        res,
-        message: `${EMessage.fetchOneSuccess} user`,
-        data: car_rent,
-      });
-    } catch (err) {
-      return SendErrorLog({
-        res,
-        message: `${EMessage.serverError} ${EMessage.errorFetchingAll} car_rent by user_id `,
-        err,
-      });
-    }
-  },
+  // async SelectAllPageByUser_id(req, res) {
+  //   try {
+  //     // await DeleteCachedKey(key);
+  //     let page = parseInt(req.query.page);
+  //     const id = req.params.id;
+  //     page = !page || page < 0 ? 0 : page - 1;
+  //     const car_rent = await CachDataLimit(
+  //       id + key + "-" + page,
+  //       model,
+  //       {
+  //         user_id: id,
+  //         // pay_status: true,
+  //         is_active: true,
+  //       },
+  //       page,
+  //       select
+  //     );
+  //     CachDataLimit(
+  //       id + key + "-" + (page + 1),
+  //       model,
+  //       {
+  //         user_id: id,
+  //         // pay_status: true,
+  //         is_active: true,
+  //       },
+  //       page + 1,
+  //       select
+  //     );
+  //     return SendSuccess({
+  //       res,
+  //       message: `${EMessage.fetchOneSuccess} user`,
+  //       data: car_rent,
+  //     });
+  //   } catch (err) {
+  //     return SendErrorLog({
+  //       res,
+  //       message: `${EMessage.serverError} ${EMessage.errorFetchingAll} car_rent by user_id `,
+  //       err,
+  //     });
+  //   }
+  // },
   async SelectAllPageByPost_id(req, res) {
     try {
       // await DeleteCachedKey(key);
@@ -675,22 +734,22 @@ const Car_rentController = {
       });
     }
   },
-  async SelectAllPageByUser_idandStatus_id(req, res) {
+  async SelectAllByUser_id(req, res) {
     try {
       // await DeleteCachedKey(key);
-      let page = parseInt(req.query.page);
-      const { user_id } = req.body;
 
-      CachDataAll(
-        user_id + status_id + key + "-" + (page + 1),
+      const user_id = req.user;
+
+      const car_rent = await CachDataAll(
+        user_id + key,
         model,
         {
           user_id,
           is_active: true,
         },
-        page + 1,
         select
       );
+
       return SendSuccess({
         res,
         message: `${EMessage.fetchOneSuccess} user`,
@@ -782,7 +841,13 @@ const UpdateCar_rentImage = async (
     const imageUpdate = await updateImage(image_data_update.id, {
       url: imageUrl,
     });
-
+    await ResCachedDataCar_rent({
+      id,
+      key,
+      post_key: car_rentExists.post_id,
+      user_key: car_rentExists.user_id,
+      pay_status: car_rentExists.pay_status,
+    });
     return SendSuccess({
       res,
       message: `${EMessage.updateSuccess} update ${imageType}`,

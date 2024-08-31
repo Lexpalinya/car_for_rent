@@ -39,7 +39,7 @@ const CheckConnectionDatabase = async () => {
     setTimeout(async () => {
       console.error(`reconnecting database ...`);
       await CheckConnectionDatabase();
-    }, 10000);
+    }, 5000);
   }
 };
 

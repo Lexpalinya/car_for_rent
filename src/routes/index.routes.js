@@ -127,17 +127,17 @@ route.delete(
   Insurance_companysController.Delete
 );
 
-//-----------Labels-----------------------------------------------------
-const labels = `/labels`;
-route.get(`${labels}/selAll`, auth, LabelsController.SelectAll);
-route.get(`${labels}/selOne/:id`, auth, LabelsController.SelectOne);
+// //-----------Labels-----------------------------------------------------
+// const labels = `/labels`;
+// route.get(`${labels}/selAll`, auth, LabelsController.SelectAll);
+// route.get(`${labels}/selOne/:id`, auth, LabelsController.SelectOne);
 
-route.post(`${labels}/insert`, auth, LabelsController.Insert);
+// route.post(`${labels}/insert`, auth, LabelsController.Insert);
 
-route.put(`${labels}/update/:id`, auth, LabelsController.Update);
-route.put(`${labels}/updateIcon/:id`, auth, LabelsController.UpdateIcon);
+// route.put(`${labels}/update/:id`, auth, LabelsController.Update);
+// route.put(`${labels}/updateIcon/:id`, auth, LabelsController.UpdateIcon);
 
-route.delete(`${labels}/delete/:id`, auth, LabelsController.Delete);
+// route.delete(`${labels}/delete/:id`, auth, LabelsController.Delete);
 
 //-----------Type_of_fuals-----------------------------------------------------
 const type_of_fuals = `/type_of_fuals`;
@@ -376,15 +376,15 @@ route.put(
 route.put(`${post}/like_post/:id`, auth, Like_postController.Like_post);
 route.put(`${post}/unlike_post/:id`, auth, Like_postController.UnLike_post);
 
-//--------------Labels_post_data------------------------------------
-route.put(`${post}/labels_post_add`, auth, Labels_DataController.Insert);
-route.put(`${post}/labels_post_remove/:id`, auth, Labels_DataController.Delete);
+// //--------------Labels_post_data------------------------------------
+// route.put(`${post}/labels_post_add`, auth, Labels_DataController.Insert);
+// route.put(`${post}/labels_post_remove/:id`, auth, Labels_DataController.Delete);
 
-route.get(
-  `${post}/labels_post/:id`,
-  auth,
-  Labels_DataController.SelectByPostID
-);
+// route.get(
+//   `${post}/labels_post/:id`,
+//   auth,
+//   Labels_DataController.SelectByPostID
+// );
 
 //-------Review------------------------------------------------
 const review = "/reviews";
@@ -404,14 +404,9 @@ route.get(
   Car_rentController.SelectAllPageByPost_id
 );
 route.get(
-  `${car_rent}/selAllPageByUser/:id`,
+  `${car_rent}/selAllByUser`,
   auth,
-  Car_rentController.SelectAllPageByUser_id
-);
-route.post(
-  `${car_rent}/selAllPageUser_status`,
-  auth,
-  Car_rentController.SelectAllPageByUser_idandStatus_id
+  Car_rentController.SelectAllByUser_id
 );
 route.get(
   `${car_rent}/selAllPagePay_status`,

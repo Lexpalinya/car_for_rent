@@ -27,8 +27,6 @@ import {
   Post_doc_image,
   Post_driver_license_image,
   Post_insurance_image,
-  Post_label_data,
-  Post_like_posts,
   Post_rent_data,
 } from "../services/subtabel";
 import { UploadImage, uploadImages } from "../services/upload.file";
@@ -61,8 +59,9 @@ let select = {
   seat: true,
   car_color: true,
   description: true,
+  street: true,
+  point: true,
   address: true,
-  text_address: true,
   detail_address: true,
   deposits_fee: true,
   status_id: true,

@@ -37,34 +37,41 @@ const ReviewController = {
     try {
       const validate = ValidateReveiw(req.body);
       if (validate.length > 0)
-        return SendError(
+        return SendError({
           res,
-          400,
-          `${EMessage.pleaseInput}: ${validate.join(", ")}`
-        );
-      let { user_id, post_id, star, comment } = req.body;
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: validate.join(", "),
+        });
+      const user_id = req.user;
+      let { post_id, star, comment } = req.body;
       if (typeof star !== "number") star = parseFloat(star);
       const [userExists, postExists] = await Promise.all([
         FindUserById_ID(user_id),
         FindPostById_for_edit(post_id),
       ]);
       if (!userExists || !postExists)
-        return SendError(
+        return SendError({
           res,
-          404,
-          `${EMessage.notFound}:${!userExists ? "user" : "post"} id`
-        );
+          statuscode: 404,
+          message: `${EMessage.notFound}`,
+          err: `${!userExists ? "user" : "post"} id`,
+        });
       const reveiw = await prisma.review.create({
         data: { user_id, post_id, star, comment },
       });
       await redis.del(post_id + key);
-      return SendCreate(res, `${EMessage.insertSuccess}`, reveiw);
-    } catch (error) {
-      SendErrorLog(
+      return SendCreate({
         res,
-        `${EMessage.serverError} ${EMessage.errorFetchingOne}`,
-        error
-      );
+        message: `${EMessage.insertSuccess}`,
+        data: reveiw,
+      });
+    } catch (err) {
+      SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingOne}`,
+        err,
+      });
     }
   },
 
@@ -73,7 +80,12 @@ const ReviewController = {
       const id = req.params.id;
       const reveiwExists = await FindReviewById_ID(id);
       if (!reveiwExists)
-        return SendError(res, 404, `${EMessage.notFound}: review id`);
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}`,
+          err: "review id",
+        });
       const review = await prisma.review.update({
         where: {
           id,
@@ -82,14 +94,18 @@ const ReviewController = {
           is_active: false,
         },
       });
-      await redis.del(reveiwExists.post_id + key, id + "reviews");
-      return SendSuccess(res, `${EMessage.deleteSuccess}`, review);
-    } catch (error) {
-      SendErrorLog(
+      await redis.del(reveiwExists.post_id + key);
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.deleteFailed}`,
-        error
-      );
+        message: `${EMessage.deleteSuccess}`,
+        data: review,
+      });
+    } catch (err) {
+      SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.deleteFailed}`,
+        err,
+      });
     }
   },
   async SelectByPostId(req, res) {
@@ -101,13 +117,17 @@ const ReviewController = {
         { post_id: id, is_active: true },
         select
       );
-      return SendSuccess(res, `${EMessage.fetchAllSuccess}`, review);
-    } catch (error) {
-      SendErrorLog(
+      return SendSuccess({
         res,
-        `${EMessage.serverError} ${EMessage.errorFetchingAll} review by post_id`,
-        error
-      );
+        message: `${EMessage.fetchAllSuccess}`,
+        data: review,
+      });
+    } catch (err) {
+      SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll} review by post_id`,
+        err,
+      });
     }
   },
 };
