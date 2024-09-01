@@ -6,7 +6,6 @@ import {
   FindCar_BrandsById,
   FindCar_typesById,
   FindInsurance_CompanysById,
-  FindLablesById,
   FindLevel_InsurancesById,
   FindPost_StatusById,
   FindPostById,
@@ -408,7 +407,7 @@ const PostController = {
       if (data.star && typeof data.star !== "number") {
         data.star = parseFloat(data.star);
       }
-      if (data.deposits_fee&&typeof data.deposits_fee !== "number") {
+      if (data.deposits_fee && typeof data.deposits_fee !== "number") {
         data.deposits_fee = parseFloat(data.deposits_fee);
       }
       if (data.car_insurance && typeof data.car_insurance !== "boolean") {
@@ -646,7 +645,7 @@ const PostController = {
       return SendSuccess({
         res,
         message: `${EMessage.fetchAllSuccess} `,
-        data: user,
+        data: { id: car_type_id, user },
       });
     } catch (err) {
       SendErrorLog({
