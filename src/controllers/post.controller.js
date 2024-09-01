@@ -645,7 +645,7 @@ const PostController = {
       return SendSuccess({
         res,
         message: `${EMessage.fetchAllSuccess} `,
-        data: { id: car_type_id, post },
+        data: {car_type_id: car_type_id, ...post },
       });
     } catch (err) {
       SendErrorLog({
