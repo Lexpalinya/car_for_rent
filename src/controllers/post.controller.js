@@ -628,7 +628,7 @@ const PostController = {
       let page = parseInt(req.query.page);
       const { car_type_id } = req.params;
       page = !page || page < 0 ? 0 : page - 1;
-      const user = await CachDataLimit(
+      const post = await CachDataLimit(
         car_type_id + key + "-" + page,
         model,
         { car_type_id: car_type_id, is_active: true },
@@ -645,7 +645,7 @@ const PostController = {
       return SendSuccess({
         res,
         message: `${EMessage.fetchAllSuccess} `,
-        data: { id: car_type_id, user },
+        data: { id: car_type_id, post },
       });
     } catch (err) {
       SendErrorLog({
@@ -661,7 +661,7 @@ const PostController = {
       let page = parseInt(req.query.page);
       const { type_of_fual_id } = req.params;
       page = !page || page < 0 ? 0 : page - 1;
-      const user = await CachDataLimit(
+      const post = await CachDataLimit(
         type_of_fual_id + key + "-" + page,
         model,
         { type_of_fual_id, is_active: true },
@@ -678,7 +678,7 @@ const PostController = {
       return SendSuccess({
         res,
         message: `${EMessage.fetchAllSuccess}`,
-        data: user,
+        data: post,
       });
     } catch (err) {
       SendErrorLog({
