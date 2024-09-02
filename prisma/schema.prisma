@@ -257,6 +257,7 @@ model posts {
   car_version               String
   car_year                  String
   car_resgistration         String
+  door                      Int                         @default(2)
   type_of_fual_id           String                      @db.VarChar(36)
   driver_system             String
   seat                      String

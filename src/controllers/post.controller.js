@@ -53,6 +53,7 @@ let select = {
   car_version: true,
   car_year: true,
   car_resgistration: true,
+  door: true,
   type_of_fual_id: true,
   driver_system: true,
   seat: true,
@@ -123,6 +124,7 @@ const PostController = {
         car_version,
         car_year,
         car_resgistration,
+        door,
         type_of_fual_id,
         driver_system,
         seat,
@@ -203,6 +205,7 @@ const PostController = {
       if (typeof post_rent_data === "string") {
         post_rent_data = JSON.parse(post_rent_data);
       }
+      if (typeof door !== "number") door = parseInt(door);
 
       post_rent_data = EnsureArray(post_rent_data);
 
@@ -337,6 +340,7 @@ const PostController = {
           car_version,
           car_year,
           car_resgistration,
+          door,
           type_of_fual_id,
           driver_system,
           seat,
@@ -413,7 +417,9 @@ const PostController = {
       if (data.car_insurance && typeof data.car_insurance !== "boolean") {
         data.car_insurance = data.car_insurance === "true";
       }
-
+      if (data.door && typeof data.door !== "number") {
+        data.door = parseInt(data.door);
+      }
       if (!postExists)
         return SendError({
           res,
@@ -645,7 +651,7 @@ const PostController = {
       return SendSuccess({
         res,
         message: `${EMessage.fetchAllSuccess} `,
-        data: {car_type_id: car_type_id, ...post },
+        data: { car_type_id: car_type_id, ...post },
       });
     } catch (err) {
       SendErrorLog({
