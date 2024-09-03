@@ -243,15 +243,22 @@ export const FindPostById = (id) => {
       insurance_company_id: true,
       level_insurance_id: true,
       car_brand_id: true,
+      car_brand: true,
       car_version: true,
       car_year: true,
       car_resgistration: true,
+      door: true,
       type_of_fual_id: true,
       driver_system: true,
       seat: true,
       car_color: true,
       description: true,
+      street: true,
+      point: true,
       address: true,
+      detail_address: true,
+      booking_fee: true,
+      mutjum: true,
       deposits_fee: true,
       status_id: true,
       created_at: true,
@@ -272,18 +279,6 @@ export const FindPostById = (id) => {
       post_driver_license_image: true,
       post_insurance_image: true,
       post_rent_data: true,
-      labels_data: {
-        select: {
-          id: true,
-          label_id: true,
-          label: {
-            select: {
-              icon: true,
-              name: true,
-            },
-          },
-        },
-      },
       like_post: {
         select: {
           user_id: true,
@@ -353,5 +348,5 @@ export const FindCar_rentById = (id) => {
 };
 
 export const FindLocationById = (id) => {
-  return findUnique("location", id, );
+  return findUnique("location", id);
 };

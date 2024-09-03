@@ -116,6 +116,7 @@ export const ValidatePost = (data) => {
     point,
     address,
     detail_address,
+    booking_fee,
     deposits_fee,
     status_id,
     //
@@ -143,6 +144,7 @@ export const ValidatePost = (data) => {
     point,
     address,
     detail_address,
+    booking_fee,
     deposits_fee,
     status_id,
     //
