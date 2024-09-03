@@ -63,7 +63,6 @@ let select = {
   point: true,
   address: true,
   detail_address: true,
-  booking_fee: true,
   mutjum: true,
   deposits_fee: true,
   status_id: true,
@@ -136,7 +135,6 @@ const PostController = {
         point,
         address,
         detail_address,
-        booking_fee,
         deposits_fee,
         status_id,
         //
@@ -155,9 +153,6 @@ const PostController = {
 
       if (typeof deposits_fee !== "number") {
         deposits_fee = parseFloat(deposits_fee);
-      }
-      if (typeof booking_fee !== "number") {
-        booking_fee = parseFloat(booking_fee);
       }
       if (mutjum && typeof mutjum !== "number") {
         mutjum = parseFloat(mutjum);
@@ -361,9 +356,7 @@ const PostController = {
           point,
           address,
           detail_address,
-          booking_fee,
           deposits_fee,
-          booking_fee,
           status_id,
           mutjum,
         },
@@ -431,9 +424,7 @@ const PostController = {
       if (data.mutjum && typeof data.mutjum !== "number") {
         data.mutjum = parseFloat(data.mutjum);
       }
-      if (data.booking_fee && typeof data.booking_fee !== "number") {
-        data.booking_fee = parseFloat(data.booking_fee);
-      }
+
       if (data.car_insurance && typeof data.car_insurance !== "boolean") {
         data.car_insurance = data.car_insurance === "true";
       }

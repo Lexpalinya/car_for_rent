@@ -232,7 +232,6 @@ model posts {
   address                   String?
   detail_address            String?
   mutjum                    Float?
-  booking_fee               Float?
   deposits_fee              Float
   status_id                 String                      @db.VarChar(36)
   created_at                DateTime                    @default(now())

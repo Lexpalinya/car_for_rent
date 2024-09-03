@@ -257,7 +257,6 @@ export const FindPostById = (id) => {
       point: true,
       address: true,
       detail_address: true,
-      booking_fee: true,
       mutjum: true,
       deposits_fee: true,
       status_id: true,
