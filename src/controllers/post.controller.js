@@ -283,6 +283,7 @@ const PostController = {
         level_insuranceExists,
         car_brandExists,
       ] = await Promise.all(promiseList);
+      console.log('insurance :>> ', insurance_companyExists);
       const notFoundEntity = !car_typeExists
         ? "car_types"
         : !userExists
