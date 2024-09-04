@@ -23,8 +23,8 @@ export const ValidatePost_Status = (data) => {
 
 //----------------------------------------------
 export const ValidateCar_Types = (data) => {
-  const { name, detail, wheel } = data;
-  return ValidateData({ name, detail, wheel });
+  const { name, detail, wheel, commition } = data;
+  return ValidateData({ name, detail, wheel, commition });
 };
 
 export const ValidateLabels = (data) => {
@@ -114,10 +114,12 @@ export const ValidatePost = (data) => {
     description,
     street,
     point,
-    address,
-    detail_address,
+    village,
+    district,
+    province,
     deposits_fee,
     status_id,
+    user_type,
     //
     post_rent_data,
   } = data;
@@ -141,10 +143,12 @@ export const ValidatePost = (data) => {
     description,
     street,
     point,
-    address,
-    detail_address,
+    village,
+    district,
+    province,
     deposits_fee,
     status_id,
+    user_type,
     //
     post_rent_data,
   });
@@ -206,12 +210,13 @@ export const ValidateCar_rent = (data) => {
 };
 
 export const ValidateLocation = (data) => {
-  const { tag, street, point, address, detail } = data;
+  const { tag, street, point, village, district, province } = data;
   return ValidateData({
     tag,
     street,
     point,
-    address,
-    detail,
+    village,
+    district,
+    province,
   });
 };

@@ -39,17 +39,19 @@ const Car_typesController = {
           message: `${EMessage.pleaseInput}`,
           err: "icon",
         });
-      const { name, detail, wheel } = req.body;
+      let { name, detail, wheel, commition } = req.body;
       const icon = await UploadImage(data.icon.data);
       if (!icon) {
         throw new Error("upload image failed");
       }
+      if (typeof commition !== "number") commition = parseFloat(commition);
       const car_type = await prisma.car_types.create({
         data: {
           detail,
           wheel,
           name,
           icon,
+          commition,
         },
       });
       await RecacheData();
@@ -71,6 +73,8 @@ const Car_typesController = {
       const id = req.params.id;
       const data = DataExists(req.body);
       const car_typeExists = await FindCar_typesById(id);
+      if (data.commition && typeof data.commition !== "number")
+        data.commition = parseFloat(data.commition);
       if (!car_typeExists)
         return SendError({
           res,

@@ -111,7 +111,7 @@ const Like_postController = {
       await redis.del(postExists.id + key);
       return SendSuccess({
         res,
-        message: `${EMessage.insertSuccess} :unlike post successfully`,
+        message: `${EMessage.deleteSuccess} :unlike post successfully`,
         data: like,
       });
     } catch (err) {

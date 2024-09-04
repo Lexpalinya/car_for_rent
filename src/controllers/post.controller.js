@@ -61,8 +61,10 @@ let select = {
   description: true,
   street: true,
   point: true,
-  address: true,
-  detail_address: true,
+  village: true,
+  district: true,
+  province: true,
+  user_type: true,
   mutjum: true,
   deposits_fee: true,
   status_id: true,
@@ -133,10 +135,12 @@ const PostController = {
         description,
         street,
         point,
-        address,
-        detail_address,
+        village,
+        district,
+        province,
         deposits_fee,
         status_id,
+        user_type,
         //
         mutjum,
         post_rent_data,
@@ -149,6 +153,9 @@ const PostController = {
       const data = req.files;
       if (typeof car_insurance !== "boolean") {
         car_insurance = car_insurance === "true";
+      }
+      if (typeof user_type !== "boolean") {
+        user_type = user_type === "true";
       }
 
       if (typeof deposits_fee !== "number") {
@@ -354,8 +361,10 @@ const PostController = {
           description,
           street,
           point,
-          address,
-          detail_address,
+          village,
+          district,
+          province,
+          user_type,
           deposits_fee,
           status_id,
           mutjum,
@@ -427,6 +436,9 @@ const PostController = {
 
       if (data.car_insurance && typeof data.car_insurance !== "boolean") {
         data.car_insurance = data.car_insurance === "true";
+      }
+      if (data.user_type && typeof data.user_type !== "boolean") {
+        data.user_type = data.user_type === "true";
       }
       if (data.door && typeof data.door !== "number") {
         data.door = parseInt(data.door);

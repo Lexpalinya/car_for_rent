@@ -48,8 +48,9 @@ model location {
   tag        String
   street     String
   point      String
-  address    String
-  detail     String
+  village    String?
+  district   String?
+  province   String?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   user       users    @relation(fields: [user_id], references: [id])
@@ -123,6 +124,7 @@ model car_types {
   id         String   @id @default(uuid()) @db.VarChar(36)
   is_active  Boolean  @default(true)
   name       String
+  commition  Float    @default(10)
   icon       String
   detail     String
   wheel      String?
@@ -204,6 +206,7 @@ model like_post {
 
 model posts {
   id                        String                      @id @default(uuid()) @db.VarChar(36)
+  // post_statu                Boolean                     @default(false)
   is_active                 Boolean                     @default(true)
   car_type_id               String                      @db.VarChar(36)
   user_id                   String                      @db.VarChar(36)
@@ -229,10 +232,12 @@ model posts {
   description               String                      @db.Text
   street                    String?
   point                     String?
-  address                   String?
-  detail_address            String?
+  village                   String?
+  district                  String?
+  province                  String?
   mutjum                    Float?
   deposits_fee              Float
+  user_type                 Boolean                     @default(true)
   status_id                 String                      @db.VarChar(36)
   created_at                DateTime                    @default(now())
   updated_at                DateTime                    @updatedAt
