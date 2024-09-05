@@ -40,11 +40,18 @@ let select = {
   email: true,
   phone_number: true,
   doc_type: true,
+  description: true,
+  promotion_id: true,
   booking_fee: true,
   pay_destination: true,
-  description: true,
+  pay_type: true,
+  bank_no: true,
+  pay_status: true,
   reason: true,
-  promotion_id: true,
+  status_id: true,
+  is_success: true,
+  created_at: true,
+  updated_at: true,
   post: {
     select: {
       star: true,
@@ -72,6 +79,7 @@ const ResCachedDataCar_rent = async ({
   key,
   post_key,
   user_key,
+  user_post_key,
   pay_status,
 }) => {
   let promise = [
@@ -79,6 +87,7 @@ const ResCachedDataCar_rent = async ({
     DeleteCachedKey(post_key + key),
     DeleteCachedKey(user_key + key),
     DeleteCachedKey(pay_status + key),
+    DeleteCachedKey(user_post_key + key),
   ];
   if (id) {
     promise.push(redis.del(id + key));
@@ -265,6 +274,7 @@ const Car_rentController = {
         post_key: post_id,
         user_key: user_id,
         pay_status: car_rent.pay_status,
+        user_post_key: user_id + "post",
       });
       return SendSuccess({
         res,
@@ -350,6 +360,7 @@ const Car_rentController = {
         post_key: car_rentExists.post_id,
         user_key: car_rentExists.user_id,
         pay_status: car_rentExists.pay_status,
+        user_post_key: car_rentExists.user_id + "post",
       });
       return SendSuccess({
         res,
@@ -397,6 +408,7 @@ const Car_rentController = {
         post_key: car_rentExists.post_id,
         user_key: car_rentExists.user_id,
         pay_status: car_rentExists.pay_status,
+        user_post_key: car_rentExists.user_id + "post",
       });
       return SendSuccess({
         res,
@@ -460,6 +472,7 @@ const Car_rentController = {
         post_key: car_rentExists.post_id,
         user_key: car_rentExists.user_id,
         pay_status: car_rentExists.pay_status,
+        user_post_key: car_rentExists.user_id + "post",
       });
       return SendSuccess({
         res,
@@ -526,6 +539,7 @@ const Car_rentController = {
         post_key: car_rentExists.post_id,
         user_key: car_rentExists.user_id,
         pay_status: car_rentExists.pay_status,
+        user_post_key: car_rentExists.user_id + "post",
       });
       return SendSuccess({
         res,
@@ -568,44 +582,44 @@ const Car_rentController = {
     try {
       // await DeleteCachedKey(key);
 
-      let select1 = {
-        id: true,
-        post_id: true,
-        user_id: true,
-        start_date: true,
-        end_date: true,
-        frist_name: true,
-        last_name: true,
-        email: true,
-        phone_number: true,
-        doc_type: true,
-        booking_fee: true,
-        pay_destination: true,
-        description: true,
-        reason: true,
-        promotion_id: true,
-        post: {
-          select: {
-            star: true,
-            car_brands: {
-              select: {
-                name: true,
-              },
-            },
-            car_version: true,
-            car_year: true,
-            post_car_image: {
-              select: {
-                url: true,
-              },
-            },
-          },
-        },
-        car_rent_doc_image: true,
-        car_rent_payment_image: true,
-        car_rent_driving_lincense_image: true,
-        car_rent_visa: true,
-      };
+      // let select1 = {
+      //   id: true,
+      //   post_id: true,
+      //   user_id: true,
+      //   start_date: true,
+      //   end_date: true,
+      //   frist_name: true,
+      //   last_name: true,
+      //   email: true,
+      //   phone_number: true,
+      //   doc_type: true,
+      //   booking_fee: true,
+      //   pay_destination: true,
+      //   description: true,
+      //   reason: true,
+      //   promotion_id: true,
+      //   post: {
+      //     select: {
+      //       star: true,
+      //       car_brands: {
+      //         select: {
+      //           name: true,
+      //         },
+      //       },
+      //       car_version: true,
+      //       car_year: true,
+      //       post_car_image: {
+      //         select: {
+      //           url: true,
+      //         },
+      //       },
+      //     },
+      //   },
+      //   car_rent_doc_image: true,
+      //   car_rent_payment_image: true,
+      //   car_rent_driving_lincense_image: true,
+      //   car_rent_visa: true,
+      // };
 
       let page = parseInt(req.query.page);
       page = !page || page < 0 ? 0 : page - 1;
@@ -616,7 +630,7 @@ const Car_rentController = {
           is_active: true,
         },
         page,
-        select1
+        select
       );
       CachDataLimit(
         key + "-" + (page + 1),
@@ -625,7 +639,7 @@ const Car_rentController = {
           is_active: true,
         },
         page + 1,
-        select1
+        select
       );
       return SendSuccess({
         res,
@@ -804,13 +818,35 @@ const Car_rentController = {
       const user_id = req.user;
 
       const car_rent = await CachDataAll(
-        user_id + key,
-        model,
+        user_id + "post" + key,
+        "posts",
         {
           user_id,
           is_active: true,
         },
-        select
+        {
+          id: true,
+          user_id: true,
+          star: true,
+          users: {
+            select: {
+              username: true,
+              phone_number: true,
+              profile: true,
+            },
+          },
+          car_types: true,
+          type_of_fual: true,
+          status: true,
+          post_car_image: true,
+          created_at: true,
+          updated_at: true,
+          car_rent: {
+            select: {
+              ...select,
+            },
+          },
+        }
       );
 
       return SendSuccess({
@@ -911,6 +947,7 @@ const UpdateCar_rentImage = async (
       post_key: car_rentExists.post_id,
       user_key: car_rentExists.user_id,
       pay_status: car_rentExists.pay_status,
+      user_post_key: car_rentExists.user_id + "post",
     });
     return SendSuccess({
       res,

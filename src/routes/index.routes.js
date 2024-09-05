@@ -419,6 +419,12 @@ route.get(
   Car_rentController.SelectAllPagePay_status
 );
 
+route.get(
+  `${car_rent}/selAllByUserPost`,
+  auth,
+  Car_rentController.SelectByUserPost
+);
+
 route.post(`${car_rent}/insert`, auth, Car_rentController.Insert);
 
 route.put(`${car_rent}/update/:id`, auth, Car_rentController.Update);

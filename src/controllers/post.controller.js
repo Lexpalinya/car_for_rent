@@ -90,6 +90,7 @@ let select = {
       profile: true,
     },
   },
+  car_types: true,
   post_doc_image: true,
   post_car_image: true,
   post_driver_license_image: true,
