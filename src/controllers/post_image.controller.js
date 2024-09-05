@@ -38,6 +38,7 @@ const InsertPostImage = async (req, res, imageType, InsertImage) => {
       car_type_id_key: postExists.car_type_id + key,
       type_of_fual_id_key: postExists.type_of_fual_id + key,
       user_id_key: postExists.user_id + key,
+      post_status_key: postExists.status_id + key,
     });
     return SendSuccess({
       res,
@@ -133,6 +134,7 @@ const UpdatePostImage = async (
       car_type_id_key: postExists.car_type_id + key,
       type_of_fual_id_key: postExists.type_of_fual_id + key,
       user_id_key: postExists.user_id + key,
+      post_status_key: postExists.status_id + key,
     });
 
     return SendSuccess({
@@ -208,6 +210,7 @@ const DeletePostImage = async (
       car_type_id_key: postExists.car_type_id + key,
       type_of_fual_id_key: postExists.type_of_fual_id + key,
       user_id_key: postExists.user_id + key,
+      post_status_key: postExists.status_id + key,
     });
     return SendSuccess({
       res,

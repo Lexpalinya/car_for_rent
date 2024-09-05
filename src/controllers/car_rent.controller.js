@@ -19,12 +19,14 @@ import {
 } from "../services/services";
 import {
   Car_rent_doc_image,
+  Car_rent_driving_lincense_image,
   Car_rent_payment_image,
   Car_rent_visa,
 } from "../services/subtabel";
 import { UploadImage, uploadImages } from "../services/upload.file";
 import { DataExists, ValidateCar_rent } from "../services/validate";
 import prisma from "../utils/prisma.client";
+const car_rent_status = "ea086ac0-b912-4607-bd83-72d14fb67a6f";
 let key = "car_rent";
 let model = "car_rent";
 let select = {
@@ -60,6 +62,10 @@ let select = {
       },
     },
   },
+  car_rent_doc_image: true,
+  car_rent_driving_lincense_image: true,
+  car_rent_payment_image: true,
+  car_rent_visa: true,
 };
 const ResCachedDataCar_rent = async ({
   id,
@@ -104,7 +110,6 @@ const Car_rentController = {
         pay_destination, //number
         pay_type,
         bank_no,
-        status_id,
 
         //------
         description,
@@ -117,18 +122,25 @@ const Car_rentController = {
         booking_fee = parseFloat(booking_fee);
       if (typeof pay_destination !== "number")
         pay_destination = parseFloat(pay_destination);
-
+      const status_id = car_rent_status;
       const data = req.files;
-      if (!data || !data.car_rent_doc_image || !data.car_rent_payment_image) {
+      if (
+        !data ||
+        !data.car_rent_doc_image ||
+        !data.car_rent_payment_image ||
+        !data.car_rent_driving_lincense_image
+      ) {
         return SendError({
           res,
           statuscode: 400,
           message: `${EMessage.pleaseInput}`,
           err: ` ${
             !data
-              ? "car_rent_doc_image,car_rent_payment_image"
+              ? "car_rent_doc_image,car_rent_payment_image,car_rent_driving_lincense_image"
               : !data.car_rent_doc_image
               ? "car_rent_doc_image"
+              : !data.car_rent_driving_lincense_image
+              ? "car_rent_driving_lincense_image"
               : "car_rent_payment_image"
           }`,
         });
@@ -151,6 +163,9 @@ const Car_rentController = {
       }
 
       data.car_rent_doc_image = EnsureArray(data.car_rent_doc_image);
+      data.car_rent_driving_lincense_image = EnsureArray(
+        data.car_rent_driving_lincense_image
+      );
       data.car_rent_payment_image = EnsureArray(data.car_rent_payment_image);
       let promiseFind = [
         FindUserById_ID(user_id),
@@ -178,16 +193,20 @@ const Car_rentController = {
               : !postExists
               ? "post"
               : !car_Rent_StatusExists
-              ? "car_Rent_status"
+              ? "car_rent_status"
               : "promotion"
           }`,
         });
       }
-      const [car_rent_doc_image_url, car_rent_payment_image_url] =
-        await Promise.all([
-          uploadImages(data.car_rent_doc_image),
-          uploadImages(data.car_rent_payment_image),
-        ]);
+      const [
+        car_rent_doc_image_url,
+        car_rent_payment_image_url,
+        car_rent_driving_lincense_image_url,
+      ] = await Promise.all([
+        uploadImages(data.car_rent_doc_image),
+        uploadImages(data.car_rent_payment_image),
+        uploadImages(data.car_rent_driving_lincense_image),
+      ]);
       const car_rent = await prisma.car_rent.create({
         data: {
           user_id,
@@ -217,9 +236,16 @@ const Car_rentController = {
         car_rent_payment_image_url,
         car_rent.id
       );
+      const car_rent_driving_lincense_image_data = AddCar_rent_id_url(
+        car_rent_driving_lincense_image_url,
+        car_rent.id
+      );
       const promiseAdd = [
         Car_rent_doc_image.insert(car_rent_doc_image_data),
         Car_rent_payment_image.insert(car_rent_payment_image_data),
+        Car_rent_driving_lincense_image.insert(
+          car_rent_driving_lincense_image_data
+        ),
       ];
 
       if (car_rent_visa) {
@@ -466,7 +492,15 @@ const Car_rentController = {
       Car_rent_payment_image.update
     );
   },
-
+  async UpdateCar_rent_driving_lincense_image(req, res) {
+    return UpdateCar_rentImage(
+      req,
+      res,
+      "car_rent_driving_lincense_image",
+      Car_rent_driving_lincense_image.findUnique,
+      Car_rent_driving_lincense_image.update
+    );
+  },
   async Delete(req, res) {
     try {
       const id = req.params.id;
@@ -569,6 +603,7 @@ const Car_rentController = {
         },
         car_rent_doc_image: true,
         car_rent_payment_image: true,
+        car_rent_driving_lincense_image: true,
         car_rent_visa: true,
       };
 
@@ -776,6 +811,7 @@ const UpdateCar_rentImage = async (
   try {
     const id = req.params.id;
     let { image_data_update } = req.body;
+    console.log("image_data_update :>> ", image_data_update);
 
     if (!image_data_update) {
       return SendError(res, 400, `${EMessage.pleaseInput}: image_data_update`);

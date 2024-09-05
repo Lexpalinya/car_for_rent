@@ -121,6 +121,9 @@ const Post_like_posts = createModelHandler("like_post");
 const Car_rent_doc_image = createModelHandler("car_rent_doc_image");
 const Car_rent_payment_image = createModelHandler("car_rent_payment_image");
 const Car_rent_visa = createModelHandler("car_rent_visa");
+const Car_rent_driving_lincense_image = createModelHandler(
+  "car_rent_driving_lincense_image"
+);
 
 export {
   Post_doc_image,
@@ -132,6 +135,7 @@ export {
   Post_like_posts,
   //--------------------
   Car_rent_doc_image,
+  Car_rent_driving_lincense_image,
   Car_rent_payment_image,
   Car_rent_visa,
 };

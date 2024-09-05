@@ -344,6 +344,10 @@ export const FindCar_rentById = (id) => {
           },
         },
       },
+      car_rent_doc_image: true,
+      car_rent_driving_lincense_image: true,
+      car_rent_payment_image: true,
+      car_rent_visa: true,
     }
   );
 };

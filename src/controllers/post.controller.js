@@ -28,13 +28,14 @@ import {
   Post_insurance_image,
   Post_rent_data,
 } from "../services/subtabel";
-import { UploadImage, uploadImages } from "../services/upload.file";
+import { uploadImages } from "../services/upload.file";
 import {
   DataExists,
   ValidatePost,
   ValidatePostSearch,
 } from "../services/validate";
 import prisma from "../utils/prisma.client";
+const post_status_id = "0ea2baf1-5cb0-4730-a3cf-164e3a9078f6";
 let key = "posts";
 const model = "posts";
 let where = {
@@ -105,11 +106,13 @@ export const RecacheDataPost = async ({
   car_type_id_key,
   type_of_fual_id_key,
   user_id_key,
+  post_status_key,
 }) => {
   let a = [DeleteCachedKey(key)];
   if (car_type_id_key) a.push(DeleteCachedKey(car_type_id_key));
   if (type_of_fual_id_key) a.push(DeleteCachedKey(type_of_fual_id_key));
   if (user_id_key) a.push(DeleteCachedKey(user_id_key));
+  if (post_status_key) a.push(DeleteCachedKey(post_status_key));
   await Promise.all(a);
 };
 const PostController = {
@@ -147,7 +150,6 @@ const PostController = {
         district,
         province,
         deposits_fee,
-        status_id,
         user_type,
         //
         mutjum,
@@ -157,6 +159,7 @@ const PostController = {
         insurance_company_id,
         level_insurance_id,
       } = req.body;
+      const status_id = post_status_id;
       const user_id = req.user;
       const data = req.files;
       if (typeof car_insurance !== "boolean") {
@@ -410,6 +413,7 @@ const PostController = {
         car_type_id_key: car_type_id + key,
         type_of_fual_id_key: type_of_fual_id + key,
         user_id_key: user_id + key,
+        post_status_key: status_id + key,
       });
       await redis.del(post.id + "posts-edit");
 
@@ -554,6 +558,7 @@ const PostController = {
         car_type_id_key: postExists.car_type_id + key,
         type_of_fual_id_key: postExists.type_of_fual_id + key,
         user_id_key: postExists.user_id + key,
+        post_status_key: postExists.status_id + key,
       });
       await redis.del(postExists.id + key);
 
@@ -590,7 +595,8 @@ const PostController = {
         key,
         car_type_id_key: postExists.car_type_id + key,
         type_of_fual_id_key: postExists.type_of_fual_id + key,
-        user_id_key: postExists.user_id,
+        user_id_key: postExists.user_id + key,
+        post_status_key: postExists.status_id + key,
       });
       await redis.del(id + "posts-edit", id + key);
       return SendSuccess({
@@ -656,6 +662,40 @@ const PostController = {
       SendErrorLog({
         res,
         message: `${EMessage.serverError} ${EMessage.errorFetchingAll} post select allpage`,
+        err,
+      });
+    }
+  },
+  async SelectAllByPost_Status(req, res) {
+    try {
+      const status_id = req.params.id;
+      let page = parseInt(req.query.page);
+      page = !page || page < 0 ? 0 : page - 1;
+      const userwhere = { status_id: status_id, is_active: true };
+
+      const post = await CachDataLimit(
+        status_id + key + "-" + page,
+        model,
+        userwhere,
+        page,
+        select
+      );
+      CachDataLimit(
+        status_id + key + "-" + (page + 1),
+        model,
+        userwhere,
+        page,
+        select
+      );
+      return SendSuccess({
+        res,
+        message: `${EMessage.fetchAllSuccess}`,
+        data: post,
+      });
+    } catch (err) {
+      SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingOne} post select All by post`,
         err,
       });
     }
@@ -746,7 +786,6 @@ const PostController = {
         userwhere,
         select
       );
-      CachDataAll(user_id + key + "-" + (page + 1), model, userwhere, select);
       return SendSuccess({
         res,
         message: `${EMessage.fetchAllSuccess}`,

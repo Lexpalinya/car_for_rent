@@ -281,7 +281,11 @@ route.get(
   auth,
   PostController.SelectAllPageByCar_type_Id
 );
-
+route.get(
+  `${post}/selByPost_statu/:id`,
+  auth,
+  PostController.SelectAllByPost_Status
+);
 route.get(`${post}/search`, auth, PostController.Search);
 
 route.get(`${post}/selAllByUser`, auth, PostController.SelectAllByUser);
@@ -437,6 +441,10 @@ route.put(
   `${car_rent}/updatePayment_status/:id`,
   auth,
   Car_rentController.UpdatePayment_status
+);
+route.put(
+  `${car_rent}/updateDriving_lincense_image/:id`,
+  Car_rentController.UpdateCar_rent_driving_lincense_image
 );
 
 route.delete(`${car_rent}/delete/:id`, auth, Car_rentController.Delete);

@@ -58,6 +58,7 @@ const Post_rent_dataController = {
         car_type_id_key: postExists.car_type_id + key,
         type_of_fual_id_key: postExists.type_of_fual_id + key,
         user_id_key: postExists.user_id + key,
+        post_status_key: postExists.status_id + key,
       });
 
       return SendSuccess({
@@ -134,6 +135,7 @@ const Post_rent_dataController = {
         car_type_id_key: postExists.car_type_id + key,
         type_of_fual_id_key: postExists.type_of_fual_id + key,
         user_id_key: postExists.user_id + key,
+        post_status_key: postExists.status_id + key,
       });
       return SendSuccess({
         res,
@@ -188,6 +190,8 @@ const Post_rent_dataController = {
         key,
         car_type_id_key: postExists.car_type_id + key,
         type_of_fual_id_key: postExists.type_of_fual_id + key,
+        user_id_key: postExists.user_id + key,
+        post_status_key: postExists.status_id + key,
       });
       return SendSuccess({
         res,

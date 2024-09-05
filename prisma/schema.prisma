@@ -326,36 +326,37 @@ model car_rent_status {
 }
 
 model car_rent {
-  id                     String                   @id @default(uuid()) @db.VarChar(36)
-  is_active              Boolean                  @default(true)
-  user_id                String                   @db.VarChar(36)
-  post_id                String                   @db.VarChar(36)
-  start_date             DateTime                 @db.Date
-  end_date               DateTime                 @db.Date
-  frist_name             String
-  last_name              String
-  email                  String
-  phone_number           String
-  doc_type               String
-  description            String?                  @db.LongText
-  promotion_id           String?                  @db.VarChar(36)
-  booking_fee            Float
-  pay_destination        Float
-  pay_type               String
-  bank_no                String                   @db.VarChar(17)
-  pay_status             Boolean                  @default(false)
-  reason                 String?                  @db.LongText
-  status_id              String                   @db.VarChar(36)
-  is_success             Boolean                  @default(true)
-  created_at             DateTime                 @default(now())
-  updated_at             DateTime                 @updatedAt
-  post                   posts                    @relation(fields: [post_id], references: [id])
-  promotion              promotions?              @relation(fields: [promotion_id], references: [id])
-  status                 car_rent_status          @relation(fields: [status_id], references: [id])
-  user                   users                    @relation(fields: [user_id], references: [id])
-  car_rent_doc_image     car_rent_doc_image[]
-  car_rent_payment_image car_rent_payment_image[]
-  car_rent_visa          car_rent_visa?
+  id                              String                            @id @default(uuid()) @db.VarChar(36)
+  is_active                       Boolean                           @default(true)
+  user_id                         String                            @db.VarChar(36)
+  post_id                         String                            @db.VarChar(36)
+  start_date                      DateTime                          @db.Date
+  end_date                        DateTime                          @db.Date
+  frist_name                      String
+  last_name                       String
+  email                           String
+  phone_number                    String
+  doc_type                        String
+  description                     String?                           @db.LongText
+  promotion_id                    String?                           @db.VarChar(36)
+  booking_fee                     Float
+  pay_destination                 Float
+  pay_type                        String
+  bank_no                         String                            @db.VarChar(17)
+  pay_status                      Boolean                           @default(false)
+  reason                          String?                           @db.LongText
+  status_id                       String                            @db.VarChar(36)
+  is_success                      Boolean                           @default(true)
+  created_at                      DateTime                          @default(now())
+  updated_at                      DateTime                          @updatedAt
+  post                            posts                             @relation(fields: [post_id], references: [id])
+  promotion                       promotions?                       @relation(fields: [promotion_id], references: [id])
+  status                          car_rent_status                   @relation(fields: [status_id], references: [id])
+  user                            users                             @relation(fields: [user_id], references: [id])
+  car_rent_doc_image              car_rent_doc_image[]
+  car_rent_payment_image          car_rent_payment_image[]
+  car_rent_visa                   car_rent_visa[]
+  car_rent_driving_lincense_image car_rent_driving_lincense_image[]
 
   @@index([post_id], map: "car_rent_post_id_fkey")
   @@index([promotion_id], map: "car_rent_promotion_id_fkey")
@@ -364,6 +365,15 @@ model car_rent {
 }
 
 model car_rent_doc_image {
+  id          Int      @id @default(autoincrement())
+  car_rent_id String   @db.VarChar(36)
+  url         String
+  car_rend    car_rent @relation(fields: [car_rent_id], references: [id])
+
+  @@index([car_rent_id])
+}
+
+model car_rent_driving_lincense_image {
   id          Int      @id @default(autoincrement())
   car_rent_id String   @db.VarChar(36)
   url         String

@@ -118,7 +118,7 @@ export const ValidatePost = (data) => {
     district,
     province,
     deposits_fee,
-    status_id,
+
     user_type,
     //
     post_rent_data,
@@ -147,7 +147,7 @@ export const ValidatePost = (data) => {
     district,
     province,
     deposits_fee,
-    status_id,
+
     user_type,
     //
     post_rent_data,
@@ -189,7 +189,6 @@ export const ValidateCar_rent = (data) => {
     pay_type,
     bank_no,
     // pay_status,
-    status_id,
   } = data;
   return ValidateData({
     post_id,
@@ -205,7 +204,6 @@ export const ValidateCar_rent = (data) => {
     pay_type,
     bank_no,
     // pay_status,
-    status_id,
   });
 };
 
