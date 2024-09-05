@@ -4,7 +4,6 @@ import BannerController from "../controllers/banner.controller";
 import Car_BrandsController from "../controllers/car_brands.controller";
 import Car_typesController from "../controllers/car_types.controller";
 import Insurance_companysController from "../controllers/insurance_companies.controller";
-import LabelsController from "../controllers/labels.controller";
 import Level_InsurancesController from "../controllers/level_insurance.controller";
 import Type_of_FualsController from "../controllers/type_of_fuals.controller";
 import Post_StatusController from "../controllers/post_status.controller";
@@ -13,18 +12,17 @@ import UsersController from "../controllers/user.controller";
 import WalletController from "../controllers/wallet.controller";
 import PostController from "../controllers/post.controller";
 import Post_rent_dataController from "../controllers/post_rent_dataController";
+import Like_postController from "../controllers/like_post.controller";
+import ReviewController from "../controllers/review.controller";
+import Car_rentController from "../controllers/car_rent.controller";
+import LocationController from "../controllers/location.controller";
+import { admin, auth } from "../middleware/auth";
 import {
   Post_car_imageController,
   Post_doc_imageController,
   Post_driver_license_imageController,
   Post_insurance_imageController,
 } from "../controllers/post_image.controller";
-import Like_postController from "../controllers/like_post.controller";
-import Labels_DataController from "../controllers/labels_data.controller";
-import ReviewController from "../controllers/review.controller";
-import Car_rentController from "../controllers/car_rent.controller";
-import { admin, auth } from "../middleware/auth";
-import LocationController from "../controllers/location.controller";
 const route = express.Router();
 
 //-----------Promotion-------------------------
@@ -283,6 +281,9 @@ route.get(
   auth,
   PostController.SelectAllPageByCar_type_Id
 );
+
+route.get(`${post}/search`, auth, PostController.Search);
+
 route.get(`${post}/selAllByUser`, auth, PostController.SelectAllByUser);
 
 route.post(`${post}/insert`, auth, PostController.Insert);

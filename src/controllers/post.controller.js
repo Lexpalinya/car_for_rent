@@ -29,11 +29,18 @@ import {
   Post_rent_data,
 } from "../services/subtabel";
 import { UploadImage, uploadImages } from "../services/upload.file";
-import { DataExists, ValidatePost } from "../services/validate";
+import {
+  DataExists,
+  ValidatePost,
+  ValidatePostSearch,
+} from "../services/validate";
 import prisma from "../utils/prisma.client";
 let key = "posts";
 const model = "posts";
-let where = { is_active: true };
+let where = {
+  is_active: true,
+  status_id: "ba2b8c95-590d-4499-9da3-2c64b5cfb480",
+};
 let select = {
   id: true,
   is_active: true,
@@ -79,6 +86,7 @@ let select = {
     select: {
       username: true,
       phone_number: true,
+      profile: true,
     },
   },
   post_doc_image: true,
@@ -164,6 +172,7 @@ const PostController = {
       if (mutjum && typeof mutjum !== "number") {
         mutjum = parseFloat(mutjum);
       }
+
       if (
         (car_insurance && !insurance_company_id) ||
         (car_insurance && !level_insurance_id) ||
@@ -651,23 +660,25 @@ const PostController = {
       });
     }
   },
+
   async SelectAllPageByCar_type_Id(req, res) {
     try {
       // await DeleteCachedKey(key);
       let page = parseInt(req.query.page);
       const { car_type_id } = req.params;
       page = !page || page < 0 ? 0 : page - 1;
+      const car_typewhere = { car_type_id: car_type_id, ...where };
       const post = await CachDataLimit(
         car_type_id + key + "-" + page,
         model,
-        { car_type_id: car_type_id, is_active: true },
+        car_typewhere,
         page,
         select
       );
       CachDataLimit(
         car_type_id + key + "-" + (page + 1),
         model,
-        { car_type_id: car_type_id, is_active: true },
+        car_typewhere,
         page + 1,
         select
       );
@@ -684,23 +695,26 @@ const PostController = {
       });
     }
   },
+
   async SelectAllPageByType_of_fuals_Id(req, res) {
     try {
       // await DeleteCachedKey(key);
       let page = parseInt(req.query.page);
       const { type_of_fual_id } = req.params;
       page = !page || page < 0 ? 0 : page - 1;
+      const type_fualwhere = { type_of_fual_id, ...where };
+
       const post = await CachDataLimit(
         type_of_fual_id + key + "-" + page,
         model,
-        { type_of_fual_id, is_active: true },
+        type_fualwhere,
         page,
         select
       );
       CachDataLimit(
         type_of_fual_id + key + "-" + (page + 1),
         model,
-        { type_of_fual_id, is_active: true },
+        type_fualwhere,
         page + 1,
         select
       );
@@ -717,28 +731,66 @@ const PostController = {
       });
     }
   },
+
   async SelectAllByUser(req, res) {
     try {
       // await DeleteCachedKey(key);
-      let page = parseInt(req.query.page);
       const user_id = req.user;
+      let page = parseInt(req.query.page);
       page = !page || page < 0 ? 0 : page - 1;
+      const userwhere = { user_id: user_id, is_active: true };
+
       const user = await CachDataAll(
         user_id + key + "-" + page,
         model,
-        { user_id, is_active: true },
+        userwhere,
         select
       );
-      CachDataAll(
-        user_id + key + "-" + (page + 1),
-        model,
-        { user_id, is_active: true },
-        select
-      );
+      CachDataAll(user_id + key + "-" + (page + 1), model, userwhere, select);
       return SendSuccess({
         res,
         message: `${EMessage.fetchAllSuccess}`,
         data: user,
+      });
+    } catch (err) {
+      SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingOne} post select All by user`,
+        err,
+      });
+    }
+  },
+
+  async Search(req, res) {
+    try {
+      let page = parseInt(req.query.page);
+      page = !page || page < 0 ? 0 : page - 1;
+      let { district, province, type_of_fual_id, car_type_id } = req.query;
+      const validate = ValidatePostSearch(req.query);
+      if (validate.length > 0)
+        return SendError({
+          res,
+          statuscode: 400,
+          message: `${EMessage.pleaseInput} query`,
+          err: validate.join(", "),
+        });
+      const keysearch =
+        key + district + province + type_of_fual_id + car_type_id + "-" + page;
+      const wheresearch = {
+        district: { contains: district },
+        province: { contains: province },
+        type_of_fual_id,
+        car_type_id,
+        ...where,
+      };
+      const [post] = await Promise.all([
+        CachDataLimit(keysearch, model, wheresearch, page, select),
+        CachDataLimit(keysearch, model, wheresearch, page + 1, select),
+      ]);
+      return SendSuccess({
+        res,
+        message: `${EMessage.searchsuccess}`,
+        data: post,
       });
     } catch (err) {
       SendErrorLog({

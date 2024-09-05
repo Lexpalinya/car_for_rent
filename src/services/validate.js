@@ -220,3 +220,8 @@ export const ValidateLocation = (data) => {
     province,
   });
 };
+
+export const ValidatePostSearch = (data) => {
+  const { district, province, type_of_fual_id, car_type_id } = data;
+  return ValidateData({ district, province, type_of_fual_id, car_type_id });
+};
