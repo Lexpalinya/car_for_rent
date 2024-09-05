@@ -342,7 +342,7 @@ model car_rent {
   booking_fee                     Float
   pay_destination                 Float
   pay_type                        String
-  bank_no                         String                            @db.VarChar(17)
+  bank_no                         String?                           @db.VarChar(17)
   pay_status                      Boolean                           @default(false)
   reason                          String?                           @db.LongText
   status_id                       String                            @db.VarChar(36)

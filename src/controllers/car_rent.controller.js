@@ -798,6 +798,34 @@ const Car_rentController = {
       });
     }
   },
+
+  async SelectByUserPost(req, res) {
+    try {
+      const user_id = req.user;
+
+      const car_rent = await CachDataAll(
+        user_id + key,
+        model,
+        {
+          user_id,
+          is_active: true,
+        },
+        select
+      );
+
+      return SendSuccess({
+        res,
+        message: `${EMessage.fetchOneSuccess} user`,
+        data: car_rent,
+      });
+    } catch (error) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll}car_rent by user id post`,
+        err,
+      });
+    }
+  },
 };
 export default Car_rentController;
 

@@ -187,7 +187,7 @@ export const ValidateCar_rent = (data) => {
     booking_fee,
     pay_destination,
     pay_type,
-    bank_no,
+    // bank_no,
     // pay_status,
   } = data;
   return ValidateData({
@@ -202,7 +202,7 @@ export const ValidateCar_rent = (data) => {
     booking_fee,
     pay_destination,
     pay_type,
-    bank_no,
+    // bank_no,
     // pay_status,
   });
 };
