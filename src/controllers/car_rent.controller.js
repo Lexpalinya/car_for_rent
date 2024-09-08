@@ -752,7 +752,7 @@ const Car_rentController = {
         id + key + "-" + page,
         model,
         {
-          post_id: true,
+          post_id: id,
           pay_status: true,
           is_active: true,
         },

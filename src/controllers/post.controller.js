@@ -35,12 +35,14 @@ import {
   ValidatePostSearch,
 } from "../services/validate";
 import prisma from "../utils/prisma.client";
-const post_status_id = "0ea2baf1-5cb0-4730-a3cf-164e3a9078f6";
+const post_status_id = "1cf8b1a2-219a-4441-8ca3-e2553a3e306a";
 let key = "posts";
 const model = "posts";
 let where = {
   is_active: true,
-  status_id: "ba2b8c95-590d-4499-9da3-2c64b5cfb480",
+  status_id: {
+    not: "1cf8b1a2-219a-4441-8ca3-e2553a3e306a",
+  },
 };
 let select = {
   id: true,
