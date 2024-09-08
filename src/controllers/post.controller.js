@@ -40,9 +40,7 @@ let key = "posts";
 const model = "posts";
 let where = {
   is_active: true,
-  status_id: {
-    not: "1cf8b1a2-219a-4441-8ca3-e2553a3e306a",
-  },
+  status_id: "eb22589e-0bc5-4d7e-9c42-c9fe2f4825cf",
 };
 let select = {
   id: true,

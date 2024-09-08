@@ -55,7 +55,7 @@ let select = {
   post: {
     select: {
       star: true,
-      car_brands: {
+      car_types: {
         select: {
           name: true,
         },
