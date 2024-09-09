@@ -6,6 +6,7 @@ import morgan from "morgan";
 import redis from "./DB/redis";
 import APIRoute from "./routes/index.routes";
 import { EAPI, SERVER_PORT } from "./config/api.config";
+import { broadcast, initSocketServer } from "./server/socketIO.server"; // Import the Socket.IO setup
 
 const app = new express();
 
@@ -30,6 +31,7 @@ app.use(
 );
 
 app.use(EAPI, APIRoute);
+
 const CheckConnectionDatabase = async () => {
   try {
     await prisma.$connect();
@@ -44,10 +46,25 @@ const CheckConnectionDatabase = async () => {
 };
 
 await redis.flushdb();
-// const c = await CachDataAll("banners", "banners", { is_active: true });
-// console.log("object :>> ", c);
-app.listen(SERVER_PORT, async () => {
+
+export const server = app.listen(SERVER_PORT, async () => {
   console.log(`server listening on port:${SERVER_PORT}`);
   console.log(`url: http://localhost:${SERVER_PORT}`);
   await CheckConnectionDatabase();
+
+  // Initialize Socket.IO after the server is up
+  initSocketServer(server);
+});
+app.post("/products", async (req, res) => {
+  res.json({
+    message: "ok",
+  });
+  const products = {
+    name: "asdf",
+  };
+  broadcast({
+    client_id: "client1",
+
+    data: { type: "NEW_PRODUCT", products },
+  });
 });

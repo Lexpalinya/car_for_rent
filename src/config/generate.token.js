@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import {
   JWT_REFRECH_TIMEOUT,
   JWT_SECRET_KEY,
+  JWT_SECRET_KEY_REFRESH,
   JWT_TIMEOUT,
   SECRET_KEY,
 } from "./api.config";
@@ -15,7 +16,7 @@ export const generateToken = async (data) => {
     };
 
     // Encrypt the user ID
-    const encrypt_id = await Encrypt(payload.id);
+    const encrypt_id = payload.id;
 
     // JWT options for access and refresh tokens
     const jwtOptions = { expiresIn: String(JWT_TIMEOUT) };
@@ -33,7 +34,7 @@ export const generateToken = async (data) => {
     // Generate the refresh token
     const refreshToken = jwt.sign(
       refreshPayload,
-      JWT_SECRET_KEY,
+      JWT_SECRET_KEY_REFRESH,
       jwtRefreshOptions
     );
 

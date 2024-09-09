@@ -1,4 +1,3 @@
-import redis from "../DB/redis";
 import { CachDataAll, CachDataNoClear } from "../services/cach.contro";
 import { DeleteCachedKey } from "../services/cach.deletekey";
 import { EMessage } from "../services/enum";

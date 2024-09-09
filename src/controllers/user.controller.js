@@ -332,7 +332,7 @@ const UsersController = {
       const token = await generateToken(token_data);
       const result = {
         ...user,
-        token,
+        ...token,
       };
       await RecacheData(user.id, { page: false });
       return SendSuccess({
@@ -391,7 +391,7 @@ const UsersController = {
       const token = await generateToken(token_data);
       const result = {
         ...user,
-        token,
+        ...token,
       };
       await RecacheData(user.id, { page: false });
       return SendSuccess({
@@ -562,10 +562,17 @@ const UsersController = {
           message: `${EMessage.notFound} user`,
           err: "id",
         });
+      const token = await generateToken({
+        id: user.id,
+        loginversion: user.loginversion,
+      });
       return SendSuccess({
         res,
         message: `${EMessage.fetchOneSuccess}`,
-        data: user,
+        data: {
+          ...user,
+          ...token,
+        },
       });
     } catch (err) {
       SendErrorLog({

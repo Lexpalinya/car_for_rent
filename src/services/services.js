@@ -115,7 +115,8 @@ export const verify_refresh_token = (token) => {
         }
       }
       try {
-        const id = await Decrypt(decode.id);
+        const id = decode.id;
+        // const id = await Decrypt(decode.id);
         if (!id) {
           return reject("Error Invalid Refresh Token");
         }
