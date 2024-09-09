@@ -155,6 +155,12 @@ export const AddCar_rent_id_url = (arr, id) => {
     url,
   }));
 };
+export const AddKyc_id_url = (arr, id) => {
+  return arr.map((url) => ({
+    kyc_id: id,
+    url,
+  }));
+};
 
 export const EnsureArray = (arr) => {
   return Array.isArray(arr) ? arr : [arr];

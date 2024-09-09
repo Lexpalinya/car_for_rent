@@ -107,6 +107,7 @@ const createModelHandler = (modelName) => ({
   },
 });
 
+const Kyc_doc_image = createModelHandler("kyc_doc_image");
 // Creating handlers for each model
 const Post_doc_image = createModelHandler("post_doc_image");
 const Post_driver_license_image = createModelHandler(
@@ -126,6 +127,8 @@ const Car_rent_driving_lincense_image = createModelHandler(
 );
 
 export {
+  Kyc_doc_image,
+  //--------------------
   Post_doc_image,
   Post_driver_license_image,
   Post_car_image,

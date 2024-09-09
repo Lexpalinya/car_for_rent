@@ -18,6 +18,7 @@ model users {
   fackbook_id   String          @default("")
   google_id     String          @default("")
   device_token  String          @default("")
+  kyc           Boolean         @default(false)
   login_version Int             @default(0)
   is_vertified  Boolean         @default(false)
   role          userRoles       @default(customer)
@@ -35,10 +36,35 @@ model users {
   replys        replys[]
   review        review[]
   wallet        wallet[]
+  kycs          kycs[]
 
   @@index([username])
   @@index([email])
   @@index([phone_number])
+}
+
+model kycs {
+  id            String          @id @default(uuid()) @db.VarChar(36)
+  status        Boolean         @default(false)
+  user_type     Boolean
+  user_id       String          @db.VarChar(36)
+  first_name    String
+  last_name     String
+  birthday      DateTime
+  nationality   String
+  doc_type      String
+  created_at    DateTime        @default(now())
+  updated_at    DateTime        @updatedAt
+  user          users           @relation(fields: [user_id], references: [id])
+  kyc_doc_image kyc_doc_image[]
+}
+
+model kyc_doc_image {
+  id         Int      @id @default(autoincrement())
+  kyc_id     String   @db.VarChar(36)
+  url        String
+  kycs       kycs     @relation(fields: [kyc_id], references: [id])
+  updated_at DateTime @updatedAt
 }
 
 model location {

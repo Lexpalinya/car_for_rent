@@ -223,3 +223,16 @@ export const ValidatePostSearch = (data) => {
   const { district, province, type_of_fual_id, car_type_id } = data;
   return ValidateData({ district, province, type_of_fual_id, car_type_id });
 };
+
+export const ValidateKyc = (data) => {
+  const { user_type, first_name, last_name, birthday, nationality, doc_type } =
+    data;
+  return ValidateData({
+    user_type,
+    first_name,
+    last_name,
+    birthday,
+    nationality,
+    doc_type,
+  });
+};

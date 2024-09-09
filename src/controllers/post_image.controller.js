@@ -114,7 +114,8 @@ const UpdatePostImage = async (
       return SendError({
         res,
         statuscode: 400,
-        message: `you not own post_rent_dat`,
+        message: `you not own post_rent_data`,
+        err: `you not own post_rent_data`,
       });
 
     const imageUrl = await UploadImage(
@@ -201,6 +202,7 @@ const DeletePostImage = async (
         res,
         statuscode: 400,
         message: `you not own post_rent_dat`,
+        err: `you not own post_rent_dat`,
       });
     const delImage = await DeleteImage(image_data_delete.url);
     console.log("delImage :>> ", delImage);

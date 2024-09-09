@@ -113,7 +113,7 @@ export const FindUserById = (id) => {
       google_id: true,
       device_token: true,
       login_version: true,
-      role: true,
+      // role: true,
       created_at: true,
       updated_at: true,
     }
@@ -356,4 +356,29 @@ export const FindCar_rentById = (id) => {
 
 export const FindLocationById = (id) => {
   return findUnique("location", id);
+};
+
+export const FindKycById = (id) => {
+  return CachDataFindDataId_One(
+    id + "kycs",
+    "kycs",
+    {
+      is_active: true,
+      id,
+    },
+    {
+      id: true,
+      status: true,
+      user_type: true,
+      first_name: true,
+      last_name: true,
+      birthday: true,
+      nationality: true,
+      doc_type: true,
+      user_id: true,
+      create: true,
+      updated_at: true,
+      kyc_doc_image: true,
+    }
+  );
 };
