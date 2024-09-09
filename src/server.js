@@ -64,7 +64,21 @@ app.post("/products", async (req, res) => {
   };
   broadcast({
     client_id: "client1",
+    ctx: "123",
+    data: { type: "NEW_PRODUCT", products },
+  });
+});
 
+app.post("/sell", async (req, res) => {
+  res.json({
+    message: "ok",
+  });
+  const products = {
+    name: "asdf",
+  };
+  broadcast({
+    client_id: "client1",
+    ctx: "a",
     data: { type: "NEW_PRODUCT", products },
   });
 });
