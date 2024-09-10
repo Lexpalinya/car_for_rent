@@ -14,6 +14,8 @@ model users {
   email         String?
   phone_number  String
   password      String
+  first_name    String          @default("")
+  last_name     String          @default("")
   profile       String          @default("")
   fackbook_id   String          @default("")
   google_id     String          @default("")
@@ -53,6 +55,7 @@ model kycs {
   birthday      DateTime
   nationality   String
   doc_type      String
+  phone_number  String
   created_at    DateTime        @default(now())
   updated_at    DateTime        @updatedAt
   user          users           @relation(fields: [user_id], references: [id])

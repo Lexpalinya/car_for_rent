@@ -108,6 +108,8 @@ export const FindUserById = (id) => {
       email: true,
       phone_number: true,
       // password: true,
+      first_name: true,
+      last_name: true,
       profile: true,
       fackbook_id: true,
       google_id: true,

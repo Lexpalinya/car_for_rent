@@ -41,6 +41,8 @@ let select = {
   email: true,
   phone_number: true,
   profile: true,
+  first_name: true,
+  last_name: true,
   fackbook_id: true,
   google_id: true,
   device_token: true,

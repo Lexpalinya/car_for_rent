@@ -23,6 +23,8 @@ import {
   Post_driver_license_imageController,
   Post_insurance_imageController,
 } from "../controllers/post_image.controller";
+import KycController from "../controllers/kyc.controller";
+import Kyc_doc_imageController from "../controllers/kyc_doc_image.controller";
 const route = express.Router();
 
 //-----------Promotion-------------------------
@@ -461,3 +463,22 @@ route.post(`${location}/insert`, auth, LocationController.Insert);
 route.put(`${location}/update/:id`, auth, LocationController.Update);
 route.delete(`${location}/delete/:id`, auth, LocationController.Delete);
 export default route;
+
+//--------Kyc----------------------------------
+const kyc = `/kyc`;
+route.get(`${kyc}/selAll`, auth, KycController.SelectAll);
+route.get(`${kyc}/selByUser`, auth, KycController.SelectByUserID);
+route.get(`${kyc}/selByStatus`, auth, KycController.SelectByStatus);
+route.get(`${kyc}/selOne/:id`, auth, KycController.SelectOne);
+
+route.post(`${kyc}/insert`, auth, KycController.Insert);
+
+route.put(`${kyc}/update/:id`, auth, KycController.Update);
+
+route.delete(`${kyc}/delete/:id`, auth, KycController.Delete);
+
+//-----------Kyc_doc_image------------------------------------
+
+route.put(`${kyc}/doc_image_insert/:id`, auth, Kyc_doc_imageController.Insert);
+route.put(`${kyc}/doc_image_update/:id`, auth, Kyc_doc_imageController.Update);
+route.put(`${kyc}/doc_image_delete/:id`, auth, Kyc_doc_imageController.Delete);
