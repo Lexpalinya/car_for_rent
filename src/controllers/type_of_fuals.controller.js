@@ -31,7 +31,7 @@ const Type_of_FualsController = {
           message: `${EMessage.pleaseInput}`,
           err: validate.join(", "),
         });
-      const { name } = req.body;
+      const { nameLao, nameEng, nameChi, nameRok } = req.body;
       const data = req.files;
       if (!data || !data.icon)
         return SendError({
@@ -47,7 +47,10 @@ const Type_of_FualsController = {
 
       const type_of_fuals = await prisma.type_of_fuals.create({
         data: {
-          name,
+          nameLao,
+          nameEng,
+          nameChi,
+          nameRok,
           icon,
         },
       });

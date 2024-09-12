@@ -30,10 +30,13 @@ const Level_InsurancesController = {
           message: `${EMessage.pleaseInput}`,
           err: validate.join(", "),
         });
-      const { name } = req.body;
+      const { nameLao, nameEng, nameChi, nameRok } = req.body;
       const level_insurances = await prisma.level_insurances.create({
         data: {
-          name,
+          nameLao,
+          nameEng,
+          nameChi,
+          nameRok,
         },
       });
       await RecacheData();

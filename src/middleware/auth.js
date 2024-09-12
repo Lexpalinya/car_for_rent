@@ -35,6 +35,7 @@ export const auth = async (req, res, next) => {
       res,
       status: 401,
       message: err.message || "Unauthorized",
+      err: err.message,
     });
   }
 };

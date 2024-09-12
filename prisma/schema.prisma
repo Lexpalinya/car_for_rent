@@ -8,37 +8,31 @@ datasource db {
 }
 
 model users {
-  id            String          @id @default(uuid()) @db.VarChar(36)
-  is_active     Boolean         @default(true)
+  id            String      @id @default(uuid()) @db.VarChar(36)
+  is_active     Boolean     @default(true)
   username      String
   email         String?
   phone_number  String
   password      String
-  first_name    String          @default("")
-  last_name     String          @default("")
-  profile       String          @default("")
-  fackbook_id   String          @default("")
-  google_id     String          @default("")
-  device_token  String          @default("")
-  kyc           Boolean         @default(false)
-  login_version Int             @default(0)
-  is_vertified  Boolean         @default(false)
-  role          userRoles       @default(customer)
-  created_at    DateTime        @default(now())
-  updated_at    DateTime        @updatedAt
+  first_name    String      @default("")
+  last_name     String      @default("")
+  profile       String      @default("")
+  fackbook_id   String      @default("")
+  google_id     String      @default("")
+  device_token  String      @default("")
+  kyc           Boolean     @default(false)
+  login_version Int         @default(0)
+  blacklist     Boolean     @default(false)
+  role          userRoles   @default(customer)
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @updatedAt
   car_rent      car_rent[]
-  comments      comments[]
-  like_comment  like_comments[]
-  like_post     like_post[]
-  like_reel     like_reels[]
-  like_reply    like_replys[]
   location      location[]
   post          posts[]
-  reels         reels[]
-  replys        replys[]
   review        review[]
   wallet        wallet[]
   kycs          kycs[]
+  like_post     like_post[]
 
   @@index([username])
   @@index([email])
@@ -47,6 +41,7 @@ model users {
 
 model kycs {
   id            String          @id @default(uuid()) @db.VarChar(36)
+  is_active     Boolean         @default(true)
   status        Boolean         @default(false)
   user_type     Boolean
   user_id       String          @db.VarChar(36)
@@ -56,6 +51,10 @@ model kycs {
   nationality   String
   doc_type      String
   phone_number  String
+  point         String?
+  village       String?
+  district      String?
+  province      String?
   created_at    DateTime        @default(now())
   updated_at    DateTime        @updatedAt
   user          users           @relation(fields: [user_id], references: [id])
@@ -143,7 +142,11 @@ model review {
 model post_status {
   id         String   @id @default(uuid()) @db.VarChar(36)
   is_active  Boolean  @default(true)
-  name       String
+  nameLao    String
+  nameEng    String
+  nameChi    String
+  nameRok    String
+  priority   Int
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   post       posts[]
@@ -152,7 +155,10 @@ model post_status {
 model car_types {
   id         String   @id @default(uuid()) @db.VarChar(36)
   is_active  Boolean  @default(true)
-  name       String
+  nameLao    String
+  nameEng    String
+  nameChi    String
+  nameRok    String
   commition  Float    @default(10)
   icon       String
   detail     String
@@ -162,27 +168,27 @@ model car_types {
   post       posts[]
 }
 
-model labels {
-  id          String        @id @default(uuid()) @db.VarChar(36)
-  is_active   Boolean       @default(true)
-  name        String
-  icon        String
-  created_at  DateTime      @default(now())
-  updated_at  DateTime      @updatedAt
-  labels_data labels_data[]
-}
+// model labels {
+//   id          String        @id @default(uuid()) @db.VarChar(36)
+//   is_active   Boolean       @default(true)
+//   name        String
+//   icon        String
+//   created_at  DateTime      @default(now())
+//   updated_at  DateTime      @updatedAt
+//   labels_data labels_data[]
+// }
 
-model labels_data {
-  id       Int    @id @default(autoincrement())
-  post_id  String @db.VarChar(36)
-  label_id String @db.VarChar(36)
-  label    labels @relation(fields: [label_id], references: [id])
-  post     posts  @relation(fields: [post_id], references: [id])
+// model labels_data {
+//   id       Int    @id @default(autoincrement())
+//   post_id  String @db.VarChar(36)
+//   label_id String @db.VarChar(36)
+//   label    labels @relation(fields: [label_id], references: [id])
+//   post     posts  @relation(fields: [post_id], references: [id])
 
-  @@unique([post_id, label_id])
-  @@index([post_id])
-  @@index([label_id], map: "labels_data_label_id_fkey")
-}
+//   @@unique([post_id, label_id])
+//   @@index([post_id])
+//   @@index([label_id], map: "labels_data_label_id_fkey")
+// }
 
 model car_brands {
   id         String   @id @default(uuid()) @db.VarChar(36)
@@ -197,7 +203,10 @@ model car_brands {
 model level_insurances {
   id         String   @id @default(uuid()) @db.VarChar(36)
   is_active  Boolean  @default(true)
-  name       String
+  nameLao    String
+  nameEng    String
+  nameChi    String
+  nameRok    String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   post       posts[]
@@ -216,7 +225,10 @@ model insurance_companies {
 model type_of_fuals {
   id         String   @id @default(uuid()) @db.VarChar(36)
   is_active  Boolean  @default(true)
-  name       String
+  nameLao    String
+  nameEng    String
+  nameChi    String
+  nameRok    String
   icon       String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -234,24 +246,25 @@ model like_post {
 }
 
 model posts {
-  id                        String                      @id @default(uuid()) @db.VarChar(36)
+  id                   String  @id @default(uuid()) @db.VarChar(36)
   // post_statu                Boolean                     @default(false)
-  is_active                 Boolean                     @default(true)
-  car_type_id               String                      @db.VarChar(36)
-  user_id                   String                      @db.VarChar(36)
-  star                      Float                       @default(0)
-  frist_name                String
-  last_name                 String
-  birth_day                 DateTime                    @db.Date
-  nationnality              String
-  doc_type                  String
-  car_insurance             Boolean
-  insurance_company_id      String?                     @db.VarChar(36)
-  level_insurance_id        String?                     @db.VarChar(36)
-  car_brand_id              String?                     @db.VarChar(36)
-  car_brand                 String?
-  car_version               String
-  car_year                  String
+  is_active            Boolean @default(true)
+  car_type_id          String  @db.VarChar(36)
+  user_id              String  @db.VarChar(36)
+  star                 Float   @default(0)
+  // frist_name                String
+  // last_name                 String
+  // birth_day                 DateTime                    @db.Date
+  // nationnality              String
+  // doc_type                  String
+  car_insurance        Boolean
+  insurance_company_id String? @db.VarChar(36)
+  level_insurance_id   String? @db.VarChar(36)
+  car_brand_id         String? @db.VarChar(36)
+  car_brand            String?
+  car_version          String
+  car_year             String
+
   car_resgistration         String
   door                      Int                         @default(2)
   type_of_fual_id           String                      @db.VarChar(36)
@@ -271,7 +284,6 @@ model posts {
   created_at                DateTime                    @default(now())
   updated_at                DateTime                    @updatedAt
   car_rent                  car_rent[]
-  labels_data               labels_data[]
   like_post                 like_post[]
   post_car_image            post_car_image[]
   post_doc_image            post_doc_image[]
@@ -346,12 +358,20 @@ model post_rent_data {
 }
 
 model car_rent_status {
-  id         String     @id @default(uuid()) @db.VarChar(36)
-  is_active  Boolean    @default(true)
-  name       String
-  created_at DateTime   @default(now())
-  updated_at DateTime   @updatedAt
-  car_rent   car_rent[]
+  id             String     @id @default(uuid()) @db.VarChar(36)
+  is_active      Boolean    @default(true)
+  nameTenantLao  String
+  nameTenantEng  String
+  nameTenantChi  String
+  nameTenantRok  String
+  namePostertLao String?
+  namePostertEng String?
+  namePostertChi String?
+  namePostertRok String?
+  priority       Int
+  created_at     DateTime   @default(now())
+  updated_at     DateTime   @updatedAt
+  car_rent       car_rent[]
 }
 
 model car_rent {
@@ -431,81 +451,81 @@ model car_rent_visa {
   @@index([car_rent_id])
 }
 
-model reels {
-  id           String          @id @default(uuid()) @db.VarChar(36)
-  is_active    Boolean         @default(true)
-  title        String
-  detail       String?
-  url          String
-  user_id      String          @db.VarChar(36)
-  created_at   DateTime        @default(now())
-  updated_at   DateTime        @updatedAt
-  comments     comments[]
-  like_comment like_comments[]
-  like_reel    like_reels[]
-  like_reply   like_replys[]
-  users        users           @relation(fields: [user_id], references: [id])
+// model reels {
+//   id           String          @id @default(uuid()) @db.VarChar(36)
+//   is_active    Boolean         @default(true)
+//   title        String
+//   detail       String?
+//   url          String
+//   user_id      String          @db.VarChar(36)
+//   created_at   DateTime        @default(now())
+//   updated_at   DateTime        @updatedAt
+//   comments     comments[]
+//   like_comment like_comments[]
+//   like_reel    like_reels[]
+//   like_reply   like_replys[]
+//   users        users           @relation(fields: [user_id], references: [id])
 
-  @@index([user_id], map: "reels_user_id_fkey")
-}
+//   @@index([user_id], map: "reels_user_id_fkey")
+// }
 
-model like_reels {
-  user_id  String @db.VarChar(36)
-  reels_id String @db.VarChar(36)
-  reels    reels  @relation(fields: [reels_id], references: [id])
-  users    users  @relation(fields: [user_id], references: [id])
+// model like_reels {
+//   user_id  String @db.VarChar(36)
+//   reels_id String @db.VarChar(36)
+//   reels    reels  @relation(fields: [reels_id], references: [id])
+//   users    users  @relation(fields: [user_id], references: [id])
 
-  @@id([user_id, reels_id])
-  @@index([reels_id], map: "like_reels_reels_id_fkey")
-}
+//   @@id([user_id, reels_id])
+//   @@index([reels_id], map: "like_reels_reels_id_fkey")
+// }
 
-model comments {
-  id           String   @id @default(uuid()) @db.VarChar(36)
-  is_active    Boolean  @default(true)
-  user_id      String   @db.VarChar(36)
-  reels_id     String   @db.VarChar(36)
-  comment_text String
-  timestamp    DateTime @default(now())
-  reels        reels    @relation(fields: [reels_id], references: [id])
-  users        users    @relation(fields: [user_id], references: [id])
+// model comments {
+//   id           String   @id @default(uuid()) @db.VarChar(36)
+//   is_active    Boolean  @default(true)
+//   user_id      String   @db.VarChar(36)
+//   reels_id     String   @db.VarChar(36)
+//   comment_text String
+//   timestamp    DateTime @default(now())
+//   reels        reels    @relation(fields: [reels_id], references: [id])
+//   users        users    @relation(fields: [user_id], references: [id])
 
-  @@index([reels_id], map: "comments_reels_id_fkey")
-  @@index([user_id], map: "comments_user_id_fkey")
-}
+//   @@index([reels_id], map: "comments_reels_id_fkey")
+//   @@index([user_id], map: "comments_user_id_fkey")
+// }
 
-model like_comments {
-  id         String @id @default(uuid()) @db.VarChar(36)
-  user_id    String @db.VarChar(36)
-  comment_id String @db.VarChar(36)
-  reels      reels  @relation(fields: [comment_id], references: [id])
-  users      users  @relation(fields: [user_id], references: [id])
+// model like_comments {
+//   id         String @id @default(uuid()) @db.VarChar(36)
+//   user_id    String @db.VarChar(36)
+//   comment_id String @db.VarChar(36)
+//   reels      reels  @relation(fields: [comment_id], references: [id])
+//   users      users  @relation(fields: [user_id], references: [id])
 
-  @@index([comment_id], map: "like_comments_comment_id_fkey")
-  @@index([user_id], map: "like_comments_user_id_fkey")
-}
+//   @@index([comment_id], map: "like_comments_comment_id_fkey")
+//   @@index([user_id], map: "like_comments_user_id_fkey")
+// }
 
-model replys {
-  id         String   @id @default(uuid()) @db.VarChar(36)
-  is_active  Boolean  @default(true)
-  user_id    String   @db.VarChar(36)
-  comment_id String   @db.VarChar(36)
-  reply_text String
-  timestamp  DateTime @default(now())
-  users      users    @relation(fields: [user_id], references: [id])
+// model replys {
+//   id         String   @id @default(uuid()) @db.VarChar(36)
+//   is_active  Boolean  @default(true)
+//   user_id    String   @db.VarChar(36)
+//   comment_id String   @db.VarChar(36)
+//   reply_text String
+//   timestamp  DateTime @default(now())
+//   users      users    @relation(fields: [user_id], references: [id])
 
-  @@index([user_id], map: "replys_user_id_fkey")
-}
+//   @@index([user_id], map: "replys_user_id_fkey")
+// }
 
-model like_replys {
-  id       String @id @default(uuid()) @db.VarChar(36)
-  user_id  String @db.VarChar(36)
-  reply_id String @db.VarChar(36)
-  reply    reels  @relation(fields: [reply_id], references: [id])
-  users    users  @relation(fields: [user_id], references: [id])
+// model like_replys {
+//   id       String @id @default(uuid()) @db.VarChar(36)
+//   user_id  String @db.VarChar(36)
+//   reply_id String @db.VarChar(36)
+//   reply    reels  @relation(fields: [reply_id], references: [id])
+//   users    users  @relation(fields: [user_id], references: [id])
 
-  @@index([reply_id], map: "like_replys_reply_id_fkey")
-  @@index([user_id], map: "like_replys_user_id_fkey")
-}
+//   @@index([reply_id], map: "like_replys_reply_id_fkey")
+//   @@index([user_id], map: "like_replys_user_id_fkey")
+// }
 
 enum userRoles {
   customer

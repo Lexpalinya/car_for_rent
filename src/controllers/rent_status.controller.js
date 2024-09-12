@@ -30,10 +30,29 @@ const Car_Rent_StatusController = {
           message: `${EMessage.pleaseInput}`,
           err: validate.join(", "),
         });
-      const { name } = req.body;
+      let {
+        nameTenantLao,
+        nameTenantEng,
+        nameTenantChi,
+        nameTenantRok,
+        namePostertLao,
+        namePostertEng,
+        namePostertChi,
+        namePostertRok,
+        priority,
+      } = req.body;
+      if (typeof priority !== "number") priority = parseInt(priority, 10);
       const car_rent_status = await prisma.car_rent_status.create({
         data: {
-          name,
+          nameTenantLao,
+          nameTenantEng,
+          nameTenantChi,
+          nameTenantRok,
+          namePostertLao,
+          namePostertEng,
+          namePostertChi,
+          namePostertRok,
+          priority,
         },
       });
       await RecacheData();
@@ -54,6 +73,8 @@ const Car_Rent_StatusController = {
     try {
       const id = req.params.id;
       const data = DataExists(req.body);
+      if (data.priority && typeof data.priority !== "number")
+        data.priority = parseInt(data.priority, 10);
       const statusExists = await FindCar_Rent_StatusById(id);
       if (!statusExists)
         return SendError({
@@ -147,6 +168,93 @@ const Car_Rent_StatusController = {
         `${EMessage.serverError} ${EMessage.errorFetchingOne} car_rent_status`,
         err
       );
+    }
+  },
+  async SelectShowUserRent(req, res) {
+    try {
+      const car_rent_user = await CachDataAll(
+        key + "showUserRent",
+        model,
+        {
+          is_active: true,
+          priority: {
+            gte: 1,
+            lte: 5,
+          },
+        },
+        select,
+        {
+          priority: "asc",
+        }
+      );
+      return SendSuccess({
+        res,
+        message: `${EMessage.fetchAllSuccess}`,
+        data: car_rent_user,
+      });
+    } catch (error) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.fetchOneSuccess} show_user_rent_status`,
+      });
+    }
+  },
+  async SelectShowUserPost(req, res) {
+    try {
+      const car_rent_user = await CachDataAll(
+        key + "showUserPost",
+        model,
+        {
+          is_active: true,
+          priority: {
+            gte: 2,
+            lte: 5,
+          },
+        },
+        select,
+        {
+          priority: "asc",
+        }
+      );
+      return SendSuccess({
+        res,
+        message: `${EMessage.fetchAllSuccess}`,
+        data: car_rent_user,
+      });
+    } catch (error) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.fetchOneSuccess} show_user_rent_status`,
+      });
+    }
+  },
+  async SelectShowHistory(req, res) {
+    try {
+      const car_rent_user = await CachDataAll(
+        key + "showHistory",
+        model,
+        {
+          is_active: true,
+          priority: {
+            gte: 6,
+            lte: 10,
+          },
+        },
+        select,
+        {
+          priority: "asc",
+        }
+      );
+      return SendSuccess({
+        res,
+        message: `${EMessage.fetchAllSuccess}`,
+        data: car_rent_user,
+      });
+    } catch (error) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.fetchOneSuccess} show_user_rent_status`,
+      });
     }
   },
 };

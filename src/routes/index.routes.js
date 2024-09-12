@@ -196,6 +196,16 @@ route.delete(
 const post_status = "/post_status";
 
 route.get(`${post_status}/selAll`, auth, Post_StatusController.SelectAll);
+route.get(
+  `${post_status}/selForShowCarData`,
+  auth,
+  Post_StatusController.SelectForshowCarData
+);
+route.get(
+  `${post_status}/selForshowFollow`,
+  auth,
+  Post_StatusController.SelectForshowFollow
+);
 route.get(`${post_status}/selOne/:id`, auth, Post_StatusController.SelectOne);
 route.post(`${post_status}/insert`, auth, Post_StatusController.Insert);
 route.put(`${post_status}/update/:id`, auth, Post_StatusController.Update);
@@ -207,6 +217,22 @@ route.get(
   `${car_rent_status}/selAll`,
   auth,
   Car_Rent_StatusController.SelectAll
+);
+
+route.get(
+  `${car_rent_status}/selShowUserRent`,
+  auth,
+  Car_Rent_StatusController.SelectShowUserRent
+);
+route.get(
+  `${car_rent_status}/selShowUserPost`,
+  auth,
+  Car_Rent_StatusController.SelectShowUserPost
+);
+route.get(
+  `${car_rent_status}/selShowHistory`,
+  auth,
+  Car_Rent_StatusController.SelectShowHistory
 );
 route.get(
   `${car_rent_status}/selOne/:id`,
@@ -236,7 +262,7 @@ route.delete(
 //----------Users------------------------------------
 const user = "/users";
 route.get(`${user}/selAllPage`, auth, UsersController.SelectAllPage);
-route.get(`${user}/selOne/:id`, auth, UsersController.SelectOne);
+route.get(`${user}/selOne`, auth, UsersController.SelectOne);
 
 route.post(
   `${user}/check_username_phone_number`,
@@ -466,14 +492,15 @@ export default route;
 
 //--------Kyc----------------------------------
 const kyc = `/kyc`;
-route.get(`${kyc}/selAll`, auth, KycController.SelectAll);
-route.get(`${kyc}/selByUser`, auth, KycController.SelectByUserID);
-route.get(`${kyc}/selByStatus`, auth, KycController.SelectByStatus);
+route.get(`${kyc}/selAll`, auth, admin, KycController.SelectAll);
+route.get(`${kyc}/selByUser/:id`, auth, KycController.SelectByUserID);
+route.get(`${kyc}/selByStatus`, auth, admin, KycController.SelectByStatus);
 route.get(`${kyc}/selOne/:id`, auth, KycController.SelectOne);
 
 route.post(`${kyc}/insert`, auth, KycController.Insert);
 
 route.put(`${kyc}/update/:id`, auth, KycController.Update);
+route.put(`${kyc}/updateStatus/:id`, auth, admin, KycController.UpdateStatus);
 
 route.delete(`${kyc}/delete/:id`, auth, KycController.Delete);
 

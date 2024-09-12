@@ -13,6 +13,10 @@ import {
   UploadImage,
   uploadImages,
 } from "../services/upload.file";
+import prisma from "../utils/prisma.client";
+import { ReDataInCacheKyc } from "./kyc.controller";
+import { RecacheData } from "./user.controller";
+const key = "kycs";
 
 const Kyc_doc_imageController = {
   async Insert(req, res) {
@@ -39,6 +43,24 @@ const Kyc_doc_imageController = {
       const add_kyc_doc_images = await AddKyc_id_url(kyc_doc_images_url, id);
       const kyc_doc_image = await Kyc_doc_image.insert(add_kyc_doc_images);
       console.log("kyc_doc_image :>> ", kyc_doc_image);
+      const user = await prisma.users.update({
+        where: {
+          id: kycExists.user_id,
+        },
+        data: {
+          kyc: false,
+        },
+        select: {
+          kyc: true,
+        },
+      });
+      await RecacheData(user.id, { page: true });
+      await ReDataInCacheKyc({
+        key,
+        idkyckey: id + key,
+        statuskyckey: kycExists.status,
+        userkyckey: kycExists.user_id,
+      });
       return SendSuccess({
         res,
         message: `${EMessage.insertSuccess}`,
@@ -58,8 +80,16 @@ const Kyc_doc_imageController = {
     try {
       const id = req.params.id;
       let { kyc_doc_image_data } = req.body;
-      if (typeof kyc_doc_image_data !== "string")
+      if (!kyc_doc_image_data)
+        return SendError({
+          res,
+          message: `${EMessage.pleaseInput}`,
+          err: "kyc_doc_image_data",
+        });
+
+      if (typeof kyc_doc_image_data === "string")
         kyc_doc_image_data = JSON.parse(kyc_doc_image_data);
+
       const data = req.files;
       if (!data || !data.kyc_doc_image)
         return SendError({
@@ -68,12 +98,13 @@ const Kyc_doc_imageController = {
           message: `${EMessage.pleaseInput}`,
           err: "kyc_doc_image",
         });
+
       if (
         !kyc_doc_image_data ||
         !kyc_doc_image_data.id ||
         !kyc_doc_image_data.url ||
         !kyc_doc_image_data.kyc_id ||
-        !kyc_doc_image_data.update_at
+        !kyc_doc_image_data.updated_at
       )
         return SendError({
           res,
@@ -94,7 +125,7 @@ const Kyc_doc_imageController = {
           message: `${EMessage.notFound}`,
           err: `${!kycExists ? "kyc id" : "kyc_doc_image id"} `,
         });
-      if (id !== kyc_doc_imagesExists.id)
+      if (id !== kyc_doc_imagesExists.kyc_id)
         return SendError({
           res,
           statuscode: 400,
@@ -111,6 +142,25 @@ const Kyc_doc_imageController = {
       const kyc_doc_image = await Kyc_doc_image.update(kyc_doc_image_data.id, {
         url: url,
       });
+      const user = await prisma.users.update({
+        where: {
+          id: kycExists.user_id,
+        },
+        data: {
+          kyc: false,
+        },
+        select: {
+          kyc: true,
+        },
+      });
+      await RecacheData(user.id, { page: true });
+      await ReDataInCacheKyc({
+        key,
+        idkyckey: id + key,
+        statuskyckey: kycExists.status,
+        userkyckey: kycExists.user_id,
+      });
+
       return SendSuccess({
         res,
         message: `${EMessage.updateSuccess}`,
@@ -130,14 +180,14 @@ const Kyc_doc_imageController = {
     try {
       const id = req.params.id;
       let { kyc_doc_image_data } = req.body;
-      if (typeof kyc_doc_image_data !== "string")
+      if (typeof kyc_doc_image_data === "string")
         kyc_doc_image_data = JSON.parse(kyc_doc_image_data);
       if (
         !kyc_doc_image_data ||
         !kyc_doc_image_data.id ||
         !kyc_doc_image_data.url ||
         !kyc_doc_image_data.kyc_id ||
-        !kyc_doc_image_data.update_at
+        !kyc_doc_image_data.updated_at
       )
         return SendError({
           res,
@@ -158,7 +208,7 @@ const Kyc_doc_imageController = {
           message: `${EMessage.notFound}`,
           err: `${!kycExists ? "kyc id" : "kyc_doc_image id"} `,
         });
-      if (id !== kyc_doc_imagesExists.id)
+      if (id !== kyc_doc_imagesExists.kyc_id)
         return SendError({
           res,
           statuscode: 400,
@@ -167,9 +217,26 @@ const Kyc_doc_imageController = {
         });
       const delImage = await DeleteImage(kyc_doc_image_data.url);
       console.log("delImage :>> ", delImage);
-      const kyc_doc_images = await Kyc_doc_image.delete({
-        id: kyc_doc_image_data.id,
+      const kyc_doc_images = await Kyc_doc_image.delete(kyc_doc_image_data.id);
+      const user = await prisma.users.update({
+        where: {
+          id: kycExists.user_id,
+        },
+        data: {
+          kyc: false,
+        },
+        select: {
+          kyc: true,
+        },
       });
+      await RecacheData(user.id, { page: true });
+      await ReDataInCacheKyc({
+        key,
+        idkyckey: id + key,
+        statuskyckey: kycExists.status,
+        userkyckey: kycExists.user_id,
+      });
+
       return SendSuccess({
         res,
         message: `${EMessage.updateSuccess}`,

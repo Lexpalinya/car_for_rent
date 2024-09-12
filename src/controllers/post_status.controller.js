@@ -30,10 +30,15 @@ const Post_StatusController = {
           message: `${EMessage.pleaseInput}`,
           err: validate.join(", "),
         });
-      const { name } = req.body;
+      let { nameLao, nameEng, nameChi, nameRok, priority } = req.body;
+      if (typeof priority !== "number") priority = parseInt(priority, 10);
       const post_status = await prisma.post_status.create({
         data: {
-          name,
+          nameLao,
+          nameEng,
+          nameChi,
+          nameRok,
+          priority,
         },
       });
       await RecacheData();
@@ -54,6 +59,8 @@ const Post_StatusController = {
     try {
       const id = req.params.id;
       const data = DataExists(req.body);
+      if (data.priority && data.priority !== "number")
+        data.priority = parseInt(data.priority, 10);
       const statusExists = await FindPost_StatusById(id);
       if (!statusExists)
         return SendError({
@@ -145,6 +152,66 @@ const Post_StatusController = {
       return SendErrorLog(
         res,
         `${EMessage.serverError} ${EMessage.errorFetchingOne} post_status`,
+        error
+      );
+    }
+  },
+  async SelectForshowCarData(req, res) {
+    try {
+      const status = await CachDataNoClear(
+        key + "show_cardata",
+        model,
+        {
+          ...where,
+          priority: {
+            gte: 1,
+            lte: 2,
+          },
+        },
+        select,
+        {
+          priority: "asc",
+        }
+      );
+      return SendSuccess({
+        res,
+        message: `${EMessage.fetchAllSuccess}`,
+        data: status,
+      });
+    } catch (error) {
+      return SendErrorLog(
+        res,
+        `${EMessage.serverError} ${EMessage.errorFetchingOne} post_status select for show car data`,
+        error
+      );
+    }
+  },
+  async SelectForshowFollow(req, res) {
+    try {
+      const status = await CachDataNoClear(
+        key + "show_follow",
+        model,
+        {
+          ...where,
+          priority: {
+            gte: 3,
+            lte: 5,
+          },
+        },
+        select,
+        {
+          priority: "asc",
+        }
+      );
+      return SendSuccess({
+        res,
+        message: `${EMessage.fetchAllSuccess}`,
+        data: status,
+      });
+    } catch (error) {
+      return SendErrorLog(
+        res,
+        `${EMessage.serverError} ${EMessage.errorFetchingOne} post_status select for show car data`,
         error
       );
     }

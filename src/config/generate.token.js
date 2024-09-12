@@ -6,7 +6,6 @@ import {
   JWT_TIMEOUT,
   SECRET_KEY,
 } from "./api.config";
-import { Encrypt } from "../services/services";
 
 export const generateToken = async (data) => {
   try {
@@ -46,11 +45,13 @@ export const generateToken = async (data) => {
     //     console.log("Verified token payload:", decoded);
     //   }
     // });
+    const expired = jwt.verify(token, JWT_SECRET_KEY);
 
     // Return the tokens
     return {
       token,
       refresh_token: refreshToken,
+      token_expires: expired.exp,
     };
   } catch (err) {
     console.error("Error generating token:", err);

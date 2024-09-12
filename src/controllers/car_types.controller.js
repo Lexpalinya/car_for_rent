@@ -39,7 +39,8 @@ const Car_typesController = {
           message: `${EMessage.pleaseInput}`,
           err: "icon",
         });
-      let { name, detail, wheel, commition } = req.body;
+      let { nameLao, nameEng, nameChi, nameRok, detail, wheel, commition } =
+        req.body;
       const icon = await UploadImage(data.icon.data);
       if (!icon) {
         throw new Error("upload image failed");
@@ -49,7 +50,10 @@ const Car_typesController = {
         data: {
           detail,
           wheel,
-          name,
+          nameLao,
+          nameEng,
+          nameChi,
+          nameRok,
           icon,
           commition,
         },
