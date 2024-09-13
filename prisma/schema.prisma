@@ -215,7 +215,7 @@ model level_insurances {
 model insurance_companies {
   id         String   @id @default(uuid()) @db.VarChar(36)
   is_active  Boolean  @default(true)
-  nameLao    String
+  name       String
   icon       String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -266,14 +266,16 @@ model posts {
   insurance_company_id      String?                     @db.VarChar(36)
   level_insurance_id        String?                     @db.VarChar(36)
   // ເອກະສານປະກັນໄພ --- post_insurance_image
-  // ຮູບລົດ --- post_car_image
   description               String                      @db.Text
-  street                    String?
-  point                     String?
-  village                   String?
-  district                  String?
-  province                  String?
-  mutjum                    Float?
+  // ຮູບລົດ --- post_car_image
+  pubmai                    Float
+  mutjum                    Float
+  // ຂໍມູນລາຄາລົດ --- post_rent_data
+  point                     String
+  street                    String
+  province                  String
+  village                   String
+  district                  String
   deposits_fee              Float
   user_type                 Boolean                     @default(true)
   status_id                 String                      @db.VarChar(36)

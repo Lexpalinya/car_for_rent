@@ -48,8 +48,8 @@ export const ValidateLevel_Insurances = (data) => {
   return ValidateData({ nameLao, nameEng, nameChi, nameRok });
 };
 export const ValidateInsurances_Companies = (data) => {
-  const { nameLao } = data;
-  return ValidateData({ nameLao });
+  const { name } = data;
+  return ValidateData({ name });
 };
 
 export const ValidateType_of_Fuals = (data) => {
