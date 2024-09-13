@@ -215,7 +215,7 @@ model level_insurances {
 model insurance_companies {
   id         String   @id @default(uuid()) @db.VarChar(36)
   is_active  Boolean  @default(true)
-  name       String
+  nameLao    String
   icon       String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -246,31 +246,27 @@ model like_post {
 }
 
 model posts {
-  id                   String  @id @default(uuid()) @db.VarChar(36)
-  // post_statu                Boolean                     @default(false)
-  is_active            Boolean @default(true)
-  car_type_id          String  @db.VarChar(36)
-  user_id              String  @db.VarChar(36)
-  star                 Float   @default(0)
-  // frist_name                String
-  // last_name                 String
-  // birth_day                 DateTime                    @db.Date
-  // nationnality              String
-  // doc_type                  String
-  car_insurance        Boolean
-  insurance_company_id String? @db.VarChar(36)
-  level_insurance_id   String? @db.VarChar(36)
-  car_brand_id         String? @db.VarChar(36)
-  car_brand            String?
-  car_version          String
-  car_year             String
-
-  car_resgistration         String
-  door                      Int                         @default(2)
+  id                        String                      @id @default(uuid()) @db.VarChar(36)
+  post_statu                Boolean                     @default(false)
+  is_active                 Boolean                     @default(true)
+  car_type_id               String                      @db.VarChar(36)
+  user_id                   String                      @db.VarChar(36)
+  star                      Float                       @default(0)
+  car_brand                 String
+  car_version               String
+  car_year                  String
+  car_resgistration         String //ທະບຽນລົດ
   type_of_fual_id           String                      @db.VarChar(36)
   driver_system             String
+  door                      String
   seat                      String
   car_color                 String
+  // ໃບທະບຽນລົດ  --- post_doc_image
+  car_insurance             Boolean
+  insurance_company_id      String?                     @db.VarChar(36)
+  level_insurance_id        String?                     @db.VarChar(36)
+  // ເອກະສານປະກັນໄພ --- post_insurance_image
+  // ຮູບລົດ --- post_car_image
   description               String                      @db.Text
   street                    String?
   point                     String?
@@ -290,7 +286,6 @@ model posts {
   post_driver_license_image post_driver_license_image[]
   post_insurance_image      post_insurance_image[]
   post_rent_data            post_rent_data[]
-  car_brands                car_brands?                 @relation(fields: [car_brand_id], references: [id])
   car_types                 car_types                   @relation(fields: [car_type_id], references: [id])
   insurance_company         insurance_companies?        @relation(fields: [insurance_company_id], references: [id])
   level_insurance           level_insurances?           @relation(fields: [level_insurance_id], references: [id])
@@ -298,9 +293,10 @@ model posts {
   type_of_fual              type_of_fuals               @relation(fields: [type_of_fual_id], references: [id])
   users                     users                       @relation(fields: [user_id], references: [id])
   review                    review[]
+  car_brands                car_brands?                 @relation(fields: [car_brandsId], references: [id])
+  car_brandsId              String?                     @db.VarChar(36)
 
   @@index([car_type_id])
-  @@index([car_brand_id], map: "posts_car_brand_id_fkey")
   @@index([insurance_company_id], map: "posts_insurance_company_id_fkey")
   @@index([level_insurance_id], map: "posts_level_insurance_id_fkey")
   @@index([status_id], map: "posts_status_id_fkey")
