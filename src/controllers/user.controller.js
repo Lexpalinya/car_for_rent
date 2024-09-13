@@ -140,7 +140,7 @@ const UsersController = {
       const token = await generateToken(datatoken);
       const result = {
         ...user,
-        token,
+        ...token,
       };
 
       await RecacheData(user.id, { page: true });
