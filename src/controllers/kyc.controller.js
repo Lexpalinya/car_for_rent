@@ -1,6 +1,8 @@
+import redis from "../DB/redis";
 import { CachDataAll, CachDataLimit } from "../services/cach.contro";
+import { DeleteCachedKey } from "../services/cach.deletekey";
 import { EMessage } from "../services/enum";
-import { FindUserById_ID } from "../services/find";
+import { FindKycById, FindUserById_ID } from "../services/find";
 import {
   AddKyc_id_url,
   EnsureArray,
@@ -11,13 +13,15 @@ import {
 } from "../services/services";
 import { Kyc_doc_image } from "../services/subtabel";
 import { uploadImages } from "../services/upload.file";
-import { ValidateKyc } from "../services/validate";
+import { DataExists, ValidateKyc } from "../services/validate";
 import prisma from "../utils/prisma.client";
+import { RecacheData } from "./user.controller";
 const key = "kycs";
 const model = "kycs";
 let where = { is_active: true };
 let select = {
   id: true,
+  is_active: true,
   status: true,
   user_type: true,
   first_name: true,
@@ -25,10 +29,29 @@ let select = {
   birthday: true,
   nationality: true,
   doc_type: true,
+  point: true,
+  village: true,
+  district: true,
+  province: true,
   user_id: true,
-  create: true,
+  created_at: true,
   updated_at: true,
   kyc_doc_image: true,
+};
+
+export const ReDataInCacheKyc = async ({
+  key,
+  userkyckey,
+  statuskyckey,
+  idkyckey,
+}) => {
+  const promise = [];
+  if (key) promise.push(DeleteCachedKey(key));
+  if (userkyckey) promise.push(DeleteCachedKey(userkyckey));
+  if (statuskyckey) promise.push(DeleteCachedKey(statuskyckey));
+  if (idkyckey) promise.push(redis.del(idkyckey));
+  await Promise.all(promise);
+  console.log(`Deleted kyc cache key successfully`);
 };
 const KycController = {
   async Insert(req, res) {
@@ -47,10 +70,15 @@ const KycController = {
         last_name,
         birthday,
         nationality,
+        phone_number,
         doc_type,
+        point,
+        village,
+        district,
+        province,
       } = req.body;
       const data = req.files;
-      if (!data || !data.image)
+      if (!data || !data.doc_image)
         return SendError({
           res,
           statuscode: 400,
@@ -77,18 +105,30 @@ const KycController = {
           last_name,
           birthday,
           nationality,
+          phone_number,
           doc_type,
           user_id,
+          point,
+          village,
+          district,
+          province,
         },
       });
+
       const add_kyc_doc_image = AddKyc_id_url(kyc_doc_image_list, kyc.id);
 
       const kyc_doc_image = await Kyc_doc_image.insert(add_kyc_doc_image);
       console.log("kyc_doc_image :>> ", kyc_doc_image);
+      await ReDataInCacheKyc({
+        key,
+        // idkyckey: id + key,
+        statuskyckey: "false" + key,
+        userkyckey: user_id + key,
+      });
       return SendCreate({
         res,
         message: `${EMessage.insertSuccess}`,
-        data: kcy,
+        data: kyc,
       });
     } catch (err) {
       SendErrorLog({
@@ -120,6 +160,12 @@ const KycController = {
           id,
         },
         data,
+      });
+      await ReDataInCacheKyc({
+        key,
+        idkyckey: id + key,
+        statuskyckey: kycExists.status,
+        userkyckey: kycExists.user_id,
       });
       return SendSuccess({
         res,
@@ -153,6 +199,12 @@ const KycController = {
           is_active: false,
         },
       });
+      await ReDataInCacheKyc({
+        key,
+        idkyckey: id + key,
+        statuskyckey: kycExists.status + key,
+        userkyckey: kycExists.user_id + key,
+      });
       return SendSuccess({
         res,
         message: `${EMessage.deleteSuccess}`,
@@ -169,7 +221,7 @@ const KycController = {
   async SelectOne(req, res) {
     try {
       const id = req.params.id;
-      const kyc = await FindkycById(id);
+      const kyc = await FindKycById(id);
       if (!kyc)
         return SendError({
           res,
@@ -198,6 +250,11 @@ const KycController = {
         CachDataLimit(key + "-" + page, model, where, page, select),
         CachDataLimit(key + "-" + (page + 1), model, where, page + 1, select),
       ]);
+      return SendSuccess({
+        res,
+        message: `${EMessage.fetchAllSuccess}`,
+        data: kycs,
+      });
     } catch (err) {
       return SendErrorLog({
         res,
@@ -208,7 +265,7 @@ const KycController = {
   },
   async SelectByUserID(req, res) {
     try {
-      const user_id = req.user;
+      const user_id = req.params.id;
       const kyc = await CachDataAll(
         user_id + key,
         model,
@@ -236,9 +293,10 @@ const KycController = {
       let { status, page } = req.query;
       page = parseInt(page, 10);
       page = page > 0 || !page ? 0 : page - 1;
+      if (typeof status !== "boolean") status = status === "true";
       const [kyc] = await Promise.all([
         CachDataLimit(
-          status + kyc + page,
+          status + key + page,
           model,
           {
             is_active: true,
@@ -248,7 +306,7 @@ const KycController = {
           select
         ),
         CachDataLimit(
-          status + kyc + (page + 1),
+          status + key + (page + 1),
           model,
           {
             is_active: true,
@@ -267,6 +325,69 @@ const KycController = {
       return SendErrorLog({
         res,
         message: `${EMessage.serverError} ${EMessage.errorFetchingAll}`,
+        err,
+      });
+    }
+  },
+  async UpdateStatus(req, res) {
+    try {
+      const id = req.params.id;
+      let { status } = req.query;
+      if (!status)
+        return SendError({
+          res,
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: "status  in query parameter",
+        });
+      if (typeof status !== "boolean") status = status === "true";
+      const kycExists = await FindKycById(id);
+      if (!kycExists)
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound} kyc`,
+          err: "kyc",
+        });
+      const kyc = await prisma.kycs.update({
+        where: {
+          id,
+        },
+        data: {
+          status: status,
+        },
+      });
+      const user = await prisma.users.update({
+        where: {
+          id: kycExists.user_id,
+        },
+        data: {
+          kyc: status,
+        },
+        select: {
+          kyc: true,
+        },
+      });
+
+      await ReDataInCacheKyc({
+        key,
+        idkyckey: id + key,
+        statuskyckey: kycExists.status + key,
+        userkyckey: kycExists.user_id + key,
+      });
+      await RecacheData(user.id, { page: true });
+      return SendSuccess({
+        res,
+        message: `${EMessage.updateSuccess} status and kyc user status`,
+        data: {
+          kyc,
+          user,
+        },
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.updateFailed} status and  kyc user status`,
         err,
       });
     }

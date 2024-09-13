@@ -1,4 +1,5 @@
 import cloudinary from "cloudinary";
+
 import {
   CLOUDINARY_API_KEY,
   CLOUDINARY_API_SECRET,

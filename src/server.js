@@ -49,7 +49,7 @@ await redis.flushdb();
 
 export const server = app.listen(SERVER_PORT, async () => {
   console.log(`server listening on port:${SERVER_PORT}`);
-  console.log(`url: http://localhost:${SERVER_PORT}`);
+  console.log(`Express is running at http://localhost:${SERVER_PORT}`);
   await CheckConnectionDatabase();
 
   // Initialize Socket.IO after the server is up

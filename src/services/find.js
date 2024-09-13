@@ -107,15 +107,15 @@ export const FindUserById = (id) => {
       username: true,
       email: true,
       phone_number: true,
-      // password: true,
+      profile: true,
       first_name: true,
       last_name: true,
-      profile: true,
       fackbook_id: true,
       google_id: true,
+      kyc: true,
+      blacklist: true,
       device_token: true,
       login_version: true,
-      // role: true,
       created_at: true,
       updated_at: true,
     }
@@ -138,6 +138,7 @@ export const FindUserById_ID = (id) => {
       phone_number: true,
       password: true,
       login_version: true,
+      blacklist: true,
       role: true,
     }
   );
@@ -159,6 +160,7 @@ export const FindUserUserNameAlready = (username) => {
       phone_number: true,
       password: true,
       login_version: true,
+      blacklist: true,
       role: true,
     },
     "username"
@@ -179,6 +181,7 @@ export const FindUserEmailAlready = (email) => {
       phone_number: true,
       password: true,
       login_version: true,
+      blacklist: true,
       role: true,
     },
     "email"
@@ -200,6 +203,7 @@ export const FindUserPhone_NumberAlready = (phone_number) => {
       phone_number: true,
       password: true,
       login_version: true,
+      blacklist: true,
       role: true,
     },
     "phone_number"
@@ -370,6 +374,7 @@ export const FindKycById = (id) => {
     },
     {
       id: true,
+      is_active: true,
       status: true,
       user_type: true,
       first_name: true,
@@ -378,7 +383,7 @@ export const FindKycById = (id) => {
       nationality: true,
       doc_type: true,
       user_id: true,
-      create: true,
+      created_at: true,
       updated_at: true,
       kyc_doc_image: true,
     }

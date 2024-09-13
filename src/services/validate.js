@@ -17,14 +17,22 @@ export const ValidatePromotion = (data) => {
 
 //------------post_status----------------------
 export const ValidatePost_Status = (data) => {
-  const { name } = data;
-  return ValidateData({ name });
+  const { nameLao, nameEng, nameChi, nameRok, priority } = data;
+  return ValidateData({ nameLao, nameEng, nameChi, nameRok, priority });
 };
 
 //----------------------------------------------
 export const ValidateCar_Types = (data) => {
-  const { name, detail, wheel, commition } = data;
-  return ValidateData({ name, detail, wheel, commition });
+  const { nameLao, nameEng, nameChi, nameRok, detail, wheel, commition } = data;
+  return ValidateData({
+    nameLao,
+    nameEng,
+    nameChi,
+    nameRok,
+    detail,
+    wheel,
+    commition,
+  });
 };
 
 export const ValidateLabels = (data) => {
@@ -36,8 +44,8 @@ export const ValidateCar_Brands = (data) => {
   return ValidateData({ name });
 };
 export const ValidateLevel_Insurances = (data) => {
-  const { name } = data;
-  return ValidateData({ name });
+  const { nameLao, nameEng, nameChi, nameRok } = data;
+  return ValidateData({ nameLao, nameEng, nameChi, nameRok });
 };
 export const ValidateInsurances_Companies = (data) => {
   const { name } = data;
@@ -45,14 +53,26 @@ export const ValidateInsurances_Companies = (data) => {
 };
 
 export const ValidateType_of_Fuals = (data) => {
-  const { name } = data;
-  return ValidateData({ name });
+  const { nameLao, nameEng, nameChi, nameRok } = data;
+  return ValidateData({ nameLao, nameEng, nameChi, nameRok });
 };
 
 //----------rent_status---------------------------------
 export const ValidateCar_Rent_Status = (data) => {
-  const { name } = data;
-  return ValidateData({ name });
+  const {
+    nameTenantLao,
+    nameTenantEng,
+    nameTenantChi,
+    nameTenantRok,
+    priority,
+  } = data;
+  return ValidateData({
+    nameTenantLao,
+    nameTenantEng,
+    nameTenantChi,
+    nameTenantRok,
+    priority,
+  });
 };
 
 //---------------User----------------------------
@@ -225,14 +245,30 @@ export const ValidatePostSearch = (data) => {
 };
 
 export const ValidateKyc = (data) => {
-  const { user_type, first_name, last_name, birthday, nationality, doc_type } =
-    data;
-  return ValidateData({
+  const {
     user_type,
     first_name,
     last_name,
     birthday,
     nationality,
+    phone_number,
     doc_type,
+    point,
+    village,
+    district,
+    province,
+  } = data;
+  return ValidateData({
+    user_type,
+    first_name,
+    last_name,
+    phone_number,
+    birthday: new Date(birthday).toString(),
+    nationality,
+    doc_type,
+    point,
+    village,
+    district,
+    province,
   });
 };

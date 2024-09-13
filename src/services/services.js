@@ -1,5 +1,9 @@
 import CryptoJS from "crypto-js";
-import { JWT_SECRET_KEY, SECRET_KEY } from "../config/api.config";
+import {
+  JWT_SECRET_KEY,
+  JWT_SECRET_KEY_REFRESH,
+  SECRET_KEY,
+} from "../config/api.config";
 import Jwt from "jsonwebtoken";
 import { generateToken } from "../config/generate.token";
 import prisma from "../utils/prisma.client";
@@ -91,6 +95,8 @@ export const verify_token = (token) => {
           return reject(
             new Error("Invalid valid authentication:user not found")
           );
+        if (user.blacklist === true)
+          return reject(new Error("this account is not blacklisted"));
         return resolve(user.id);
       } catch (err) {
         console.log("Decryted or Database error", err);
@@ -101,7 +107,7 @@ export const verify_token = (token) => {
 };
 export const verify_refresh_token = (token) => {
   return new Promise(async (resolve, reject) => {
-    Jwt.verify(token, JWT_SECRET_KEY, async (err, decode) => {
+    Jwt.verify(token, JWT_SECRET_KEY_REFRESH, async (err, decode) => {
       if (err) {
         if (err.message === "TokenExpiredError") {
           console.error(
@@ -164,4 +170,13 @@ export const AddKyc_id_url = (arr, id) => {
 
 export const EnsureArray = (arr) => {
   return Array.isArray(arr) ? arr : [arr];
+};
+
+export const CheckUserBlackList = (res, data) => {
+  if (data.blacklist === true)
+    return SendError({
+      res,
+      statuscode: 400,
+      message: "this account is already blacklisted",
+    });
 };

@@ -1,6 +1,7 @@
 import { generateToken } from "../config/generate.token";
 import { EMessage } from "../services/enum";
 import {
+  CheckUserBlackList,
   Decrypt,
   Encrypt,
   SendCreate,
@@ -45,14 +46,16 @@ let select = {
   last_name: true,
   fackbook_id: true,
   google_id: true,
+  kyc: true,
+  blacklist: true,
   device_token: true,
   login_version: true,
-  is_vertified: true,
+  // is_vertified: true,
   created_at: true,
   updated_at: true,
 };
 
-const RecacheData = async (id = "", { page = true }) => {
+export const RecacheData = async (id = "", { page = true }) => {
   let promise = [redis.del([id + key, "ID_user"])];
   if (page === true) {
     promise.push(DeleteCachedKey(key));
@@ -157,7 +160,9 @@ const UsersController = {
 
   async Delete(req, res) {
     try {
-      const id = req.params.id;
+      const user_id = req.user;
+      const userid = req.query.user_id;
+      const id = !userid ? user_id : userid;
       const userExists = await FindUserById_ID(id);
       if (!userExists)
         return SendError({
@@ -214,6 +219,7 @@ const UsersController = {
           message: `${EMessage.notFound} user`,
           err: "id",
         });
+      CheckUserBlackList(res, userExists);
       const decrypassword = await Decrypt(userExists.password);
       if (decrypassword !== old_password)
         return SendError({
@@ -269,6 +275,7 @@ const UsersController = {
           message: `${EMessage.notFound} user`,
           err: "phone_number",
         });
+      CheckUserBlackList(res, userExists);
       const user = await prisma.users.update({
         where: { id: userExists.id },
         data: {
@@ -303,7 +310,7 @@ const UsersController = {
         });
       const { username, password } = req.body;
       const userExists = await FindUserUserNameAlready(username);
-
+      console.log("userE :>> ", userExists);
       if (!userExists)
         return SendError({
           res,
@@ -311,6 +318,7 @@ const UsersController = {
           message: `${EMessage.notFound}: user`,
           err: "username",
         });
+      CheckUserBlackList(res, userExists);
       const decrypassword = await Decrypt(userExists.password);
 
       if (decrypassword !== password)
@@ -362,7 +370,6 @@ const UsersController = {
         });
       const { phone_number, password } = req.body;
       const userExists = await FindUserPhone_NumberAlready(phone_number);
-
       if (!userExists)
         return SendError({
           res,
@@ -370,6 +377,7 @@ const UsersController = {
           message: `${EMessage.notFound}: user`,
           err: "phone_number",
         });
+      CheckUserBlackList(res, userExists);
       const decrypassword = await Decrypt(userExists.password);
 
       if (decrypassword !== password)
@@ -411,15 +419,19 @@ const UsersController = {
   },
   async Update(req, res) {
     try {
-      const id = req.user;
+      const user_id = req.user;
+      const userid = req.query.user_id;
+      const id = !userid ? user_id : userid;
       const data = DataExists(req.body);
-
       // Prepare the list of promises to execute concurrently
       const promiseList = [FindUserById_ID(id)];
       const checks = {}; // Store whether checks were made
-      if (data.is_vertified && typeof data.is_vertified !== "bigint") {
-        data.is_vertified = data.is_vertified === "true";
-      }
+      if (data.kyc && typeof data.kyc !== "boolean")
+        data.kyc = data.kyc === "true";
+
+      if (data.blacklist && typeof data.blacklist !== "boolean")
+        data.blacklist = data.blacklist === "true";
+
       if (data.username) {
         promiseList.push(FindUserUserNameAlready(data.username));
         checks.username = true;
@@ -504,7 +516,9 @@ const UsersController = {
   },
   async UpdateProfile(req, res) {
     try {
-      const id = req.user;
+      const user_id = req.user;
+      const userid = req.query.user_id;
+      const id = !userid ? user_id : userid;
       const { old_profile } = req.body;
       const data = req.files;
 
@@ -555,7 +569,9 @@ const UsersController = {
   },
   async SelectOne(req, res) {
     try {
-      const id = req.params.id;
+      const user_id = req.user;
+      const userid = req.query.user_id;
+      const id = !userid ? user_id : userid;
       const user = await FindUserById(id);
       if (!user)
         return SendError({
@@ -564,10 +580,13 @@ const UsersController = {
           message: `${EMessage.notFound} user`,
           err: "id",
         });
-      const token = await generateToken({
-        id: user.id,
-        loginversion: user.loginversion,
-      });
+      let token;
+      if (!userid) {
+        token = await generateToken({
+          id: user.id,
+          loginversion: user.loginversion,
+        });
+      }
       return SendSuccess({
         res,
         message: `${EMessage.fetchOneSuccess}`,
