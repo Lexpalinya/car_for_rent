@@ -39,14 +39,14 @@ const Insurance_companysController = {
           message: `${EMessage.pleaseInput}`,
           err: "icon",
         });
-      const { name } = req.body;
+      const { nameLao } = req.body;
       const icon = await UploadImage(data.icon.data);
       if (!icon) {
         throw new Error("upload image failed");
       }
       const companies = await prisma.insurance_companies.create({
         data: {
-          name,
+          nameLao,
           icon,
         },
       });
