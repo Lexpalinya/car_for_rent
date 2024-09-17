@@ -1,3 +1,4 @@
+import { connect } from "bun";
 import redis from "../DB/redis";
 import { CachDataAll, CachDataLimit } from "../services/cach.contro";
 import { DeleteCachedKey } from "../services/cach.deletekey";
@@ -24,7 +25,7 @@ import {
 import {
   Post_car_image,
   Post_doc_image,
-  Post_driver_license_image,
+  // Post_driver_license_image,
   Post_insurance_image,
   Post_rent_data,
 } from "../services/subtabel";
@@ -35,28 +36,68 @@ import {
   ValidatePostSearch,
 } from "../services/validate";
 import prisma from "../utils/prisma.client";
-const post_status_id = "1cf8b1a2-219a-4441-8ca3-e2553a3e306a";
+const post_status_id = "44c3d8f0-432b-4f26-a9de-059df566761c";
 let key = "posts";
 const model = "posts";
 let where = {
   is_active: true,
-  status_id: "eb22589e-0bc5-4d7e-9c42-c9fe2f4825cf",
+  post_status: true,
+  status_id: "44c3d8f0-432b-4f26-a9de-059df566761c",
 };
+// let a = {
+//   post_status,
+//   is_active,
+//   car_type_id,
+//   user_id,
+//   star,
+//   car_brand,
+//   car_year,
+//   province_vehicle,
+//   car_resgistration,
+//   type_of_fual_id,
+//   driver_system,
+//   door,
+//   seat,
+//   car_color,
+//   post_doc_image,
+//   car_insurance,
+//   insurance_company_id,
+//   level_insurance_id,
+//   post_insurance_image,
+//   description,
+//   pubmai,
+//   mutjum,
+//   post_rent_data,
+//   point,
+//   street,
+//   province,
+//   village,
+//   district,
+//   status_id,
+//   created_id,
+//   updated_id,
+//   like_post,
+//   post_car_image,
+//   post_doc_image,
+//   post_insurance_image,
+//   post_rent_data,
+//   car_types,
+//   insurance_company,
+//   level_insurance,
+//   status,
+//   type_of_fual,
+//   users,
+//   car_brans,
+// };
 let select = {
   id: true,
   is_active: true,
   car_type_id: true,
   user_id: true,
   star: true,
-  frist_name: true,
-  last_name: true,
-  birth_day: true,
-  nationnality: true,
-  doc_type: true,
   car_insurance: true,
   insurance_company_id: true,
   level_insurance_id: true,
-  car_brand_id: true,
   car_brand: true,
   car_version: true,
   car_year: true,
@@ -72,15 +113,13 @@ let select = {
   village: true,
   district: true,
   province: true,
-  user_type: true,
   mutjum: true,
-  deposits_fee: true,
+  pubmai: true,
   status_id: true,
   created_at: true,
   updated_at: true,
   insurance_company: true,
   level_insurance: true,
-  car_brands: true,
   type_of_fual: true,
   status: true,
   users: {
@@ -93,7 +132,7 @@ let select = {
   car_types: true,
   post_doc_image: true,
   post_car_image: true,
-  post_driver_license_image: true,
+  // post_driver_license_image: true,
   post_insurance_image: true,
   post_rent_data: true,
   like_post: {
@@ -129,58 +168,53 @@ const PostController = {
         });
       let {
         car_type_id,
-        frist_name,
-        last_name,
-        birth_day,
-        nationnality,
-        doc_type,
-        car_insurance,
+        user_id,
         car_brand,
         car_version,
         car_year,
+        province_vehicle,
         car_resgistration,
-        door,
         type_of_fual_id,
         driver_system,
+        door,
         seat,
         car_color,
-        description,
-        street,
-        point,
-        village,
-        district,
-        province,
-        deposits_fee,
-        user_type,
-        //
-        mutjum,
-        post_rent_data,
-        //
-        car_brand_id,
+        car_insurance,
         insurance_company_id,
         level_insurance_id,
+        description,
+        pubmai,
+        mutjum,
+        point,
+        street,
+        province,
+        village,
+        district,
+        post_rent_data,
       } = req.body;
       const status_id = post_status_id;
-      const user_id = req.user;
+      // const user_id = req.user;
       const data = req.files;
       if (typeof car_insurance !== "boolean") {
         car_insurance = car_insurance === "true";
       }
-      if (typeof user_type !== "boolean") {
-        user_type = user_type === "true";
-      }
+      // if (typeof user_type !== "boolean") {
+      //   user_type = user_type === "true";
+      // }
 
-      if (typeof deposits_fee !== "number") {
-        deposits_fee = parseFloat(deposits_fee);
-      }
+      // if (typeof deposits_fee !== "number") {
+      //   deposits_fee = parseFloat(deposits_fee);
+      // }
       if (mutjum && typeof mutjum !== "number") {
         mutjum = parseFloat(mutjum);
+      }
+      if (pubmai && typeof pubmai !== "number") {
+        pubmai = parseFloat(pubmai);
       }
 
       if (
         (car_insurance && !insurance_company_id) ||
-        (car_insurance && !level_insurance_id) ||
-        (car_insurance && !car_brand_id)
+        (car_insurance && !level_insurance_id)
       )
         return SendError({
           res,
@@ -189,9 +223,7 @@ const PostController = {
           err: ` ${
             !insurance_company_id
               ? "insurance_company_id"
-              : !level_insurance_id
-              ? "level_insurance_id"
-              : "car_brand_id"
+              : "level_insurance_id"
           }`,
         });
       if (!data)
@@ -199,16 +231,16 @@ const PostController = {
           res,
           statuscode: 400,
           message: `${EMessage.pleaseInput}`,
-          err: "post_doc_image,post_driver_license_image,post_car_image",
+          err: "post_doc_image,post_car_image",
         });
 
       let post_doc_image = data.post_doc_image;
-      let post_driver_license_image = data.post_driver_license_image;
+      // let post_driver_license_image = data.post_driver_license_image;
       let post_car_image = data.post_car_image;
       let post_insurance_image = data.post_insurance_image;
       if (
         !post_doc_image ||
-        !post_driver_license_image ||
+        // !post_driver_license_image ||
         !post_car_image ||
         (car_insurance && !post_insurance_image)
       )
@@ -219,24 +251,24 @@ const PostController = {
           err: `${
             !post_doc_image
               ? "post_doc_image"
-              : !post_driver_license_image
-              ? "post_driver_license_image"
-              : !post_car_image
-              ? "post_car_image"
+              : // : !post_driver_license_image
+              !post_car_image
+              ? // ? "post_driver_license_image"
+                "post_car_image"
               : "post_insurance_image"
-          } id`,
+          }`,
         });
       //--------------------
       if (typeof post_rent_data === "string") {
         post_rent_data = JSON.parse(post_rent_data);
       }
-      if (typeof door !== "number") door = parseInt(door);
+      // if (typeof door !== "number") door = parseInt(door);
 
       post_rent_data = EnsureArray(post_rent_data);
 
       post_doc_image = EnsureArray(post_doc_image);
 
-      post_driver_license_image = EnsureArray(post_driver_license_image);
+      // post_driver_license_image = EnsureArray(post_driver_license_image);
 
       post_car_image = EnsureArray(post_car_image);
 
@@ -296,9 +328,8 @@ const PostController = {
       if (car_insurance) {
         promiseList.push(FindInsurance_CompanysById(insurance_company_id));
         promiseList.push(FindLevel_InsurancesById(level_insurance_id));
-        promiseList.push(FindCar_BrandsById(car_brand_id));
+        // promiseList.push(FindCar_BrandsById(car_brand_id));
       }
-
       const [
         car_typeExists,
         userExists,
@@ -306,9 +337,10 @@ const PostController = {
         post_statusExists,
         insurance_companyExists,
         level_insuranceExists,
-        car_brandExists,
+        // car_brandExists,
       ] = await Promise.all(promiseList);
-      console.log("insurance :>> ", insurance_companyExists);
+      console.log("car_typeExists :>> ", car_typeExists);
+      console.log("insurance :>> ", level_insuranceExists);
       const notFoundEntity = !car_typeExists
         ? "car_types"
         : !userExists
@@ -317,9 +349,9 @@ const PostController = {
         ? "type_of_fuals"
         : !post_statusExists
         ? "post_status"
-        : car_insurance && !car_brandExists
-        ? "car_brands"
-        : car_insurance && !insurance_companyExists
+        : // : car_insurance && !car_brandExists
+        // ? "car_brands"
+        car_insurance && !insurance_companyExists
         ? "insurance_companys"
         : car_insurance && !level_insuranceExists
         ? "level_insurances"
@@ -335,7 +367,7 @@ const PostController = {
       }
 
       const promiseImageList = [
-        uploadImages(post_driver_license_image),
+        // uploadImages(post_driver_license_image),
         uploadImages(post_doc_image),
         uploadImages(post_car_image),
       ];
@@ -343,58 +375,56 @@ const PostController = {
         promiseImageList.push(uploadImages(post_insurance_image));
       }
       const [
-        post_driver_license_image_url,
+        // post_driver_license_image_url,
         post_doc_images_url,
         post_car_images_url,
         post_insurance_image_url,
       ] = await Promise.all(promiseImageList);
 
+      console.log("post_doc_images_url :>> ", post_doc_images_url);
+      console.log("post_doc_images_url :>> ", post_car_images_url);
+      console.log("post_doc_images_url :>> ", post_insurance_image_url);
       const post = await prisma.posts.create({
         data: {
           car_type_id,
           user_id,
-          frist_name,
-          last_name,
-          birth_day,
-          nationnality,
-          doc_type,
-          car_insurance,
-          insurance_company_id,
-          level_insurance_id,
-          car_brand_id,
           car_brand,
           car_version,
           car_year,
+          province_vehicle,
           car_resgistration,
-          door,
           type_of_fual_id,
           driver_system,
+          door,
           seat,
           car_color,
+          car_insurance,
+          insurance_company_id,
+          level_insurance_id,
           description,
-          street,
-          point,
-          village,
-          district,
-          province,
-          user_type,
-          deposits_fee,
-          status_id,
+          pubmai,
           mutjum,
+          point,
+          street,
+          province,
+          district,
+          village,
+          status_id,
         },
       });
 
-      const add_post_driver_license_image = AddPost_id_url(
-        post_driver_license_image_url,
-        post.id
-      );
+      // const add_post_driver_license_image = AddPost_id_url(
+      //   post_driver_license_image_url,
+      //   post.id
+      // );
+
       const add_post_doc_image = AddPost_id_url(post_doc_images_url, post.id);
       const add_post_car_image = AddPost_id_url(post_car_images_url, post.id);
 
       const add_post_rent_data = AddDataPost_rent_data(post_rent_data, post.id);
 
       const promiseAdd = [
-        Post_driver_license_image.insert(add_post_driver_license_image),
+        // Post_driver_license_image.insert(add_post_driver_license_image),
         Post_doc_image.insert(add_post_doc_image),
         Post_car_image.insert(add_post_car_image),
         Post_rent_data.insert(add_post_rent_data),
@@ -417,6 +447,8 @@ const PostController = {
         post_status_key: status_id + key,
       });
       await redis.del(post.id + "posts-edit");
+      const test = await FindPostById(post.id);
+      console.log("test :>> ", test);
 
       return SendCreate({
         res,
@@ -441,22 +473,23 @@ const PostController = {
       if (data.star && typeof data.star !== "number") {
         data.star = parseFloat(data.star);
       }
-      if (data.deposits_fee && typeof data.deposits_fee !== "number") {
-        data.deposits_fee = parseFloat(data.deposits_fee);
-      }
+      // if (data.deposits_fee && typeof data.deposits_fee !== "number") {
+      //   data.deposits_fee = parseFloat(data.deposits_fee);
+      // }
       if (data.mutjum && typeof data.mutjum !== "number") {
         data.mutjum = parseFloat(data.mutjum);
       }
-
+      if (data.pubmai && typeof data.pubmai !== "number")
+        data.pubmai = parseFloat(data.pubmai);
       if (data.car_insurance && typeof data.car_insurance !== "boolean") {
         data.car_insurance = data.car_insurance === "true";
       }
-      if (data.user_type && typeof data.user_type !== "boolean") {
-        data.user_type = data.user_type === "true";
-      }
-      if (data.door && typeof data.door !== "number") {
-        data.door = parseInt(data.door);
-      }
+      // if (data.user_type && typeof data.user_type !== "boolean") {
+      //   data.user_type = data.user_type === "true";
+      // }
+      // if (data.door && typeof data.door !== "number") {
+      //   data.door = parseInt(data.door);
+      // }
       if (!postExists)
         return SendError({
           res,
@@ -472,9 +505,9 @@ const PostController = {
       if (data.car_type_id) {
         promiseFind.push(FindCar_typesById(data.car_type_id));
       }
-      if (data.car_brand_id) {
-        promiseFind.push(FindCar_BrandsById(data.car_brand_id));
-      }
+      // if (data.car_brand_id) {
+      //   promiseFind.push(FindCar_BrandsById(data.car_brand_id));
+      // }
       if (data.type_of_fual_id) {
         promiseFind.push(FindType_of_FualsById(data.type_of_fual_id));
       }
@@ -489,7 +522,7 @@ const PostController = {
       }
       let userExists,
         car_typeExists,
-        car_brandExists,
+        // car_brandExists,
         type_of_fualExists,
         post_statusExists,
         insurance_companyExists,
@@ -502,9 +535,9 @@ const PostController = {
       if (data.car_type_id) {
         car_typeExists = result.shift();
       }
-      if (data.car_brand_id) {
-        car_brandExists = result.shift();
-      }
+      // if (data.car_brand_id) {
+      //   car_brandExists = result.shift();
+      // }
       if (data.type_of_fual_id) {
         type_of_fualExists = result.shift();
       }
@@ -531,8 +564,6 @@ const PostController = {
             ? "user"
             : data.car_type_id && !car_typeExists
             ? "car_type"
-            : data.car_brand_id && !car_brandExists
-            ? "car_brand"
             : data.type_of_fual_id && !type_of_fualExists
             ? "type_of_fuals"
             : data.status_id && !post_statusExists
@@ -646,23 +677,50 @@ const PostController = {
       // await DeleteCachedKey(key);
       let page = parseInt(req.query.page);
       page = !page || page < 0 ? 0 : page - 1;
-      const user = await CachDataLimit(
-        key + "-" + page,
-        model,
-        where,
-        page,
-        select
-      );
-      CachDataLimit(key + "-" + (page + 1), model, where, page + 1, select);
+      const [post] = await Promise.all([
+        CachDataLimit(key + "-" + page, model, where, page, select),
+        CachDataLimit(key + "-" + (page + 1), model, where, page + 1, select),
+      ]);
       return SendSuccess({
         res,
-        message: `${EMessage.fetchAllSuccess} user`,
-        data: user,
+        message: `${EMessage.fetchAllSuccess} post`,
+        data: post,
       });
     } catch (err) {
       SendErrorLog({
         res,
         message: `${EMessage.serverError} ${EMessage.errorFetchingAll} post select allpage`,
+        err,
+      });
+    }
+  },
+  async SelectAllAdminPage(req, res) {
+    try {
+      // await DeleteCachedKey(key);
+      let page = parseInt(req.query.page);
+      page = !page || page < 0 ? 0 : page - 1;
+      let whereAdmin = where;
+      delete whereAdmin.status_id;
+      console.log("whereAdmin :>> ", whereAdmin);
+      const [post] = await Promise.all([
+        CachDataLimit(key + "admin-" + page, model, whereAdmin, page, select),
+        CachDataLimit(
+          key + "admin-" + (page + 1),
+          model,
+          whereAdmin,
+          page + 1,
+          select
+        ),
+      ]);
+      return SendSuccess({
+        res,
+        message: `${EMessage.fetchAllSuccess} post`,
+        data: post,
+      });
+    } catch (err) {
+      SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll} post select allpage Admin`,
         err,
       });
     }
@@ -674,20 +732,22 @@ const PostController = {
       page = !page || page < 0 ? 0 : page - 1;
       const userwhere = { status_id: status_id, is_active: true };
 
-      const post = await CachDataLimit(
-        status_id + key + "-" + page,
-        model,
-        userwhere,
-        page,
-        select
-      );
-      CachDataLimit(
-        status_id + key + "-" + (page + 1),
-        model,
-        userwhere,
-        page,
-        select
-      );
+      const [post] = await Promise.all([
+        CachDataLimit(
+          status_id + key + "-" + page,
+          model,
+          userwhere,
+          page,
+          select
+        ),
+        CachDataLimit(
+          status_id + key + "-" + (page + 1),
+          model,
+          userwhere,
+          page,
+          select
+        ),
+      ]);
       return SendSuccess({
         res,
         message: `${EMessage.fetchAllSuccess}`,
@@ -709,20 +769,25 @@ const PostController = {
       const { car_type_id } = req.params;
       page = !page || page < 0 ? 0 : page - 1;
       const car_typewhere = { car_type_id: car_type_id, ...where };
-      const post = await CachDataLimit(
-        car_type_id + key + "-" + page,
-        model,
-        car_typewhere,
-        page,
-        select
-      );
-      CachDataLimit(
-        car_type_id + key + "-" + (page + 1),
-        model,
-        car_typewhere,
-        page + 1,
-        select
-      );
+      const [post] = await Promise.all([
+        CachDataLimit(
+          car_type_id + key + "-" + page,
+          model,
+          car_typewhere,
+          page,
+          select,
+          {
+            updated_at: "desc",
+          }
+        ),
+        CachDataLimit(
+          car_type_id + key + "-" + (page + 1),
+          model,
+          car_typewhere,
+          page + 1,
+          select
+        ),
+      ]);
       return SendSuccess({
         res,
         message: `${EMessage.fetchAllSuccess} `,
@@ -745,20 +810,22 @@ const PostController = {
       page = !page || page < 0 ? 0 : page - 1;
       const type_fualwhere = { type_of_fual_id, ...where };
 
-      const post = await CachDataLimit(
-        type_of_fual_id + key + "-" + page,
-        model,
-        type_fualwhere,
-        page,
-        select
-      );
-      CachDataLimit(
-        type_of_fual_id + key + "-" + (page + 1),
-        model,
-        type_fualwhere,
-        page + 1,
-        select
-      );
+      const [post] = await Promise.all([
+        CachDataLimit(
+          type_of_fual_id + key + "-" + page,
+          model,
+          type_fualwhere,
+          page,
+          select
+        ),
+        CachDataLimit(
+          type_of_fual_id + key + "-" + (page + 1),
+          model,
+          type_fualwhere,
+          page + 1,
+          select
+        ),
+      ]);
       return SendSuccess({
         res,
         message: `${EMessage.fetchAllSuccess}`,
@@ -776,12 +843,12 @@ const PostController = {
   async SelectAllByUser(req, res) {
     try {
       // await DeleteCachedKey(key);
-      const user_id = req.user;
+      const user_id = req.query.user_id ? req.query.user_id : req.user;
       let page = parseInt(req.query.page);
       page = !page || page < 0 ? 0 : page - 1;
       const userwhere = { user_id: user_id, is_active: true };
 
-      const user = await CachDataAll(
+      const [post] = await CachDataAll(
         user_id + key + "-" + page,
         model,
         userwhere,
@@ -790,7 +857,7 @@ const PostController = {
       return SendSuccess({
         res,
         message: `${EMessage.fetchAllSuccess}`,
-        data: user,
+        data: post,
       });
     } catch (err) {
       SendErrorLog({

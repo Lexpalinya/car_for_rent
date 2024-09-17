@@ -35,7 +35,7 @@ const PromotionController = {
           message: `${EMessage.pleaseInput}`,
           err: validate.join(", "),
         });
-      let { price, amount } = req.body;
+      let {title, price, amount, out_date } = req.body;
       if (typeof price !== "number") {
         price = parseFloat(price);
       }
@@ -46,10 +46,12 @@ const PromotionController = {
 
       const promotion = await prisma.promotions.create({
         data: {
+          title,
           code,
           price,
           amount,
           count_use: amount,
+          out_date,
         },
       });
       await RecacheData();

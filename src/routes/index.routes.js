@@ -298,6 +298,7 @@ route.delete(`${wallet}/delete/:id`, auth, WalletController.Delete);
 //------------Post---------------------------------
 const post = "/post";
 route.get(`${post}/selAllPage`, auth, PostController.SelectAllPage);
+route.get(`${post}/selAllAdminPage`, auth, admin, PostController.SelectAllAdminPage);
 route.get(`${post}/selOne/:id`, auth, PostController.SelectOne);
 route.get(
   `${post}/selAllPageByType_of_fuals_id/:type_of_fual_id`,

@@ -11,8 +11,13 @@ export const ValidateData = (data) => {
 };
 //----------Promotion-----------------------------
 export const ValidatePromotion = (data) => {
-  const { price, amount } = data;
-  return ValidateData({ price, amount });
+  const { title, price, amount, out_date } = data;
+  return ValidateData({
+    title,
+    price,
+    amount,
+    out_date,
+  });
 };
 
 //------------post_status----------------------
@@ -116,60 +121,54 @@ export const ValidateCheckUsernameAndPhone_number = (data) => {
 export const ValidatePost = (data) => {
   const {
     car_type_id,
-    frist_name,
-    last_name,
-    birth_day,
-    nationnality,
-    doc_type,
-    car_insurance,
+    user_id,
     car_brand,
     car_version,
     car_year,
+    province_vehicle,
     car_resgistration,
-    door,
     type_of_fual_id,
     driver_system,
+    door,
     seat,
     car_color,
+    car_insurance,
+    insurance_company_id,
+    level_insurance_id,
     description,
-    street,
+    pubmai,
+    mutjum,
     point,
+    street,
+    province,
     village,
     district,
-    province,
-    deposits_fee,
-
-    user_type,
-    //
     post_rent_data,
   } = data;
   return ValidateData({
     car_type_id,
-    frist_name,
-    last_name,
-    birth_day: new Date(birth_day).toString(),
-    nationnality,
-    doc_type,
-    car_insurance,
+    user_id,
     car_brand,
     car_version,
     car_year,
+    province_vehicle,
     car_resgistration,
-    door,
     type_of_fual_id,
     driver_system,
+    door,
     seat,
     car_color,
+    car_insurance,
+    insurance_company_id,
+    level_insurance_id,
     description,
-    street,
+    pubmai,
+    mutjum,
     point,
+    street,
+    province,
     village,
     district,
-    province,
-    deposits_fee,
-
-    user_type,
-    //
     post_rent_data,
   });
 };

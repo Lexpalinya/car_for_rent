@@ -23,6 +23,8 @@ let select = {
   id: true,
   user_id: true,
   promotion_id: true,
+  // title: true,
+  is_use: true,
   created_at: true,
   updated_at: true,
   users: {
@@ -100,6 +102,8 @@ const WalletController = {
 
       // Validate and clean up the input data
       const data = DataExists(req.body);
+      if (data.is_use && typeof data.is_use !== "boolean")
+        data.is_use = data.is_use === "true";
 
       // Initialize an array of promises to validate relationships
       const promises = [FindWalletById(id)];
@@ -195,6 +199,7 @@ const WalletController = {
   async SelectByUserID(req, res) {
     try {
       const id = req.user;
+      console.log("id :>> ", id);
       const wallet = await CachDataAll(
         id + key,
         model,
