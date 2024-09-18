@@ -343,17 +343,28 @@ model car_rent {
   is_active                       Boolean                           @default(true)
   user_id                         String                            @db.VarChar(36)
   post_id                         String                            @db.VarChar(36)
+  type_rent                       String
+  price_rent                      Float
   start_date                      DateTime                          @db.Date
   end_date                        DateTime                          @db.Date
   frist_name                      String
   last_name                       String
-  email                           String
+  village                         String
+  district                        String
+  province                        String
   phone_number                    String
+  email                           String
   doc_type                        String
-  description                     String?                           @db.LongText
+  car_rent_doc_image              car_rent_doc_image[]
+  car_rent_driving_lincense_image car_rent_driving_lincense_image[]
+  description                     String                            @db.LongText
   promotion_id                    String?                           @db.VarChar(36)
+  discount                        Float
+  total_price                     Float
   booking_fee                     Float
+  tax                             Float
   pay_destination                 Float
+  khampakan                       Float
   pay_type                        String
   bank_no                         String?                           @db.VarChar(17)
   pay_status                      Boolean                           @default(false)
@@ -366,8 +377,6 @@ model car_rent {
   promotion                       promotions?                       @relation(fields: [promotion_id], references: [id])
   status                          car_rent_status                   @relation(fields: [status_id], references: [id])
   user                            users                             @relation(fields: [user_id], references: [id])
-  car_rent_doc_image              car_rent_doc_image[]
-  car_rent_driving_lincense_image car_rent_driving_lincense_image[]
   car_rent_payment_image          car_rent_payment_image[]
   car_rent_visa                   car_rent_visa?
 

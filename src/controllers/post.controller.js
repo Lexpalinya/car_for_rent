@@ -4,6 +4,7 @@ import { CachDataAll, CachDataLimit } from "../services/cach.contro";
 import { DeleteCachedKey } from "../services/cach.deletekey";
 import { EMessage } from "../services/enum";
 import {
+  CheckCar_registation,
   FindCar_BrandsById,
   FindCar_typesById,
   FindInsurance_CompanysById,
@@ -127,6 +128,7 @@ let select = {
       username: true,
       phone_number: true,
       profile: true,
+      kycs: true,
     },
   },
   car_types: true,
@@ -138,6 +140,11 @@ let select = {
   like_post: {
     select: {
       user_id: true,
+    },
+  },
+  _count: {
+    select: {
+      like_post: true,
     },
   },
 };
@@ -324,6 +331,7 @@ const PostController = {
         FindUserById_ID(user_id),
         FindType_of_FualsById(type_of_fual_id),
         FindPost_StatusById(status_id),
+        CheckCar_registation({ car_resgistration, province_vehicle }),
       ];
       if (car_insurance) {
         promiseList.push(FindInsurance_CompanysById(insurance_company_id));
@@ -335,12 +343,18 @@ const PostController = {
         userExists,
         type_of_fualExists,
         post_statusExists,
+        checkCar_registaionExists,
         insurance_companyExists,
         level_insuranceExists,
         // car_brandExists,
       ] = await Promise.all(promiseList);
-      console.log("car_typeExists :>> ", car_typeExists);
-      console.log("insurance :>> ", level_insuranceExists);
+      if (checkCar_registaionExists.length > 0)
+        return SendError({
+          res,
+          statuscode: 400,
+          message: "car_resgistration or province_vehicle",
+          err: "already_registered",
+        });
       const notFoundEntity = !car_typeExists
         ? "car_types"
         : !userExists
@@ -579,6 +593,30 @@ const PostController = {
           err: `${notFoundEntity} id`,
         });
       }
+      if (data.car_resgistration || data.province_vehicle) {
+        // Set default values to avoid undefined issues
+        const carRegistration =
+          data.car_resgistration || postExists.car_resgistration;
+        const provinceVehicle =
+          data.province_vehicle || postExists.province_vehicle;
+
+        // Check for duplicates
+        const check = await CheckCar_registation({
+          car_resgistration: carRegistration,
+          province_vehicle: provinceVehicle,
+        });
+        console.log("check :>> ", check);
+
+        if (check.length > 0) {
+          return SendError({
+            res,
+            statuscode: 400,
+            message: "car_resgistration or province_vehicle",
+            err: "already_registered",
+          });
+        }
+      }
+
       const post = await prisma.posts.update({
         where: {
           id,

@@ -1,5 +1,6 @@
 import prisma from "../utils/prisma.client";
 import {
+  CachDataAll,
   CachDataFindById,
   CachDataFindByIdNoClear,
   CachDataFindDataId_One,
@@ -228,6 +229,16 @@ export const FindPostById_for_edit = (id) => {
     is_active: true,
   });
 };
+export const CheckCar_registation = ({
+  car_resgistration,
+  province_vehicle,
+}) => {
+  return CachDataAll("posts"+car_resgistration+province_vehicle, "posts", {
+    is_active: true,
+    car_resgistration,
+    province_vehicle,
+  });
+};
 
 export const FindPostById = (id) => {
   return CachDataFindDataId_One(
@@ -273,7 +284,7 @@ export const FindPostById = (id) => {
           username: true,
           phone_number: true,
           profile: true,
-          kycs:true
+          kycs: true,
         },
       },
       car_types: true,
@@ -315,28 +326,58 @@ export const FindCar_rentById = (id) => {
     },
     {
       id: true,
-      post_id: true,
+      is_active: true,
       user_id: true,
+      post_id: true,
+      type_rent: true,
+      price_rent: true,
       start_date: true,
       end_date: true,
       frist_name: true,
       last_name: true,
-      email: true,
+      village: true,
+      district: true,
+      province: true,
       phone_number: true,
+      email: true,
       doc_type: true,
-      booking_fee: true,
-      pay_destination: true,
       description: true,
-      reason: true,
       promotion_id: true,
+      discount: true,
+      total_price: true,
+      booking_fee: true,
+      tax: true,
+      pay_destination: true,
+      khampakan: true,
+      pay_type: true,
+      bank_no: true,
+      pay_status: true,
+      reason: true,
+      status_id: true,
+      is_success: true,
+      created_at: true,
+      updated_at: true,
       post: {
         select: {
           star: true,
-          car_brands: {
+          users: {
             select: {
-              name: true,
+              profile: true,
+              kycs: {
+                select: {
+                  first_name: true,
+                  last_name: true,
+                  village: true,
+                  district: true,
+                  province: true,
+                  phone_number: true,
+                },
+              },
             },
           },
+    
+          car_types: true,
+    
           car_version: true,
           car_year: true,
           post_car_image: {
@@ -346,6 +387,8 @@ export const FindCar_rentById = (id) => {
           },
         },
       },
+      status: true,
+      promotion: true,
       car_rent_doc_image: true,
       car_rent_driving_lincense_image: true,
       car_rent_payment_image: true,

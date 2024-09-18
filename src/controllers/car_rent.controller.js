@@ -26,24 +26,37 @@ import {
 import { UploadImage, uploadImages } from "../services/upload.file";
 import { DataExists, ValidateCar_rent } from "../services/validate";
 import prisma from "../utils/prisma.client";
-const car_rent_status = "ea086ac0-b912-4607-bd83-72d14fb67a6f";
+const car_rent_status = "a8581879-1cc6-4607-b998-74a79d74dd63";
+const car_rent_status_user_approval = "7a55f7c4-4f6e-4992-bf02-66f1c1c47b99";
+const car_rent_status_Success = "818ca297-e08a-49ba-88c6-9834459564a1";
+const car_rent_status_Failure = "b3b177e3-9f07-4546-ad14-bc96a7d62185";
 let key = "car_rent";
 let model = "car_rent";
 let select = {
   id: true,
-  post_id: true,
+  is_active: true,
   user_id: true,
+  post_id: true,
+  type_rent: true,
+  price_rent: true,
   start_date: true,
   end_date: true,
   frist_name: true,
   last_name: true,
-  email: true,
+  village: true,
+  district: true,
+  province: true,
   phone_number: true,
+  email: true,
   doc_type: true,
   description: true,
   promotion_id: true,
+  discount: true,
+  total_price: true,
   booking_fee: true,
+  tax: true,
   pay_destination: true,
+  khampakan: true,
   pay_type: true,
   bank_no: true,
   pay_status: true,
@@ -55,11 +68,24 @@ let select = {
   post: {
     select: {
       star: true,
-      car_types: {
+      users: {
         select: {
-          name: true,
+          profile: true,
+          kycs: {
+            select: {
+              first_name: true,
+              last_name: true,
+              village: true,
+              district: true,
+              province: true,
+              phone_number: true,
+            },
+          },
         },
       },
+
+      car_types: true,
+
       car_version: true,
       car_year: true,
       post_car_image: {
@@ -69,6 +95,8 @@ let select = {
       },
     },
   },
+  status: true,
+  promotion: true,
   car_rent_doc_image: true,
   car_rent_driving_lincense_image: true,
   car_rent_payment_image: true,
@@ -108,25 +136,39 @@ const Car_rentController = {
       const user_id = req.user;
       let {
         post_id,
+        type_rent,
+        price_rent,
         start_date,
         end_date,
         frist_name,
         last_name,
-        email,
+        village,
+        district,
+        province,
         phone_number,
+        email,
         doc_type,
-        booking_fee, //number
-        pay_destination, //number
+        discount,
+        total_price,
+        booking_fee,
+        tax,
+        pay_destination,
+        khampakan,
         pay_type,
-        bank_no,
-
-        //------
         description,
-        reason,
+        //--------
+        // reason,
         promotion_id,
         //-------------
         car_rent_visa,
       } = req.body;
+      if (typeof price_rent !== "number") price_rent = parseFloat(price_rent);
+      if (typeof discount !== "number") discount = parseFloat(discount);
+      if (typeof total_price !== "number")
+        total_price = parseFloat(total_price);
+      if (typeof tax !== "number") tax = parseFloat(tax);
+      if (typeof khampakan !== "number") khampakan = parseFloat(khampakan);
+
       if (typeof booking_fee !== "number")
         booking_fee = parseFloat(booking_fee);
       if (typeof pay_destination !== "number")
@@ -220,21 +262,27 @@ const Car_rentController = {
         data: {
           user_id,
           post_id,
+          type_rent,
+          price_rent,
           start_date,
           end_date,
           frist_name,
           last_name,
-          email,
+          village,
+          district,
+          province,
           phone_number,
+          email,
           doc_type,
+          discount,
+          total_price,
           booking_fee,
+          tax,
           pay_destination,
+          khampakan,
           pay_type,
-          bank_no,
-          status_id,
           description,
-          reason,
-          promotion_id,
+          status_id,
         },
       });
       const car_rent_doc_image_data = AddCar_rent_id_url(
@@ -276,6 +324,8 @@ const Car_rentController = {
         pay_status: car_rent.pay_status,
         user_post_key: user_id + "post",
       });
+      // const dt = FindCar_rentById(car_rent.id);
+      // console.log("car_rent :>> ", dt);
       return SendSuccess({
         res,
         message: `${EMessage.insertSuccess} car_rent`,
@@ -293,6 +343,16 @@ const Car_rentController = {
     try {
       const id = req.params.id;
       const data = DataExists(req.body);
+      if (data.price_rent && typeof data.price_rent !== "number")
+        data.price_rent = parseFloat(data.price_rent);
+      if (data.discount && typeof data.discount !== "number")
+        data.discount = parseFloat(data.discount);
+      if (data.total_price && typeof data.total_price !== "number")
+        data.total_price = parseFloat(data.total_price);
+      if (data.tax && typeof data.tax !== "number")
+        data.tax = parseFloat(data.tax);
+      if (data.khampakan && typeof data.khampakan !== "number")
+        data.khampakan = parseFloat(data.khampakan);
 
       if (data.pay_status || typeof data.pay_status !== "boolean")
         data.pay_status = data.pay_status === "true";
@@ -362,6 +422,8 @@ const Car_rentController = {
         pay_status: car_rentExists.pay_status,
         user_post_key: car_rentExists.user_id + "post",
       });
+      const dt = await FindCar_rentById(id);
+      console.log("dt :>> ", dt);
       return SendSuccess({
         res,
         message: `${EMessage.deleteSuccess}`,
@@ -400,7 +462,7 @@ const Car_rentController = {
         where: {
           id,
         },
-        data: { pay_status },
+        data: { pay_status, status_id: car_rent_status_user_approval },
       });
       await ResCachedDataCar_rent({
         id,
@@ -435,7 +497,6 @@ const Car_rentController = {
           err: `car_rent_visa type object {id:number,name,exp_date:DateTime,cvv}`,
         });
       if (typeof car_rent_visa === "string") {
-        // console.log("object :>> ", object);
         car_rent_visa = JSON.parse(car_rent_visa);
         if (
           !car_rent_visa.id ||
@@ -580,47 +641,6 @@ const Car_rentController = {
   },
   async SelectAllPage(req, res) {
     try {
-      // await DeleteCachedKey(key);
-
-      // let select1 = {
-      //   id: true,
-      //   post_id: true,
-      //   user_id: true,
-      //   start_date: true,
-      //   end_date: true,
-      //   frist_name: true,
-      //   last_name: true,
-      //   email: true,
-      //   phone_number: true,
-      //   doc_type: true,
-      //   booking_fee: true,
-      //   pay_destination: true,
-      //   description: true,
-      //   reason: true,
-      //   promotion_id: true,
-      //   post: {
-      //     select: {
-      //       star: true,
-      //       car_brands: {
-      //         select: {
-      //           name: true,
-      //         },
-      //       },
-      //       car_version: true,
-      //       car_year: true,
-      //       post_car_image: {
-      //         select: {
-      //           url: true,
-      //         },
-      //       },
-      //     },
-      //   },
-      //   car_rent_doc_image: true,
-      //   car_rent_payment_image: true,
-      //   car_rent_driving_lincense_image: true,
-      //   car_rent_visa: true,
-      // };
-
       let page = parseInt(req.query.page);
       page = !page || page < 0 ? 0 : page - 1;
       const car_rent = await CachDataLimit(
@@ -630,7 +650,10 @@ const Car_rentController = {
           is_active: true,
         },
         page,
-        select
+        select,
+        {
+          updated_at: "desc",
+        }
       );
       CachDataLimit(
         key + "-" + (page + 1),
@@ -639,7 +662,10 @@ const Car_rentController = {
           is_active: true,
         },
         page + 1,
-        select
+        select,
+        {
+          updated_at: "desc",
+        }
       );
       return SendSuccess({
         res,
@@ -676,7 +702,10 @@ const Car_rentController = {
           is_active: true,
         },
         page,
-        select
+        select,
+        {
+          updated_at: "desc",
+        }
       );
       CachDataLimit(
         `${pay_status}` + key + "-" + (page + 1),
@@ -686,7 +715,10 @@ const Car_rentController = {
           is_active: true,
         },
         page + 1,
-        select
+        select,
+        {
+          updated_at: "desc",
+        }
       );
       return SendSuccess({
         res,
@@ -757,7 +789,10 @@ const Car_rentController = {
           is_active: true,
         },
         page,
-        select
+        select,
+        {
+          updated_at: "desc",
+        }
       );
       CachDataLimit(
         id + key + "-" + (page + 1),
@@ -768,7 +803,10 @@ const Car_rentController = {
           is_active: true,
         },
         page + 1,
-        select
+        select,
+        {
+          updated_at: "desc",
+        }
       );
       return SendSuccess({
         res,
@@ -795,9 +833,70 @@ const Car_rentController = {
         {
           user_id,
           is_active: true,
+          status_id: {
+            notIn: [car_rent_status_Success, car_rent_status_Failure],
+          },
         },
-        select
+        select,
+        {
+          updated_at: "desc",
+        }
       );
+
+      return SendSuccess({
+        res,
+        message: `${EMessage.fetchOneSuccess} user`,
+        data: car_rent,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll}car_rent by user id and status id `,
+        err,
+      });
+    }
+  },
+  async SelectAllByUser_idHistory(req, res) {
+    try {
+      // await DeleteCachedKey(key);
+      const user_id = req.user;
+      let page = parseInt(req.query.page);
+      page = !page || page < 0 ? 0 : page - 1;
+
+      const car_rent = await Promise.all([
+        CachDataLimit(
+          user_id + key + "h" + page,
+          model,
+          {
+            user_id,
+            is_active: true,
+            status_id: {
+              in: [car_rent_status_Success, car_rent_status_Failure],
+            },
+          },
+          page,
+          select,
+          {
+            updated_at: "desc",
+          }
+        ),
+        CachDataLimit(
+          user_id + key + "h" + (page + 1),
+          model,
+          {
+            user_id,
+            is_active: true,
+            status_id: {
+              in: [car_rent_status_Success, car_rent_status_Failure],
+            },
+          },
+          page + 1,
+          select,
+          {
+            updated_at: "desc",
+          }
+        ),
+      ]);
 
       return SendSuccess({
         res,
@@ -819,33 +918,25 @@ const Car_rentController = {
 
       const car_rent = await CachDataAll(
         user_id + "post" + key,
-        "posts",
+        "car_rent",
         {
-          user_id,
           is_active: true,
+          pay_status: true,
+          post: {
+            user_id,
+          },
+
+          status_id: {
+            notIn: [
+              car_rent_status,
+              car_rent_status_Success,
+              car_rent_status_Failure,
+            ],
+          },
         },
+        undefined,
         {
-          id: true,
-          user_id: true,
-          star: true,
-          users: {
-            select: {
-              username: true,
-              phone_number: true,
-              profile: true,
-            },
-          },
-          car_types: true,
-          type_of_fual: true,
-          status: true,
-          post_car_image: true,
-          created_at: true,
-          updated_at: true,
-          car_rent: {
-            select: {
-              ...select,
-            },
-          },
+          updated_at: "desc",
         }
       );
 
@@ -854,7 +945,67 @@ const Car_rentController = {
         message: `${EMessage.fetchOneSuccess} user`,
         data: car_rent,
       });
-    } catch (error) {
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll}car_rent by user id post`,
+        err,
+      });
+    }
+  },
+  async SelectByUserPostHistory(req, res) {
+    try {
+      const user_id = req.user;
+      let page = parseInt(req.query.page);
+      page = !page || page < 0 ? 0 : page - 1;
+
+      const [car_rent] = await Promise.all([
+        CachDataLimit(
+          user_id + "post" + key + "h" + page,
+          "car_rent",
+          {
+            is_active: true,
+            pay_status: true,
+            post: {
+              user_id,
+            },
+            status_id: {
+              in: [car_rent_status_Success, car_rent_status_Failure],
+            },
+          },
+          page,
+          select,
+          {
+            updated_at: "desc",
+          }
+        ),
+        CachDataLimit(
+          user_id + "post" + key + "h" + (page + 1),
+          "car_rent",
+          {
+            is_active: true,
+            pay_status: true,
+            post: {
+              user_id,
+            },
+            status_id: {
+              in: [car_rent_status_Success, car_rent_status_Failure],
+            },
+          },
+          page + 1,
+          select,
+          {
+            updated_at: "desc",
+          }
+        ),
+      ]);
+
+      return SendSuccess({
+        res,
+        message: `${EMessage.fetchOneSuccess} user`,
+        data: car_rent,
+      });
+    } catch (err) {
       return SendErrorLog({
         res,
         message: `${EMessage.serverError} ${EMessage.errorFetchingAll}car_rent by user id post`,
