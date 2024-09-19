@@ -886,7 +886,7 @@ const PostController = {
       page = !page || page < 0 ? 0 : page - 1;
       const userwhere = { user_id: user_id, is_active: true };
 
-      const [post] = await CachDataAll(
+      const post = await CachDataAll(
         user_id + key + "-" + page,
         model,
         userwhere,
