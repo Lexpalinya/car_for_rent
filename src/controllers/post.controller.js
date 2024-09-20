@@ -45,51 +45,6 @@ let where = {
   post_status: true,
   status_id: "44c3d8f0-432b-4f26-a9de-059df566761c",
 };
-// let a = {
-//   post_status,
-//   is_active,
-//   car_type_id,
-//   user_id,
-//   star,
-//   car_brand,
-//   car_year,
-//   province_vehicle,
-//   car_resgistration,
-//   type_of_fual_id,
-//   driver_system,
-//   door,
-//   seat,
-//   car_color,
-//   post_doc_image,
-//   car_insurance,
-//   insurance_company_id,
-//   level_insurance_id,
-//   post_insurance_image,
-//   description,
-//   pubmai,
-//   mutjum,
-//   post_rent_data,
-//   point,
-//   street,
-//   province,
-//   village,
-//   district,
-//   status_id,
-//   created_id,
-//   updated_id,
-//   like_post,
-//   post_car_image,
-//   post_doc_image,
-//   post_insurance_image,
-//   post_rent_data,
-//   car_types,
-//   insurance_company,
-//   level_insurance,
-//   status,
-//   type_of_fual,
-//   users,
-//   car_brans,
-// };
 let select = {
   id: true,
   is_active: true,
@@ -122,6 +77,7 @@ let select = {
   insurance_company: true,
   level_insurance: true,
   type_of_fual: true,
+  currency: true,
   status: true,
   users: {
     select: {
@@ -198,6 +154,7 @@ const PostController = {
         village,
         district,
         post_rent_data,
+        currency
       } = req.body;
       const status_id = post_status_id;
       // const user_id = req.user;
@@ -424,6 +381,7 @@ const PostController = {
           district,
           village,
           status_id,
+          currency
         },
       });
 
@@ -623,14 +581,23 @@ const PostController = {
         },
         data,
       });
-      await RecacheDataPost({
-        key,
-        car_type_id_key: postExists.car_type_id + key,
-        type_of_fual_id_key: postExists.type_of_fual_id + key,
-        user_id_key: postExists.user_id + key,
-        post_status_key: postExists.status_id + key,
-      });
-      await redis.del(postExists.id + key);
+      await Promise.all([
+        RecacheDataPost({
+          key,
+          car_type_id_key: postExists.car_type_id + key,
+          type_of_fual_id_key: postExists.type_of_fual_id + key,
+          user_id_key: postExists.user_id + key,
+          post_status_key: postExists.status_id + key,
+        }),
+        RecacheDataPost({
+          key,
+          car_type_id_key: post.car_type_id + key,
+          type_of_fual_id_key: post.type_of_fual_id + key,
+          user_id_key: post.user_id + key,
+          post_status_key: post.status_id + key,
+        }),
+        redis.del(postExists.id + key),
+      ]);
 
       return SendSuccess({
         res,
@@ -661,14 +628,23 @@ const PostController = {
         where: { id },
         data: { is_active: false },
       });
-      await RecacheDataPost({
-        key,
-        car_type_id_key: postExists.car_type_id + key,
-        type_of_fual_id_key: postExists.type_of_fual_id + key,
-        user_id_key: postExists.user_id + key,
-        post_status_key: postExists.status_id + key,
-      });
-      await redis.del(id + "posts-edit", id + key);
+      await Promise.all([
+        RecacheDataPost({
+          key,
+          car_type_id_key: postExists.car_type_id + key,
+          type_of_fual_id_key: postExists.type_of_fual_id + key,
+          user_id_key: postExists.user_id + key,
+          post_status_key: postExists.status_id + key,
+        }),
+        RecacheDataPost({
+          key,
+          car_type_id_key: post.car_type_id + key,
+          type_of_fual_id_key: post.type_of_fual_id + key,
+          user_id_key: post.user_id + key,
+          post_status_key: post.status_id + key,
+        }),
+        await redis.del(id + "posts-edit", id + key),
+      ]);
       return SendSuccess({
         res,
         message: `${EMessage.deleteSuccess}`,

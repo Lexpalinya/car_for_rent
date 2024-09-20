@@ -24,7 +24,11 @@ import {
   Car_rent_visa,
 } from "../services/subtabel";
 import { UploadImage, uploadImages } from "../services/upload.file";
-import { DataExists, ValidateCar_rent } from "../services/validate";
+import {
+  DataExists,
+  ValidateCar_rent,
+  ValidateCar_rent_update_status,
+} from "../services/validate";
 import prisma from "../utils/prisma.client";
 const car_rent_status = "a8581879-1cc6-4607-b998-74a79d74dd63";
 const car_rent_status_user_approval = "7a55f7c4-4f6e-4992-bf02-66f1c1c47b99";
@@ -49,6 +53,7 @@ let select = {
   phone_number: true,
   email: true,
   doc_type: true,
+  scope: true,
   description: true,
   promotion_id: true,
   discount: true,
@@ -62,6 +67,7 @@ let select = {
   pay_status: true,
   reason: true,
   status_id: true,
+  admin_id: true,
   is_success: true,
   created_at: true,
   updated_at: true,
@@ -156,6 +162,7 @@ const Car_rentController = {
         khampakan,
         pay_type,
         description,
+        scope,
         //--------
         // reason,
         promotion_id,
@@ -283,6 +290,7 @@ const Car_rentController = {
           pay_type,
           description,
           status_id,
+          scope,
         },
       });
       const car_rent_doc_image_data = AddCar_rent_id_url(
@@ -324,8 +332,8 @@ const Car_rentController = {
         pay_status: car_rent.pay_status,
         user_post_key: user_id + "post",
       });
-      // const dt = FindCar_rentById(car_rent.id);
-      // console.log("car_rent :>> ", dt);
+      const dt = await FindCar_rentById(car_rent.id);
+      console.log("car_rent :>> ", dt);
       return SendSuccess({
         res,
         message: `${EMessage.insertSuccess} car_rent`,
@@ -414,14 +422,25 @@ const Car_rentController = {
         },
         data,
       });
-      await ResCachedDataCar_rent({
-        id,
-        key,
-        post_key: car_rentExists.post_id,
-        user_key: car_rentExists.user_id,
-        pay_status: car_rentExists.pay_status,
-        user_post_key: car_rentExists.user_id + "post",
-      });
+      await Promise.all([
+        await ResCachedDataCar_rent({
+          id,
+          key,
+          post_key: car_rentExists.post_id,
+          user_key: car_rentExists.user_id,
+          pay_status: car_rentExists.pay_status,
+          user_post_key: car_rentExists.user_id + "post",
+        }),
+        await ResCachedDataCar_rent({
+          id,
+          key,
+          post_key: car_rent.post_id,
+          user_key: car_rent.user_id,
+          pay_status: car_rent.pay_status,
+          user_post_key: car_rent.user_id + "post",
+        }),
+      ]);
+
       const dt = await FindCar_rentById(id);
       console.log("dt :>> ", dt);
       return SendSuccess({
@@ -432,7 +451,89 @@ const Car_rentController = {
     } catch (err) {
       return SendErrorLog({
         res,
-        message: `${EMessage.serverError} ${EMessage.deleteFailed} `,
+        message: `${EMessage.serverError} ${EMessage.updateFailed} `,
+        err,
+      });
+    }
+  },
+
+  async UpdateStatus(req, res) {
+    try {
+      const id = req.params.id;
+      const validate = ValidateCar_rent_update_status(req.body);
+      if (validate.length > 0)
+        return SendError({
+          res,
+          message: `${EMessage.pleaseInput}`,
+          err: validate.join(", "),
+        });
+
+      const { user_id, status_id } = req.body;
+
+      const [car_rentExists, userExists, statusExists] = await Promise.all([
+        FindCar_rentById_for_edit(id),
+        FindUserById_ID(user_id),
+        FindCar_Rent_StatusById(status_id),
+      ]);
+      if (!car_rentExists || !statusExists || !userExists)
+        return SendError({
+          res,
+          message: `${EMessage.notFound}`,
+          err: `${
+            !car_rentExists
+              ? "car_rent_id"
+              : !statusExists
+              ? "status_id"
+              : "user_id"
+          }`,
+        });
+      if (userExists.role === "customer") {
+        return SendError({
+          res,
+          message: `Not an admin account`,
+          err: "Not an admin account",
+        });
+      }
+
+      const car_rent = await prisma.car_rent.update({
+        where: {
+          id,
+        },
+        data: {
+          status_id,
+          admin_id: user_id,
+        },
+      });
+
+      await Promise.all([
+        await ResCachedDataCar_rent({
+          id,
+          key,
+          post_key: car_rentExists.post_id,
+          user_key: car_rentExists.user_id,
+          pay_status: car_rentExists.pay_status,
+          user_post_key: car_rentExists.user_id + "post",
+        }),
+        await ResCachedDataCar_rent({
+          id,
+          key,
+          post_key: car_rent.post_id,
+          user_key: car_rent.user_id,
+          pay_status: car_rent.pay_status,
+          user_post_key: car_rent.user_id + "post",
+        }),
+      ]);
+      const dt = await FindCar_rentById(id);
+      console.log("dt :>> ", dt);
+      return SendSuccess({
+        res,
+        message: `${EMessage.deleteSuccess}`,
+        data: car_rent,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.updateFailed} `,
         err,
       });
     }
@@ -464,14 +565,24 @@ const Car_rentController = {
         },
         data: { pay_status, status_id: car_rent_status_user_approval },
       });
-      await ResCachedDataCar_rent({
-        id,
-        key,
-        post_key: car_rentExists.post_id,
-        user_key: car_rentExists.user_id,
-        pay_status: car_rentExists.pay_status,
-        user_post_key: car_rentExists.user_id + "post",
-      });
+      await Promise.all([
+        await ResCachedDataCar_rent({
+          id,
+          key,
+          post_key: car_rentExists.post_id,
+          user_key: car_rentExists.user_id,
+          pay_status: car_rentExists.pay_status,
+          user_post_key: car_rentExists.user_id + "post",
+        }),
+        await ResCachedDataCar_rent({
+          id,
+          key,
+          post_key: car_rent.post_id,
+          user_key: car_rent.user_id,
+          pay_status: car_rent.pay_status,
+          user_post_key: car_rent.user_id + "post",
+        }),
+      ]);
       return SendSuccess({
         res,
         message: `${EMessage.deleteSuccess}`,

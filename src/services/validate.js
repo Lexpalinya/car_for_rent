@@ -144,6 +144,7 @@ export const ValidatePost = (data) => {
     village,
     district,
     post_rent_data,
+    currency
   } = data;
   return ValidateData({
     car_type_id,
@@ -170,6 +171,7 @@ export const ValidatePost = (data) => {
     village,
     district,
     post_rent_data,
+    currency
   });
 };
 
@@ -216,11 +218,12 @@ export const ValidateCar_rent = (data) => {
     pay_destination,
     khampakan,
     pay_type,
+    scope,
     // bank_no,
     // pay_status,
   } = data;
   return ValidateData({
-     post_id,
+    post_id,
     type_rent,
     price_rent,
     start_date,
@@ -241,9 +244,14 @@ export const ValidateCar_rent = (data) => {
     pay_destination,
     khampakan,
     pay_type,
+    scope,
     // bank_no,
     // pay_status,
   });
+};
+export const ValidateCar_rent_update_status = (data) => {
+  const { user_id, status_id } = data;
+  return ValidateData({ user_id, status_id });
 };
 
 export const ValidateLocation = (data) => {

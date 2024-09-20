@@ -233,7 +233,7 @@ export const CheckCar_registation = ({
   car_resgistration,
   province_vehicle,
 }) => {
-  return CachDataAll("posts"+car_resgistration+province_vehicle, "posts", {
+  return CachDataAll("posts" + car_resgistration + province_vehicle, "posts", {
     is_active: true,
     car_resgistration,
     province_vehicle,
@@ -273,6 +273,7 @@ export const FindPostById = (id) => {
       mutjum: true,
       pubmai: true,
       status_id: true,
+      currency: true,
       created_at: true,
       updated_at: true,
       insurance_company: true,
@@ -341,6 +342,7 @@ export const FindCar_rentById = (id) => {
       phone_number: true,
       email: true,
       doc_type: true,
+      scope: true,
       description: true,
       promotion_id: true,
       discount: true,
@@ -354,6 +356,7 @@ export const FindCar_rentById = (id) => {
       pay_status: true,
       reason: true,
       status_id: true,
+      admin_id: true,
       is_success: true,
       created_at: true,
       updated_at: true,
@@ -375,9 +378,9 @@ export const FindCar_rentById = (id) => {
               },
             },
           },
-    
+
           car_types: true,
-    
+
           car_version: true,
           car_year: true,
           post_car_image: {

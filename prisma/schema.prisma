@@ -251,6 +251,7 @@ model posts {
   post_status          Boolean                @default(true)
   pubmai               Float
   province_vehicle     String
+  currency             String                 @default("kip")
   car_rent             car_rent[] // Relation to car_rent
   like_post            like_post[] // Relation to likes
   post_car_image       post_car_image[] // Relation to car images
@@ -357,6 +358,7 @@ model car_rent {
   doc_type                        String
   car_rent_doc_image              car_rent_doc_image[]
   car_rent_driving_lincense_image car_rent_driving_lincense_image[]
+  scope                           String?
   description                     String                            @db.LongText
   promotion_id                    String?                           @db.VarChar(36)
   discount                        Float
@@ -370,6 +372,7 @@ model car_rent {
   pay_status                      Boolean                           @default(false)
   reason                          String?                           @db.LongText
   status_id                       String                            @db.VarChar(36)
+  admin_id                        String?                           @db.VarChar(36)
   is_success                      Boolean                           @default(true)
   created_at                      DateTime                          @default(now())
   updated_at                      DateTime                          @updatedAt

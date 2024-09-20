@@ -496,6 +496,12 @@ route.put(
   Car_rentController.UpdateCar_rent_driving_lincense_image
 );
 
+route.put(
+  `${car_rent}/updatestatus/:id`,
+  auth,
+  Car_rentController.UpdateStatus
+);
+
 route.delete(`${car_rent}/delete/:id`, auth, Car_rentController.Delete);
 //-----Location-----------------------------
 const location = "/location";
