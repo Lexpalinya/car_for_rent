@@ -2,6 +2,7 @@ import redis from "../DB/redis";
 import { CachDataAll } from "../services/cach.contro";
 import { EMessage } from "../services/enum";
 import {
+  FindPostById,
   FindPostById_for_edit,
   FindReviewById_ID,
   FindUserById_ID,
@@ -14,6 +15,7 @@ import {
 } from "../services/services";
 import { ValidateReveiw } from "../services/validate";
 import prisma from "../utils/prisma.client";
+import { RecacheDataPost } from "./post.controller";
 let key = "reviews";
 let model = "review";
 let where = { is_active: true };
@@ -61,6 +63,34 @@ const ReviewController = {
         data: { user_id, post_id, star, comment },
       });
       await redis.del(post_id + key);
+      const stars = await prisma.review.aggregate({
+        where: {
+          post_id,
+        },
+        _avg: {
+          star: true,
+        },
+      });
+      // const convertstar = parseFloat(stars._avg.star);
+      console.log("stars :>> ", stars);
+      const post = await prisma.posts.update({
+        where: {
+          id: post_id,
+        },
+        data: {
+          star: stars._avg.star,
+        },
+      });
+      await Promise.all([
+        RecacheDataPost({
+          key: "posts",
+          car_type_id_key: post.car_type_id + "posts",
+          type_of_fual_id_key: post.type_of_fual_id + "posts",
+          user_id_key: post.user_id + "posts",
+          post_status_key: post.status_id + "posts",
+        }),
+        redis.del(post.id + "posts"),
+      ]);
       return SendCreate({
         res,
         message: `${EMessage.insertSuccess}`,
