@@ -61,6 +61,7 @@ const Kyc_doc_imageController = {
         statuskyckey: kycExists.status,
         userkyckey: kycExists.user_id,
       });
+      broadcast({ client_id: "admin", ctx: "kyc", data: "kyc new" });
       return SendSuccess({
         res,
         message: `${EMessage.insertSuccess}`,
@@ -160,7 +161,7 @@ const Kyc_doc_imageController = {
         statuskyckey: kycExists.status,
         userkyckey: kycExists.user_id,
       });
-
+      broadcast({ client_id: "admin", ctx: "kyc", data: "kyc new" });
       return SendSuccess({
         res,
         message: `${EMessage.updateSuccess}`,
@@ -236,7 +237,7 @@ const Kyc_doc_imageController = {
         statuskyckey: kycExists.status,
         userkyckey: kycExists.user_id,
       });
-
+      broadcast({ client_id: "admin", ctx: "kyc", data: "kyc new" });
       return SendSuccess({
         res,
         message: `${EMessage.updateSuccess}`,

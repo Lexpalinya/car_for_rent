@@ -16,6 +16,7 @@ import {
   ValidateChangePassword,
   ValidateCheckUsernameAndPhone_number,
   ValidateForgotPassword,
+  ValidateGoogle,
   ValidateLogin,
   ValidateLoginPhoneNumber,
   ValidateUserRegistor,
@@ -689,6 +690,76 @@ const UsersController = {
       SendErrorLog({
         res,
         message: `${EMessage.serverError} Check Username and Phone number error`,
+        err,
+      });
+    }
+  },
+  async GoogleSignInAndSignUp(req, res) {
+    try {
+      const validate = ValidateGoogle(req.body);
+      if (validate.length > 0)
+        return SendError({
+          res,
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: validate.join(", "),
+        });
+      const { id, name, email, image } = req.body;
+      const checksAccount = await FindUserEmailAlready(email);
+      if (checksAccount) {
+        const user = await prisma.users.update({
+          where: { id: checksAccount.id },
+          data: {
+            login_version: checksAccount.login_version + 1,
+          },
+          select,
+        });
+        const token_data = {
+          id: user.id,
+          login_version: user.login_version,
+        };
+  
+        const token = await generateToken(token_data);
+        const result = {
+          ...user,
+          ...token,
+        };
+        await RecacheData(user.id, { page: true });
+
+        return SendSuccess({
+          res,
+          message: `${EMessage.loginSuccess}`,
+          data: result,
+        });
+      } else {
+        const user = await prisma.users.create({
+          data: {
+            username: name,
+            profile: image,
+            email,
+          },
+          select,
+        });
+        const datatoken = {
+          id: user.id,
+          login_version: user.login_version,
+        };
+        const token = await generateToken(datatoken);
+        const result = {
+          ...user,
+          ...token,
+        };
+        await RecacheData(user.id, { page: true });
+        return SendSuccess({
+          res,
+          message: `Sign up User Success`,
+          data: result,
+        });
+      }
+    } catch (err) {
+      SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.loginFailed} sign in and sign up failed`,
         err,
       });
     }

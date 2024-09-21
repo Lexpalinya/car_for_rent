@@ -12,8 +12,8 @@ model users {
   is_active     Boolean     @default(true)
   username      String
   email         String?
-  phone_number  String
-  password      String
+  phone_number  String?
+  password      String?
   first_name    String      @default("")
   last_name     String      @default("")
   profile       String      @default("")
@@ -372,6 +372,7 @@ model car_rent {
   pay_status                      Boolean                           @default(false)
   reason                          String?                           @db.LongText
   status_id                       String                            @db.VarChar(36)
+  currency                        String                            @default("kip")
   admin_id                        String?                           @db.VarChar(36)
   is_success                      Boolean                           @default(true)
   created_at                      DateTime                          @default(now())

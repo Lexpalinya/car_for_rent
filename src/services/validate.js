@@ -96,6 +96,10 @@ export const ValidateLoginPhoneNumber = (data) => {
   return ValidateData({ phone_number, password });
 };
 
+export const ValidateGoogle = (data) => {
+  const { id, name, email, image } = data;
+  return ValidateData({ id, name, email, image });
+};
 export const ValidateChangePassword = (data) => {
   const { new_password, old_password } = data;
   return ValidateData({ new_password, old_password });
@@ -144,7 +148,7 @@ export const ValidatePost = (data) => {
     village,
     district,
     post_rent_data,
-    currency
+    currency,
   } = data;
   return ValidateData({
     car_type_id,
@@ -171,7 +175,7 @@ export const ValidatePost = (data) => {
     village,
     district,
     post_rent_data,
-    currency
+    currency,
   });
 };
 
@@ -219,6 +223,7 @@ export const ValidateCar_rent = (data) => {
     khampakan,
     pay_type,
     scope,
+    currency,
     // bank_no,
     // pay_status,
   } = data;
@@ -245,11 +250,16 @@ export const ValidateCar_rent = (data) => {
     khampakan,
     pay_type,
     scope,
+    currency,
     // bank_no,
     // pay_status,
   });
 };
 export const ValidateCar_rent_update_status = (data) => {
+  const { status_id } = data;
+  return ValidateData({ status_id });
+};
+export const ValidateCar_rent_update_status_by_admin = (data) => {
   const { user_id, status_id } = data;
   return ValidateData({ user_id, status_id });
 };

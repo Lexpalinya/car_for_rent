@@ -358,10 +358,13 @@ export const FindCar_rentById = (id) => {
       status_id: true,
       admin_id: true,
       is_success: true,
+      currency: true,
       created_at: true,
       updated_at: true,
       post: {
         select: {
+          id: true,
+          user_id: true,
           star: true,
           users: {
             select: {

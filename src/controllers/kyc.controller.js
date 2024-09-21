@@ -1,4 +1,5 @@
 import redis from "../DB/redis";
+import { broadcast } from "../server/socketIO.server";
 import { CachDataAll, CachDataLimit } from "../services/cach.contro";
 import { DeleteCachedKey } from "../services/cach.deletekey";
 import { EMessage } from "../services/enum";
@@ -125,6 +126,7 @@ const KycController = {
         statuskyckey: "false" + key,
         userkyckey: user_id + key,
       });
+      broadcast({ client_id: "admin", ctx: "kyc", data: "kyc new" });
       return SendCreate({
         res,
         message: `${EMessage.insertSuccess}`,
@@ -161,12 +163,20 @@ const KycController = {
         },
         data,
       });
-      await ReDataInCacheKyc({
-        key,
-        idkyckey: id + key,
-        statuskyckey: kycExists.status,
-        userkyckey: kycExists.user_id,
-      });
+      await Promise.all([
+        ReDataInCacheKyc({
+          key,
+          idkyckey: id + key,
+          statuskyckey: kycExists.status,
+          userkyckey: kycExists.user_id,
+        }),
+        ReDataInCacheKyc({
+          key,
+          idkyckey: id + key,
+          statuskyckey: kyc.status,
+          userkyckey: kyc.user_id,
+        }),
+      ]);
       return SendSuccess({
         res,
         message: `${EMessage.updateSuccess}`,
@@ -368,14 +378,30 @@ const KycController = {
           kyc: true,
         },
       });
+      await Promise.all([
+        ReDataInCacheKyc({
+          key,
+          idkyckey: id + key,
+          statuskyckey: kycExists.status,
+          userkyckey: kycExists.user_id,
+        }),
 
-      await ReDataInCacheKyc({
-        key,
-        idkyckey: id + key,
-        statuskyckey: kycExists.status + key,
-        userkyckey: kycExists.user_id + key,
+        ReDataInCacheKyc({
+          key,
+          idkyckey: id + key,
+          statuskyckey: kyc.status,
+          userkyckey: kyc.user_id,
+        }),
+        RecacheData(user.id, { page: true }),
+      ]);
+      broadcast({ client_id: "admin", ctx: "kyc", data: "kyc success" });
+      broadcast({
+        client_id: kycExists.user_id,
+        ctx: "kyc",
+        data: `you have been ${
+          kyc.status ? "approved" : "removed"
+        }by the admin`,
       });
-      await RecacheData(user.id, { page: true });
       return SendSuccess({
         res,
         message: `${EMessage.updateSuccess} status and kyc user status`,

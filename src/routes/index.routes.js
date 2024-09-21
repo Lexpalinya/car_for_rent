@@ -274,6 +274,10 @@ route.post(`${user}/refrechToken`, UsersController.RefrechToken);
 route.post(`${user}/registor`, UsersController.Registor);
 route.post(`${user}/login`, UsersController.Login);
 route.post(`${user}/loginPhoneNumber`, UsersController.LoginPhoneNumber);
+route.post(
+  `${user}/googleSignInandSingUp`,
+  UsersController.GoogleSignInAndSignUp
+);
 
 route.put(`${user}/update`, auth, UsersController.Update);
 route.put(`${user}/updateProfile`, auth, UsersController.UpdateProfile);
@@ -500,6 +504,11 @@ route.put(
   `${car_rent}/updatestatus/:id`,
   auth,
   Car_rentController.UpdateStatus
+);
+route.put(
+  `${car_rent}/updatestatusAdmin/:id`,
+  auth,
+  Car_rentController.UpdateStatusAdmin
 );
 
 route.delete(`${car_rent}/delete/:id`, auth, Car_rentController.Delete);
