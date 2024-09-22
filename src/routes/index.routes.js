@@ -550,17 +550,29 @@ route.get(
   ExchagneRateController.SelectOne
 );
 
-route.post(`${exchange_rate}/insert`, auth, ExchagneRateController.Insert);
+route.post(
+  `${exchange_rate}/insert`,
+  auth,
+  admin,
+  ExchagneRateController.Insert
+);
 
-route.put(`${exchange_rate}/update/:id`, auth, ExchagneRateController.Update);
+route.put(
+  `${exchange_rate}/update/:id`,
+  auth,
+  admin,
+  ExchagneRateController.Update
+);
 route.put(
   `${exchange_rate}/updateIcon/:id`,
   auth,
+  admin,
   ExchagneRateController.UpdateIcon
 );
 
 route.delete(
   `${exchange_rate}/delete/:id`,
   auth,
+  admin,
   ExchagneRateController.Delete
 );
