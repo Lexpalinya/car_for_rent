@@ -205,6 +205,7 @@ model type_of_fuals {
   nameChi    String
   nameRok    String
   icon       String
+  wheel      String?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   post       posts[]
@@ -365,6 +366,7 @@ model car_rent {
   total_price                     Float
   booking_fee                     Float
   tax                             Float
+  jaiykhon                        Float                             @default(10000000)
   pay_destination                 Float
   khampakan                       Float
   pay_type                        String

@@ -72,6 +72,7 @@ let select = {
   admin_id: true,
   is_success: true,
   currency: true,
+  jaiykhon: true,
   created_at: true,
   updated_at: true,
   post: {
@@ -169,6 +170,7 @@ const Car_rentController = {
         description,
         scope,
         currency,
+        jaiykhon,
         //--------
         // reason,
         promotion_id,
@@ -186,6 +188,7 @@ const Car_rentController = {
         booking_fee = parseFloat(booking_fee);
       if (typeof pay_destination !== "number")
         pay_destination = parseFloat(pay_destination);
+      if (typeof jaiykhon !== "number") jaiykhon = parseFloat(jaiykhon);
       const status_id = car_rent_status;
       const data = req.files;
       if (
@@ -298,6 +301,7 @@ const Car_rentController = {
           status_id,
           scope,
           currency,
+          jaiykhon,
         },
       });
       const car_rent_doc_image_data = AddCar_rent_id_url(
@@ -373,7 +377,8 @@ const Car_rentController = {
         data.tax = parseFloat(data.tax);
       if (data.khampakan && typeof data.khampakan !== "number")
         data.khampakan = parseFloat(data.khampakan);
-
+      if (data.jaiykhon && typeof data.jaiykhon !== "number")
+        data.jaiykhon = parseFloat(data.jaiykhon);
       if (data.pay_status || typeof data.pay_status !== "boolean")
         data.pay_status = data.pay_status === "true";
 

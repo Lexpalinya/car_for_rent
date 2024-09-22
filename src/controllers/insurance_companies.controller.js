@@ -173,7 +173,7 @@ const Insurance_companysController = {
         message: `${EMessage.deleteSuccess}`,
         data: companies,
       });
-    } catch (error) {
+    } catch (err) {
       return SendErrorLog({
         res,
         message: `${EMessage.serverError} ${EMessage.deleteFailed} insurance_companies`,
@@ -189,7 +189,7 @@ const Insurance_companysController = {
         message: `${EMessage.fetchAllSuccess}`,
         data: companies,
       });
-    } catch (error) {
+    } catch (err) {
       return SendErrorLog({
         res,
         message: `${EMessage.serverError} ${EMessage.errorFetchingAll} insurance_companies`,

@@ -192,7 +192,7 @@ const Car_Rent_StatusController = {
         message: `${EMessage.fetchAllSuccess}`,
         data: car_rent_user,
       });
-    } catch (error) {
+    } catch (err) {
       return SendErrorLog({
         res,
         message: `${EMessage.serverError} ${EMessage.fetchOneSuccess} show_user_rent_status`,
@@ -221,7 +221,7 @@ const Car_Rent_StatusController = {
         message: `${EMessage.fetchAllSuccess}`,
         data: car_rent_user,
       });
-    } catch (error) {
+    } catch (err) {
       return SendErrorLog({
         res,
         message: `${EMessage.serverError} ${EMessage.fetchOneSuccess} show_user_rent_status`,
@@ -250,7 +250,7 @@ const Car_Rent_StatusController = {
         message: `${EMessage.fetchAllSuccess}`,
         data: car_rent_user,
       });
-    } catch (error) {
+    } catch (err) {
       return SendErrorLog({
         res,
         message: `${EMessage.serverError} ${EMessage.fetchOneSuccess} show_user_rent_status`,

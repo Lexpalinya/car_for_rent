@@ -88,7 +88,7 @@ const WalletController = {
         message: `${EMessage.insertSuccess}`,
         data: wallet,
       });
-    } catch (error) {
+    } catch (err) {
       return SendErrorLog({
         res,
         message: `${EMessage.serverError} ${EMessage.insertFailed} wallet`,
@@ -148,7 +148,7 @@ const WalletController = {
         data: updatedWallet,
       });
     } catch (err) {
-      // Log the error and send an appropriate response
+      // Log the err and send an appropriate response
       return SendErrorLog({
         res,
         message: `${EMessage.serverError} ${EMessage.updateFailed} wallet`,

@@ -38,14 +38,14 @@ const Labels_DataController = {
       });
       await redis.del(postExists.id + key, postExists.id + key);
       return SendSuccess(res, `${EMessage.insertSuccess}`, label_data);
-    } catch (error) {
-      if (error.code === "P2002") {
+    } catch (err) {
+      if (err.code === "P2002") {
         return SendError(res, 400, `this post have label tag`);
       }
       return SendErrorLog(
         res,
         `${EMessage.serverError} ${EMessage.insertFailed}`,
-        error
+        err
       );
     }
   },
@@ -57,15 +57,15 @@ const Labels_DataController = {
         where: { id },
       });
       return SendSuccess(res, `${EMessage.deleteSuccess}`, label_data);
-    } catch (error) {
-      if (error.code === "P2025") {
+    } catch (err) {
+      if (err.code === "P2025") {
         return SendError(res, 400, `Record to delete does not exist`);
       }
       await redis.del(postExists.id + key, postExists.id + key);
       return SendErrorLog(
         res,
         `${EMessage.serverError} ${EMessage.deleteFailed}`,
-        error
+        err
       );
     }
   },
@@ -91,11 +91,11 @@ const Labels_DataController = {
         {}
       );
       return SendSuccess(res, `${EMessage.fetchAllSuccess}`, label_data);
-    } catch (error) {
+    } catch (err) {
       return SendErrorLog(
         res,
         `${EMessage.serverError} ${EMessage.fetchAllSuccess} labels_data by post_id`,
-        error
+        err
       );
     }
   },

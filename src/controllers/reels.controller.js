@@ -32,11 +32,11 @@ const ReelsController = {
         data: { user_id, title, detail, url },
       });
       return SendCreate(res, `${EMessage.insertSuccess}`, reels);
-    } catch (error) {
+    } catch (err) {
       return SendErrorLog(
         res,
         `${EMessage.serverError} ${EMessage.insertFailed} reels`,
-        error
+        err
       );
     }
   },
@@ -48,11 +48,11 @@ const ReelsController = {
       if (!reelsExists) return SendError(res, `${EMessage.notFound}: reels id`);
       const reels = await prisma.reels.update({ where: { id }, data });
       return SendSuccess(res, `${EMessage.updateSuccess} `, reels);
-    } catch (error) {
+    } catch (err) {
       return SendErrorLog(
         res,
         `${EMessage.serverError} ${EMessage.insertFailed} reels`,
-        error
+        err
       );
     }
   },
@@ -66,11 +66,11 @@ const ReelsController = {
         data: { is_active: false },
       });
       return SendSuccess(res, `${EMessage.updateSuccess} `, reels);
-    } catch (error) {
+    } catch (err) {
       return SendErrorLog(
         res,
         `${EMessage.serverError} ${EMessage.insertFailed} reels`,
-        error
+        err
       );
     }
   },
@@ -87,11 +87,11 @@ const ReelsController = {
       );
       CachDataLimit(key + "-" + (page + 1), model, where, page + 1, select);
       return SendSuccess(res, `${EMessage.fetchOneSuccess} reels`, reels);
-    } catch (error) {
+    } catch (err) {
       SendErrorLog(
         res,
         `${EMessage.serverError} ${EMessage.errorFetchingOne}`,
-        error
+        err
       );
     }
   },
@@ -116,11 +116,11 @@ const ReelsController = {
         },
       });
       return SendCreate(res, `${EMessage.likeSuccess}`, like_reels);
-    } catch (error) {
+    } catch (err) {
       SendErrorLog(
         res,
         `${EMessage.serverError} ${EMessage.insertFailed}`,
-        error
+        err
       );
     }
   },
@@ -132,11 +132,11 @@ const ReelsController = {
       });
       if (!Unlike_reels) return SendError(res, 404, `${EMessage.notFound}`);
       return SendCreate(res, `${EMessage.likeSuccess}`, Unlike_reels);
-    } catch (error) {
+    } catch (err) {
       SendErrorLog(
         res,
         `${EMessage.serverError} ${EMessage.insertFailed}`,
-        error
+        err
       );
     }
   },

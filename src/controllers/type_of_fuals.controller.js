@@ -31,7 +31,7 @@ const Type_of_FualsController = {
           message: `${EMessage.pleaseInput}`,
           err: validate.join(", "),
         });
-      const { nameLao, nameEng, nameChi, nameRok } = req.body;
+      const { nameLao, nameEng, nameChi, nameRok, wheel } = req.body;
       const data = req.files;
       if (!data || !data.icon)
         return SendError({
@@ -51,6 +51,7 @@ const Type_of_FualsController = {
           nameEng,
           nameChi,
           nameRok,
+          wheel,
           icon,
         },
       });
@@ -90,7 +91,7 @@ const Type_of_FualsController = {
         message: `${EMessage.updateSuccess}`,
         data: type_of_fuals,
       });
-    } catch (error) {
+    } catch (err) {
       return SendErrorLog({
         res,
         message: `${EMessage.serverError} ${EMessage.updateFailed} type_of_fuals`,

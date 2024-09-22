@@ -183,7 +183,7 @@ const Car_typesController = {
         message: `${EMessage.deleteSuccess}`,
         data: car_type,
       });
-    } catch (error) {
+    } catch (err) {
       return SendErrorLog({
         res,
         message: `${EMessage.serverError} ${EMessage.deleteFailed} car_type`,

@@ -108,7 +108,7 @@ const Post_StatusController = {
         message: `${EMessage.deleteSuccess}`,
         data: status,
       });
-    } catch (error) {
+    } catch (err) {
       return SendErrorLog({
         res,
         message: `${EMessage.serverError} ${EMessage.deleteFailed} post_status`,
@@ -148,11 +148,11 @@ const Post_StatusController = {
         message: `${EMessage.fetchOneSuccess}`,
         data: status,
       });
-    } catch (error) {
+    } catch (err) {
       return SendErrorLog(
         res,
         `${EMessage.serverError} ${EMessage.errorFetchingOne} post_status`,
-        error
+        err
       );
     }
   },
@@ -178,11 +178,11 @@ const Post_StatusController = {
         message: `${EMessage.fetchAllSuccess}`,
         data: status,
       });
-    } catch (error) {
+    } catch (err) {
       return SendErrorLog(
         res,
         `${EMessage.serverError} ${EMessage.errorFetchingOne} post_status select for show car data`,
-        error
+        err
       );
     }
   },
@@ -208,11 +208,11 @@ const Post_StatusController = {
         message: `${EMessage.fetchAllSuccess}`,
         data: status,
       });
-    } catch (error) {
+    } catch (err) {
       return SendErrorLog(
         res,
         `${EMessage.serverError} ${EMessage.errorFetchingOne} post_status select for show car data`,
-        error
+        err
       );
     }
   },

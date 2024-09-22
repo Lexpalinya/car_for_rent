@@ -150,7 +150,7 @@ const PromotionController = {
         message: `${EMessage.fetchAllSuccess} promotion`,
         data: promotion,
       });
-    } catch (error) {
+    } catch (err) {
       SendErrorLog({
         res,
         message: `${EMessage.serverError} ${EMessage.errorFetchingAll} promotion`,

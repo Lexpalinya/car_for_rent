@@ -46,11 +46,11 @@ const LabelsController = {
       });
       await RecacheData();
       return SendCreate(res, `${EMessage.insertSuccess}`, label);
-    } catch (error) {
+    } catch (err) {
       return SendErrorLog(
         res,
         `${EMessage.serverError} ${EMessage.insertFailed}`,
-        error
+        err
       );
     }
   },
@@ -69,11 +69,11 @@ const LabelsController = {
       });
       await RecacheData();
       return SendSuccess(res, `${EMessage.updateSuccess}`, label);
-    } catch (error) {
+    } catch (err) {
       return SendErrorLog(
         res,
         `${EMessage.serverError} ${EMessage.updateFailed}`,
-        error
+        err
       );
     }
   },
@@ -103,11 +103,11 @@ const LabelsController = {
       });
       await RecacheData();
       return SendSuccess(res, `${EMessage.updateSuccess}`, label);
-    } catch (error) {
+    } catch (err) {
       return SendErrorLog(
         res,
         `${EMessage.serverError} ${EMessage.updateFailed}`,
-        error
+        err
       );
     }
   },
@@ -126,11 +126,11 @@ const LabelsController = {
       });
       await RecacheData();
       return SendSuccess(res, `${EMessage.deleteSuccess}`, label);
-    } catch (error) {
+    } catch (err) {
       return SendErrorLog(
         res,
         `${EMessage.serverError} ${EMessage.deleteFailed}`,
-        error
+        err
       );
     }
   },
@@ -138,11 +138,11 @@ const LabelsController = {
     try {
       const label = await CachDataNoClear(key, model, where, select);
       return SendSuccess(res, `${EMessage.fetchAllSuccess}`, label);
-    } catch (error) {
+    } catch (err) {
       return SendErrorLog(
         res,
         `${EMessage.serverError} ${EMessage.fetchAllSuccess}`,
-        error
+        err
       );
     }
   },
@@ -153,11 +153,11 @@ const LabelsController = {
       const label = await FindLablesById(id);
       if (!label) return SendError(res, 404, `${EMessage.notFound}: label id`);
       return SendSuccess(res, `${EMessage.deleteSuccess}`, label);
-    } catch (error) {
+    } catch (err) {
       return SendErrorLog(
         res,
         `${EMessage.serverError} ${EMessage.deleteFailed}`,
-        error
+        err
       );
     }
   },

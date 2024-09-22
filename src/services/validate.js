@@ -58,8 +58,8 @@ export const ValidateInsurances_Companies = (data) => {
 };
 
 export const ValidateType_of_Fuals = (data) => {
-  const { nameLao, nameEng, nameChi, nameRok } = data;
-  return ValidateData({ nameLao, nameEng, nameChi, nameRok });
+  const { nameLao, nameEng, nameChi, nameRok, wheel } = data;
+  return ValidateData({ nameLao, nameEng, nameChi, nameRok, wheel });
 };
 
 //----------rent_status---------------------------------
@@ -224,6 +224,7 @@ export const ValidateCar_rent = (data) => {
     pay_type,
     scope,
     currency,
+    jaiykhon,
     // bank_no,
     // pay_status,
   } = data;
@@ -251,6 +252,7 @@ export const ValidateCar_rent = (data) => {
     pay_type,
     scope,
     currency,
+    jaiykhon,
     // bank_no,
     // pay_status,
   });
