@@ -73,6 +73,12 @@ export const FindCar_typesById = (id) => {
     is_active: true,
   });
 };
+export const FindExChange_rate_Id = (id) => {
+  return CachDataFindByIdNoClear("exchange_rate", "exchange_rate", {
+    id,
+    is_active: true,
+  });
+};
 export const FindLablesById = (id) => {
   return CachDataFindByIdNoClear("labels", "labels", {
     id,

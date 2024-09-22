@@ -48,6 +48,10 @@ export const ValidateCar_Brands = (data) => {
   const { name } = data;
   return ValidateData({ name });
 };
+export const ValidateExchange_rate = (data) => {
+  const { currency, sell, buy } = data;
+  return ValidateData({ currency, sell, buy });
+};
 export const ValidateLevel_Insurances = (data) => {
   const { nameLao, nameEng, nameChi, nameRok } = data;
   return ValidateData({ nameLao, nameEng, nameChi, nameRok });

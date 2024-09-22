@@ -8,24 +8,24 @@ datasource db {
 }
 
 model users {
-  id            String      @id @default(uuid()) @db.VarChar(36)
-  is_active     Boolean     @default(true)
+  id            String          @id @default(uuid()) @db.VarChar(36)
+  is_active     Boolean         @default(true)
   username      String
   email         String?
   phone_number  String?
   password      String?
-  first_name    String      @default("")
-  last_name     String      @default("")
-  profile       String      @default("")
-  fackbook_id   String      @default("")
-  google_id     String      @default("")
-  device_token  String      @default("")
-  kyc           Boolean     @default(false)
-  login_version Int         @default(0)
-  blacklist     Boolean     @default(false)
-  role          userRoles   @default(customer)
-  created_at    DateTime    @default(now())
-  updated_at    DateTime    @updatedAt
+  first_name    String          @default("")
+  last_name     String          @default("")
+  profile       String          @default("")
+  fackbook_id   String          @default("")
+  google_id     String          @default("")
+  device_token  String          @default("")
+  kyc           Boolean         @default(false)
+  login_version Int             @default(0)
+  blacklist     Boolean         @default(false)
+  role          userRoles       @default(customer)
+  created_at    DateTime        @default(now())
+  updated_at    DateTime        @updatedAt
   car_rent      car_rent[]
   kycs          kycs[]
   like_post     like_post[]
@@ -33,6 +33,7 @@ model users {
   post          posts[]
   review        review[]
   wallet        wallet[]
+  exchange_rate exchange_rate[]
 
   @@index([username])
   @@index([email])
@@ -434,4 +435,17 @@ enum userRoles {
   customer
   admin
   superadmin
+}
+
+model exchange_rate {
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  is_active  Boolean  @default(true)
+  currency   String
+  icon       String
+  buy        Float
+  sell       Float
+  user_id    String
+  users      users    @relation(fields: [user_id], references: [id])
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }

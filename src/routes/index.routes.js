@@ -25,6 +25,7 @@ import {
 } from "../controllers/post_image.controller";
 import KycController from "../controllers/kyc.controller";
 import Kyc_doc_imageController from "../controllers/kyc_doc_image.controller";
+import ExchagneRateController from "../controllers/exchange_rate.controller";
 const route = express.Router();
 
 //-----------Promotion-------------------------
@@ -539,3 +540,27 @@ route.delete(`${kyc}/delete/:id`, auth, KycController.Delete);
 route.put(`${kyc}/doc_image_insert/:id`, auth, Kyc_doc_imageController.Insert);
 route.put(`${kyc}/doc_image_update/:id`, auth, Kyc_doc_imageController.Update);
 route.put(`${kyc}/doc_image_delete/:id`, auth, Kyc_doc_imageController.Delete);
+
+//-----------exchange_rate-----------------------------------------------------
+const exchange_rate = `/exchange_rate`;
+route.get(`${exchange_rate}/selAll`, auth, ExchagneRateController.SelectAll);
+route.get(
+  `${exchange_rate}/selOne/:id`,
+  auth,
+  ExchagneRateController.SelectOne
+);
+
+route.post(`${exchange_rate}/insert`, auth, ExchagneRateController.Insert);
+
+route.put(`${exchange_rate}/update/:id`, auth, ExchagneRateController.Update);
+route.put(
+  `${exchange_rate}/updateIcon/:id`,
+  auth,
+  ExchagneRateController.UpdateIcon
+);
+
+route.delete(
+  `${exchange_rate}/delete/:id`,
+  auth,
+  ExchagneRateController.Delete
+);
