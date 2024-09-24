@@ -279,19 +279,23 @@ export const FindPostById = (id) => {
       mutjum: true,
       pubmai: true,
       status_id: true,
-      currency: true,
       created_at: true,
       updated_at: true,
       insurance_company: true,
       level_insurance: true,
       type_of_fual: true,
+      currency: true,
       status: true,
       users: {
         select: {
           username: true,
           phone_number: true,
           profile: true,
-          kycs: true,
+          kycs: {
+            where: {
+              is_active: true,
+            },
+          },
         },
       },
       car_types: true,
@@ -303,6 +307,11 @@ export const FindPostById = (id) => {
       like_post: {
         select: {
           user_id: true,
+        },
+      },
+      _count: {
+        select: {
+          like_post: true,
         },
       },
     }

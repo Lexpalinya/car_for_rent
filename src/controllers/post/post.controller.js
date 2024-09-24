@@ -4,7 +4,6 @@ import { DeleteCachedKey } from "../../services/cach.deletekey";
 import { EMessage } from "../../services/enum";
 import {
   CheckCar_registation,
- 
   FindCar_typesById,
   FindInsurance_CompanysById,
   FindLevel_InsurancesById,
@@ -36,13 +35,14 @@ import {
   ValidatePostSearch,
 } from "../../services/validate";
 import prisma from "../../utils/prisma.client";
-const post_status_id = "44c3d8f0-432b-4f26-a9de-059df566761c";
+const post_status_being_hired_id = "44c3d8f0-432b-4f26-a9de-059df566761c";
+const post_status_ready_id = "ccd5c106-0a6c-45e9-b01c-e0a523221506";
 let key = "posts";
 const model = "posts";
 let where = {
   is_active: true,
   post_status: true,
-  status_id: "44c3d8f0-432b-4f26-a9de-059df566761c",
+  status_id: post_status_being_hired_id,
 };
 let select = {
   id: true,
@@ -83,7 +83,11 @@ let select = {
       username: true,
       phone_number: true,
       profile: true,
-      kycs: true,
+      kycs: {
+        where: {
+          is_active: true,
+        },
+      },
     },
   },
   car_types: true,
@@ -861,11 +865,103 @@ const PostController = {
       page = !page || page < 0 ? 0 : page - 1;
       const userwhere = { user_id: user_id, is_active: true };
 
+      const selectuser = {
+        car_rent: {
+          take: 1,
+          orderBy: {
+            created_at: "desc",
+          },
+          where: {
+            post: {
+              OR: [
+                { status_id: post_status_being_hired_id },
+                { status_id: post_status_ready_id },
+              ],
+            },
+          },
+          select: {
+            id: true,
+            user: {
+              select: {
+                first_name: true,
+                last_name: true,
+                phone_number: true,
+              },
+            },
+            type_rent: true,
+            start_date: true,
+            end_date: true,
+            total_price: true,
+          },
+        },
+        id: true,
+        is_active: true,
+        car_type_id: true,
+        user_id: true,
+        star: true,
+        car_insurance: true,
+        insurance_company_id: true,
+        level_insurance_id: true,
+        car_brand: true,
+        car_version: true,
+        car_year: true,
+        car_resgistration: true,
+        door: true,
+        type_of_fual_id: true,
+        driver_system: true,
+        seat: true,
+        car_color: true,
+        description: true,
+        street: true,
+        point: true,
+        village: true,
+        district: true,
+        province: true,
+        mutjum: true,
+        pubmai: true,
+        status_id: true,
+        created_at: true,
+        updated_at: true,
+        insurance_company: true,
+        level_insurance: true,
+        type_of_fual: true,
+        currency: true,
+        status: true,
+        users: {
+          select: {
+            username: true,
+            phone_number: true,
+            profile: true,
+            kycs: {
+              where: {
+                is_active: true,
+              },
+            },
+          },
+        },
+        car_types: true,
+        // post_doc_image: true,
+        post_car_image: true,
+        // post_driver_license_image: true,
+        // post_insurance_image: true,
+        post_rent_data: true,
+        like_post: {
+          select: {
+            user_id: true,
+          },
+        },
+
+        _count: {
+          select: {
+            like_post: true,
+          },
+        },
+      };
       const post = await CachDataAll(
         user_id + key + "-" + page,
         model,
         userwhere,
-        select
+        selectuser
       );
       return SendSuccess({
         res,
