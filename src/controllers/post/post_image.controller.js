@@ -1,14 +1,15 @@
-import { EMessage } from "../services/enum";
-import { FindPostById_for_edit } from "../services/find";
-import { SendError, SendErrorLog, SendSuccess } from "../services/services";
+import { EMessage } from "../../services/enum";
+import { FindPostById_for_edit } from "../../services/find";
+import { SendError, SendErrorLog, SendSuccess } from "../../services/services";
 import {
   Post_car_image,
   Post_doc_image,
   Post_driver_license_image,
   Post_insurance_image,
-} from "../services/subtabel";
-import { DeleteImage, UploadImage } from "../services/upload.file";
+} from "../../services/subtabel";
+import { DeleteImage, UploadImage } from "../../services/upload.file";
 import { RecacheDataPost } from "./post.controller";
+
 let key = "posts";
 const InsertPostImage = async (req, res, imageType, InsertImage) => {
   try {

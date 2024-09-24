@@ -6,15 +6,14 @@ import Car_typesController from "../controllers/car_types.controller";
 import Insurance_companysController from "../controllers/insurance_companies.controller";
 import Level_InsurancesController from "../controllers/level_insurance.controller";
 import Type_of_FualsController from "../controllers/type_of_fuals.controller";
-import Post_StatusController from "../controllers/post_status.controller";
-import Car_Rent_StatusController from "../controllers/rent_status.controller";
+
 import UsersController from "../controllers/user.controller";
 import WalletController from "../controllers/wallet.controller";
-import PostController from "../controllers/post.controller";
-import Post_rent_dataController from "../controllers/post_rent_dataController";
-import Like_postController from "../controllers/like_post.controller";
-import ReviewController from "../controllers/review.controller";
-import Car_rentController from "../controllers/car_rent.controller";
+
+
+import Like_postController from "../controllers/post/like_post.controller";
+import ReviewController from "../controllers/post/review.controller";
+
 import LocationController from "../controllers/location.controller";
 import { admin, auth } from "../middleware/auth";
 import {
@@ -22,10 +21,15 @@ import {
   Post_doc_imageController,
   Post_driver_license_imageController,
   Post_insurance_imageController,
-} from "../controllers/post_image.controller";
+} from "../controllers/post/post_image.controller";
 import KycController from "../controllers/kyc.controller";
 import Kyc_doc_imageController from "../controllers/kyc_doc_image.controller";
 import ExchagneRateController from "../controllers/exchange_rate.controller";
+import Post_StatusController from "../controllers/post/post_status.controller";
+import Car_Rent_StatusController from "../controllers/car_rent/rent_status.controller";
+import PostController from "../controllers/post/post.controller";
+import Post_rent_dataController from "../controllers/post/post_rent_dataController";
+import Car_rentController from "../controllers/car_rent/car_rent.controller";
 const route = express.Router();
 
 //-----------Promotion-------------------------

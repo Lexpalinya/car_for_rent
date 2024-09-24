@@ -1,8 +1,8 @@
-import redis from "../DB/redis";
-import { broadcast } from "../server/socketIO.server";
-import { CachDataAll, CachDataLimit } from "../services/cach.contro";
-import { DeleteCachedKey } from "../services/cach.deletekey";
-import { EMessage } from "../services/enum";
+import redis from "../../DB/redis";
+import { broadcast } from "../../server/socketIO.server";
+import { CachDataAll, CachDataLimit } from "../../services/cach.contro";
+import { DeleteCachedKey } from "../../services/cach.deletekey";
+import { EMessage } from "../../services/enum";
 import {
   FindCar_Rent_StatusById,
   FindCar_rentById,
@@ -10,28 +10,28 @@ import {
   FindPostById_for_edit,
   FindPromotionById_ID,
   FindUserById_ID,
-} from "../services/find";
+} from "../../services/find";
 import {
   AddCar_rent_id_url,
   EnsureArray,
   SendError,
   SendErrorLog,
   SendSuccess,
-} from "../services/services";
+} from "../../services/services";
 import {
   Car_rent_doc_image,
   Car_rent_driving_lincense_image,
   Car_rent_payment_image,
   Car_rent_visa,
-} from "../services/subtabel";
-import { UploadImage, uploadImages } from "../services/upload.file";
+} from "../../services/subtabel";
+import { UploadImage, uploadImages } from "../../services/upload.file";
 import {
   DataExists,
   ValidateCar_rent,
   ValidateCar_rent_update_status,
   ValidateCar_rent_update_status_by_admin,
-} from "../services/validate";
-import prisma from "../utils/prisma.client";
+} from "../../services/validate";
+import prisma from "../../utils/prisma.client";
 const car_rent_status = "a8581879-1cc6-4607-b998-74a79d74dd63";
 const car_rent_status_user_approval = "7a55f7c4-4f6e-4992-bf02-66f1c1c47b99";
 const car_rent_status_Success = "818ca297-e08a-49ba-88c6-9834459564a1";
@@ -80,6 +80,7 @@ let select = {
       id: true,
       user_id: true,
       star: true,
+      car_brand: true,
       users: {
         select: {
           profile: true,
@@ -97,7 +98,7 @@ let select = {
       },
 
       car_types: true,
-
+      type_of_fual: true,
       car_version: true,
       car_year: true,
       post_car_image: {

@@ -1,9 +1,9 @@
-import redis from "../DB/redis";
-import { EMessage } from "../services/enum";
-import { FindPostById_for_edit, FindUserById_ID } from "../services/find";
-import { SendError, SendErrorLog, SendSuccess } from "../services/services";
-import { Post_like_posts } from "../services/subtabel";
-import prisma from "../utils/prisma.client";
+import redis from "../../DB/redis";
+import { EMessage } from "../../services/enum";
+import { FindPostById_for_edit, FindUserById_ID } from "../../services/find";
+import { SendError, SendErrorLog, SendSuccess } from "../../services/services";
+import { Post_like_posts } from "../../services/subtabel";
+import prisma from "../../utils/prisma.client";
 import { RecacheDataPost } from "./post.controller";
 
 let key = "post";

@@ -1,11 +1,10 @@
-import { connect } from "bun";
-import redis from "../DB/redis";
-import { CachDataAll, CachDataLimit } from "../services/cach.contro";
-import { DeleteCachedKey } from "../services/cach.deletekey";
-import { EMessage } from "../services/enum";
+import redis from "../../DB/redis";
+import { CachDataAll, CachDataLimit } from "../../services/cach.contro";
+import { DeleteCachedKey } from "../../services/cach.deletekey";
+import { EMessage } from "../../services/enum";
 import {
   CheckCar_registation,
-  FindCar_BrandsById,
+ 
   FindCar_typesById,
   FindInsurance_CompanysById,
   FindLevel_InsurancesById,
@@ -14,7 +13,7 @@ import {
   FindPostById_for_edit,
   FindType_of_FualsById,
   FindUserById_ID,
-} from "../services/find";
+} from "../../services/find";
 import {
   AddPost_id_url,
   EnsureArray,
@@ -22,21 +21,21 @@ import {
   SendError,
   SendErrorLog,
   SendSuccess,
-} from "../services/services";
+} from "../../services/services";
 import {
   Post_car_image,
   Post_doc_image,
   // Post_driver_license_image,
   Post_insurance_image,
   Post_rent_data,
-} from "../services/subtabel";
-import { uploadImages } from "../services/upload.file";
+} from "../../services/subtabel";
+import { uploadImages } from "../../services/upload.file";
 import {
   DataExists,
   ValidatePost,
   ValidatePostSearch,
-} from "../services/validate";
-import prisma from "../utils/prisma.client";
+} from "../../services/validate";
+import prisma from "../../utils/prisma.client";
 const post_status_id = "44c3d8f0-432b-4f26-a9de-059df566761c";
 let key = "posts";
 const model = "posts";
@@ -154,7 +153,7 @@ const PostController = {
         village,
         district,
         post_rent_data,
-        currency
+        currency,
       } = req.body;
       const status_id = post_status_id;
       // const user_id = req.user;
@@ -381,7 +380,7 @@ const PostController = {
           district,
           village,
           status_id,
-          currency
+          currency,
         },
       });
 

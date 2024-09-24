@@ -34,6 +34,7 @@ model users {
   review        review[]
   wallet        wallet[]
   exchange_rate exchange_rate[]
+  notification  notification[]
 
   @@index([username])
   @@index([email])
@@ -448,4 +449,19 @@ model exchange_rate {
   users      users    @relation(fields: [user_id], references: [id])
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+}
+
+model notification {
+  id         String    @id @default(uuid()) @db.VarChar(36)
+  is_active  Boolean   @default(true)
+  isNewNoti  Boolean   @default(true)
+  ref_id     String    @db.VarChar(36)
+  title     String
+  text       String?   @db.LongText
+  role       userRoles @default(customer)
+  type       String
+  user_id    String
+  users      users     @relation(fields: [user_id], references: [id])
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
 }

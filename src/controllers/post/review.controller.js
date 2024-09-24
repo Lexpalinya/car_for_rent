@@ -1,20 +1,19 @@
-import redis from "../DB/redis";
-import { CachDataAll } from "../services/cach.contro";
-import { EMessage } from "../services/enum";
+import redis from "../../DB/redis";
+import { CachDataAll } from "../../services/cach.contro";
+import { EMessage } from "../../services/enum";
 import {
-  FindPostById,
   FindPostById_for_edit,
   FindReviewById_ID,
   FindUserById_ID,
-} from "../services/find";
+} from "../../services/find";
 import {
   SendCreate,
   SendError,
   SendErrorLog,
   SendSuccess,
-} from "../services/services";
-import { ValidateReveiw } from "../services/validate";
-import prisma from "../utils/prisma.client";
+} from "../../services/services";
+import { ValidateReveiw } from "../../services/validate";
+import prisma from "../../utils/prisma.client";
 import { RecacheDataPost } from "./post.controller";
 let key = "reviews";
 let model = "review";

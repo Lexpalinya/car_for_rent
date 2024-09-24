@@ -39,6 +39,7 @@ export const EMessage = {
   passwordnotmatch: "Password not match",
   searchsuccess: "Search successful",
   searchfailed: "Search failed",
+  SUCCESS: "success",
 };
 
 export const userType = {

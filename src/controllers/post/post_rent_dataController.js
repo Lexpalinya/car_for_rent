@@ -1,12 +1,13 @@
-import { EMessage } from "../services/enum";
-import { FindPostById_for_edit } from "../services/find";
-import { SendError, SendErrorLog, SendSuccess } from "../services/services";
-import { Post_rent_data } from "../services/subtabel";
+import { EMessage } from "../../services/enum";
+import { FindPostById_for_edit } from "../../services/find";
+import { SendError, SendErrorLog, SendSuccess } from "../../services/services";
+import { Post_rent_data } from "../../services/subtabel";
 import {
   ValidatePost_rent_data,
   ValidatePost_rent_dataUpdate,
-} from "../services/validate";
+} from "../../services/validate";
 import { RecacheDataPost } from "./post.controller";
+
 
 let key = "posts";
 
