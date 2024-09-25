@@ -7,6 +7,7 @@ import {
   FindCar_Rent_StatusById,
   FindCar_rentById,
   FindCar_rentById_for_edit,
+  FindPostById,
   FindPostById_for_edit,
   FindPromotionById_ID,
   FindUserById_ID,
@@ -32,6 +33,11 @@ import {
   ValidateCar_rent_update_status_by_admin,
 } from "../../services/validate";
 import prisma from "../../utils/prisma.client";
+import NotificationController from "../notification.controller";
+import {
+  post_status_being_hired_id,
+  RecacheDataPost,
+} from "../post/post.controller";
 const car_rent_status = "a8581879-1cc6-4607-b998-74a79d74dd63";
 const car_rent_status_user_approval = "7a55f7c4-4f6e-4992-bf02-66f1c1c47b99";
 const car_rent_status_Success = "818ca297-e08a-49ba-88c6-9834459564a1";
@@ -346,10 +352,24 @@ const Car_rentController = {
       });
       const dt = await FindCar_rentById(car_rent.id);
       console.log("car_rent :>> ", dt);
+      const noti = await NotificationController.notiNew({
+        data,
+        ref_id: car_rent.id,
+
+        type: "car_rent",
+        title: "new car_rent order ",
+        text: "new car_rent order",
+        user_id,
+        role: "admin",
+      });
+      console.log("noti :>> ", noti);
       broadcast({
         client_id: "admin",
         ctx: "car_rent",
-        data: "new order",
+        data: {
+          noti: noti.data,
+          data: dt,
+        },
       });
       return SendSuccess({
         res,
@@ -676,8 +696,18 @@ const Car_rentController = {
         },
         data: { pay_status, status_id: car_rent_status_user_approval },
       });
+      const [postExists, post] = await Promise.all([
+        FindPostById(car_rent.post_id),
+        prisma.posts.update({
+          where: { id: car_rent.post_id },
+          data: {
+            status_id: post_status_being_hired_id,
+          },
+        }),
+      ]);
+
       await Promise.all([
-        await ResCachedDataCar_rent({
+        ResCachedDataCar_rent({
           id,
           key,
           post_key: car_rentExists.post_id,
@@ -685,7 +715,7 @@ const Car_rentController = {
           pay_status: car_rentExists.pay_status,
           user_post_key: car_rentExists.user_id + "post",
         }),
-        await ResCachedDataCar_rent({
+        ResCachedDataCar_rent({
           id,
           key,
           post_key: car_rent.post_id,
@@ -693,6 +723,17 @@ const Car_rentController = {
           pay_status: car_rent.pay_status,
           user_post_key: car_rent.user_id + "post",
         }),
+        RecacheDataPost({
+          key: "posts",
+          car_type_id_key: post.car_type_id + "posts",
+          type_of_fual_id_key: post.type_of_fual_id + "posts",
+          user_id_key: post.user_id + "posts",
+          post_status_key: post.status_id + "posts",
+        }),
+        RecacheDataPost({
+          post_status_key: postExists.status_id + "posts",
+        }),
+        redis.del(postExists.id + "posts"),
       ]);
       const dt = await FindCar_rentById(id);
       console.log("dt :>> ", dt);
