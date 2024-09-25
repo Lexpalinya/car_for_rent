@@ -42,7 +42,7 @@ const model = "posts";
 let where = {
   is_active: true,
   post_status: true,
-  status_id: post_status_being_hired_id,
+  status_id: post_status_ready_id,
 };
 let select = {
   id: true,
@@ -159,7 +159,7 @@ const PostController = {
         post_rent_data,
         currency,
       } = req.body;
-      const status_id = post_status_id;
+      const status_id = post_status_ready_id;
       // const user_id = req.user;
       const data = req.files;
       if (typeof car_insurance !== "boolean") {
