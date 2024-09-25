@@ -165,7 +165,7 @@ const Post_StatusController = {
           ...where,
           priority: {
             gte: 1,
-            lte: 2,
+            lte: 3,
           },
         },
         select,
@@ -194,7 +194,7 @@ const Post_StatusController = {
         {
           ...where,
           priority: {
-            gte: 3,
+            gte: 4,
             lte: 5,
           },
         },

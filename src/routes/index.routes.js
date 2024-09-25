@@ -1,6 +1,6 @@
 import express from "express";
 import PromotionController from "../controllers/promotion.controller";
-import BannerController from "../controllers/banner.controller";
+
 import Car_BrandsController from "../controllers/car_brands.controller";
 import Car_typesController from "../controllers/car_types.controller";
 import Insurance_companysController from "../controllers/insurance_companies.controller";
@@ -30,6 +30,7 @@ import Car_Rent_StatusController from "../controllers/car_rent/rent_status.contr
 import PostController from "../controllers/post/post.controller";
 import Post_rent_dataController from "../controllers/post/post_rent_dataController";
 import Car_rentController from "../controllers/car_rent/car_rent.controller";
+import BannerController from "../controllers/banner.controller";
 const route = express.Router();
 
 //-----------Promotion-------------------------
