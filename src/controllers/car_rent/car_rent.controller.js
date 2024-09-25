@@ -351,7 +351,7 @@ const Car_rentController = {
         user_post_key: user_id + "post",
       });
       const dt = await FindCar_rentById(car_rent.id);
-      console.log("car_rent :>> ", dt);
+
       const [post] = await Promise.all([
         prisma.posts.update({
           where: { id: car_rent.post_id },
@@ -363,9 +363,8 @@ const Car_rentController = {
 
       const [noti] = await Promise.all([
         NotificationController.notiNew({
-          data,
+          // data,
           ref_id: car_rent.id,
-
           type: "car_rent",
           title: "new car_rent order ",
           text: "new car_rent order",
@@ -566,16 +565,41 @@ const Car_rentController = {
       ]);
 
       const dt = await FindCar_rentById(id);
-      console.log("dt :>> ", dt);
+      const [noti_user_post, noti_user_rent] = await Promise.all([
+        NotificationController.notiNew({
+          // data,
+          ref_id: car_rent.id,
+          type: "car_rent_user_post",
+          title: "update status payment ",
+          text: "update status payment",
+          user_id: dt.post.user_id,
+          role: "customer",
+        }),
+        NotificationController.notiNew({
+          // data,
+          ref_id: car_rent.id,
+          type: "car_rent_user_rent",
+          title: "update status payment ",
+          text: "update status payment",
+          user_id: dt.user_id,
+          role: "customer",
+        }),
+      ]);
       broadcast({
         client_id: dt.post.user_id,
         ctx: "car_rent_user_post",
-        data: JSON.stringify(dt),
+        data: {
+          noti: noti_user_post.data,
+          data: dt,
+        },
       });
       broadcast({
         client_id: dt.user_id,
         ctx: "car_rent_user_rent",
-        data: JSON.stringify(dt),
+        data: {
+          noti: noti_user_rent.data,
+          data: dt,
+        },
       });
 
       return SendSuccess({
@@ -658,7 +682,6 @@ const Car_rentController = {
         }),
       ]);
       const dt = await FindCar_rentById(id);
-      console.log("dt :>> ", dt);
 
       broadcast({
         client_id: dt.user_id,
@@ -756,33 +779,60 @@ const Car_rentController = {
         }),
         redis.del(postExists.id + "posts"),
       ]);
-
-      const noti = await NotificationController.notiNew({
-        // data,
-        ref_id: car_rent.id,
-
-        type: "car_rent",
-        title: "new car_rent order ",
-        text: "new car_rent order",
-        user_id,
-        role: "admin",
-      });
       const dt = await FindCar_rentById(id);
-      console.log("dt :>> ", dt);
+
+      const [noti_admin, noti_user_post, noti_user_rent] = await Promise.all([
+        NotificationController.notiNew({
+          // data,
+          ref_id: car_rent.id,
+          type: "car_rent",
+          title: "update status payment",
+          text: "update status payment ",
+          user_id,
+          role: "admin",
+        }),
+        NotificationController.notiNew({
+          // data,
+          ref_id: car_rent.id,
+          type: "car_rent_user_post",
+          title: "update status payment ",
+          text: "update status payment",
+          user_id: dt.post.user_id,
+          role: "customer",
+        }),
+        NotificationController.notiNew({
+          // data,
+          ref_id: car_rent.id,
+          type: "car_rent_user_rent",
+          title: "update status payment ",
+          text: "update status payment",
+          user_id: dt.user_id,
+          role: "customer",
+        }),
+      ]);
       broadcast({
         client_id: dt.post.user_id,
         ctx: "car_rent_user_post",
-        data: JSON.stringify(dt),
+        data: {
+          noti: noti_user_post.data,
+          data: dt,
+        },
       });
       broadcast({
         client_id: dt.user_id,
         ctx: "car_rent_user_rent",
-        data: JSON.stringify(dt),
+        data: {
+          noti: noti_user_rent.data,
+          data: dt,
+        },
       });
       broadcast({
         client_id: "admin",
         ctx: "car_rent",
-        data: "order approved",
+        data: {
+          noti: noti_admin.data,
+          data: dt,
+        },
       });
       return SendSuccess({
         res,
@@ -859,32 +909,43 @@ const Car_rentController = {
         redis.del(post.id + "posts"),
       ]);
       const dt = await FindCar_rentById(id);
-      console.log("dt :>> ", dt);
-      const noti = await NotificationController.notiNew({
-        data: dt,
-        ref_id: car_rent.id,
 
-        type: "car_rent",
-        title: "new car_rent order ",
-        text: "new car_rent order",
-        user_id,
-        role: "admin",
-      });
+      const [noti_admin, noti_user_rent] = await Promise.all([
+        NotificationController.notiNew({
+          // data,
+          ref_id: car_rent.id,
+          type: "car_rent",
+          title: "update status payment",
+          text: "update status payment ",
+          user_id,
+          role: "admin",
+        }),
+        NotificationController.notiNew({
+          // data,
+          ref_id: car_rent.id,
+          type: "car_rent_user_rent",
+          title: "update status payment ",
+          text: "update status payment",
+          user_id: dt.user_id,
+          role: "customer",
+        }),
+      ]);
 
-      // broadcast({
-      //   client_id: dt.post.user_id,
-      //   ctx: "car_rent_user_post",
-      //   data: JSON.stringify(dt),
-      // });
       broadcast({
         client_id: dt.user_id,
         ctx: "car_rent_user_rent",
-        data: JSON.stringify(dt),
+        data: {
+          noti: noti_user_rent.data,
+          data: dt,
+        },
       });
       broadcast({
         client_id: "admin",
         ctx: "car_rent",
-        data: "order approved",
+        data: {
+          noti: noti_admin.data,
+          data: dt,
+        },
       });
       return SendSuccess({
         res,
@@ -1440,7 +1501,6 @@ const UpdateCar_rentImage = async (
   try {
     const id = req.params.id;
     let { image_data_update } = req.body;
-    console.log("image_data_update :>> ", image_data_update);
 
     if (!image_data_update) {
       return SendError(res, 400, `${EMessage.pleaseInput}: image_data_update`);

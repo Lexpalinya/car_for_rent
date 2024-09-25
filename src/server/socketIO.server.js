@@ -28,7 +28,7 @@ export const initSocketServer = (server) => {
 export const broadcast = ({ client_id, ctx, data }) => {
   const clientSocket = clients.get(client_id);
   if (clientSocket) {
-    console.log("object :>>--------------------- ", data);
+    // console.log("object :>>--------------------- ", data);
     clientSocket.emit(ctx, data);
   }
 };

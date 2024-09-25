@@ -81,7 +81,6 @@ export const CachDataFindById = async (
     return results;
   }
   let data = JSON.parse(cachedData);
-  console.log("data :>> ", data);
   if (!Array.isArray(data)) {
     return data;
   }
