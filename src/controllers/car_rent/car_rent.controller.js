@@ -352,16 +352,34 @@ const Car_rentController = {
       });
       const dt = await FindCar_rentById(car_rent.id);
       console.log("car_rent :>> ", dt);
-      const noti = await NotificationController.notiNew({
-        data,
-        ref_id: car_rent.id,
+      const [post] = await Promise.all([
+        prisma.posts.update({
+          where: { id: car_rent.post_id },
+          data: {
+            isShowPost: false,
+          },
+        }),
+      ]);
 
-        type: "car_rent",
-        title: "new car_rent order ",
-        text: "new car_rent order",
-        user_id,
-        role: "admin",
-      });
+      const [noti] = await Promise.all([
+        NotificationController.notiNew({
+          data,
+          ref_id: car_rent.id,
+
+          type: "car_rent",
+          title: "new car_rent order ",
+          text: "new car_rent order",
+          user_id,
+          role: "admin",
+        }),
+        RecacheDataPost({
+          key: "posts",
+          car_type_id_key: post.car_type_id + "posts",
+          type_of_fual_id_key: post.type_of_fual_id + "posts",
+          user_id_key: post.user_id + "posts",
+          post_status_key: post.status_id + "posts",
+        }),
+      ]);
       broadcast({
         client_id: "admin",
         ctx: "car_rent",
@@ -693,7 +711,11 @@ const Car_rentController = {
         where: {
           id,
         },
-        data: { pay_status, status_id: car_rent_status_user_approval },
+        data: {
+          admin_id: user_id,
+          pay_status,
+          status_id: car_rent_status_user_approval,
+        },
       });
       const [postExists, post] = await Promise.all([
         FindPostById(car_rent.post_id),
@@ -736,7 +758,7 @@ const Car_rentController = {
       ]);
 
       const noti = await NotificationController.notiNew({
-        data,
+        // data,
         ref_id: car_rent.id,
 
         type: "car_rent",
@@ -752,6 +774,108 @@ const Car_rentController = {
         ctx: "car_rent_user_post",
         data: JSON.stringify(dt),
       });
+      broadcast({
+        client_id: dt.user_id,
+        ctx: "car_rent_user_rent",
+        data: JSON.stringify(dt),
+      });
+      broadcast({
+        client_id: "admin",
+        ctx: "car_rent",
+        data: "order approved",
+      });
+      return SendSuccess({
+        res,
+        message: `${EMessage.deleteSuccess}`,
+        data: car_rent,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.updateFailed}car_rent pay_status`,
+        err,
+      });
+    }
+  },
+
+  async UpdatePayment_statusCancle(req, res) {
+    try {
+      const id = req.params.id;
+      let { user_id } = req.body;
+      const [car_rentExists, userExists] = await Promise.all([
+        FindCar_rentById_for_edit(id),
+        FindUserById_ID(user_id),
+      ]);
+      if (!car_rentExists || !userExists)
+        return SendError({
+          res,
+          message: `${EMessage.notFound}`,
+          err: `${!car_rentExists ? "car_rent_id" : "user_id"}`,
+        });
+      if (userExists.role === "customer") {
+        return SendError({
+          res,
+          message: `Not an admin account`,
+          err: "Not an admin account",
+        });
+      }
+      const car_rent = await prisma.car_rent.update({
+        where: {
+          id,
+        },
+        data: { admin_id: user_id, status_id: car_rent_status_Failure },
+      });
+      const post = await prisma.posts.update({
+        where: { id: car_rent.post_id },
+        data: {
+          isShowPost: true,
+        },
+      });
+
+      await Promise.all([
+        ResCachedDataCar_rent({
+          id,
+          key,
+          post_key: car_rentExists.post_id,
+          user_key: car_rentExists.user_id,
+          pay_status: car_rentExists.pay_status,
+          user_post_key: car_rentExists.user_id + "post",
+        }),
+        ResCachedDataCar_rent({
+          id,
+          key,
+          post_key: car_rent.post_id,
+          user_key: car_rent.user_id,
+          pay_status: car_rent.pay_status,
+          user_post_key: car_rent.user_id + "post",
+        }),
+        RecacheDataPost({
+          key: "posts",
+          car_type_id_key: post.car_type_id + "posts",
+          type_of_fual_id_key: post.type_of_fual_id + "posts",
+          user_id_key: post.user_id + "posts",
+          post_status_key: post.status_id + "posts",
+        }),
+        redis.del(post.id + "posts"),
+      ]);
+      const dt = await FindCar_rentById(id);
+      console.log("dt :>> ", dt);
+      const noti = await NotificationController.notiNew({
+        data: dt,
+        ref_id: car_rent.id,
+
+        type: "car_rent",
+        title: "new car_rent order ",
+        text: "new car_rent order",
+        user_id,
+        role: "admin",
+      });
+
+      // broadcast({
+      //   client_id: dt.post.user_id,
+      //   ctx: "car_rent_user_post",
+      //   data: JSON.stringify(dt),
+      // });
       broadcast({
         client_id: dt.user_id,
         ctx: "car_rent_user_rent",

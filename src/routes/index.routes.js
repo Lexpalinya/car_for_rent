@@ -10,7 +10,6 @@ import Type_of_FualsController from "../controllers/type_of_fuals.controller";
 import UsersController from "../controllers/user.controller";
 import WalletController from "../controllers/wallet.controller";
 
-
 import Like_postController from "../controllers/post/like_post.controller";
 import ReviewController from "../controllers/post/review.controller";
 
@@ -499,7 +498,14 @@ route.put(
 route.put(
   `${car_rent}/updatePayment_status/:id`,
   auth,
+  admin,
   Car_rentController.UpdatePayment_status
+);
+route.put(
+  `${car_rent}/updatePayment_statusCancle/:id`,
+  auth,
+  admin,
+  Car_rentController.UpdatePayment_statusCancle
 );
 route.put(
   `${car_rent}/updateDriving_lincense_image/:id`,
