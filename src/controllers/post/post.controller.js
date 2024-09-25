@@ -42,7 +42,7 @@ let key = "posts";
 const model = "posts";
 let where = {
   is_active: true,
-  post_status: true,
+  isShowPost: true,
   status_id: post_status_ready_id,
 };
 let select = {
@@ -72,6 +72,7 @@ let select = {
   mutjum: true,
   pubmai: true,
   status_id: true,
+  isShowPost: true,
   created_at: true,
   updated_at: true,
   insurance_company: true,
@@ -79,6 +80,7 @@ let select = {
   type_of_fual: true,
   currency: true,
   status: true,
+
   users: {
     select: {
       username: true,
@@ -460,6 +462,10 @@ const PostController = {
       if (data.car_insurance && typeof data.car_insurance !== "boolean") {
         data.car_insurance = data.car_insurance === "true";
       }
+      if (data.isShowPost && typeof data.isShowPost !== "boolean") {
+        data.isShowPost = data.isShowPost === "true";
+      }
+
       // if (data.user_type && typeof data.user_type !== "boolean") {
       //   data.user_type = data.user_type === "true";
       // }
@@ -923,6 +929,7 @@ const PostController = {
         mutjum: true,
         pubmai: true,
         status_id: true,
+        isShowPost: true,
         created_at: true,
         updated_at: true,
         insurance_company: true,
@@ -930,6 +937,7 @@ const PostController = {
         type_of_fual: true,
         currency: true,
         status: true,
+
         users: {
           select: {
             username: true,

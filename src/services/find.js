@@ -279,6 +279,7 @@ export const FindPostById = (id) => {
       mutjum: true,
       pubmai: true,
       status_id: true,
+      isShowPost: true,
       created_at: true,
       updated_at: true,
       insurance_company: true,

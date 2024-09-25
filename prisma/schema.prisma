@@ -251,7 +251,7 @@ model posts {
   status_id            String                 @db.VarChar(36)
   created_at           DateTime               @default(now())
   updated_at           DateTime               @updatedAt
-  post_status          Boolean                @default(true)
+  isShowPost           Boolean                @default(true)
   pubmai               Float
   province_vehicle     String
   currency             String                 @default("kip")
