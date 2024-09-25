@@ -1,10 +1,15 @@
+import { CachDataAll, CachDataLimit } from "../services/cach.contro";
 import { EMessage } from "../services/enum";
-import { FindUserById } from "../services/find";
+import { FindNotification, FindUserById } from "../services/find";
 import { SendError, SendErrorLog, SendSuccess } from "../services/services";
 import { ValidateData } from "../services/validate";
 import prisma from "../utils/prisma.client";
 import { RecacheData } from "./user.controller";
 
+const key = "notification";
+const model = "notification";
+let select;
+const where = { is_active: true };
 const NotificationController = {
   async saveRegisterToken(req, res) {
     try {
@@ -35,6 +40,7 @@ const NotificationController = {
       return SendErrorLog({
         res,
         message: `${EMessage.serverError} ${EMessage.insertFailed} save device token`,
+        err,
       });
     }
   },
@@ -61,13 +67,15 @@ const NotificationController = {
         message: `${EMessage.deleteSuccess}`,
         data: noti,
       });
-    } catch (error) {
+    } catch (err) {
       return SendErrorLog({
         res,
         message: `${EMessage.serverError} ${EMessage.deleteFailed}delete notification`,
+        err,
       });
     }
   },
+
   async Delete(req, res) {
     try {
       const id = req.params.id;
@@ -91,16 +99,18 @@ const NotificationController = {
         message: `${EMessage.deleteSuccess}`,
         data: noti,
       });
-    } catch (error) {
+    } catch (err) {
       return SendErrorLog({
         res,
         message: `${EMessage.serverError} ${EMessage.deleteFailed}delete notification`,
+        err,
       });
     }
   },
   async notiNew({ data, ref_id, type, title, text, user_id, role }) {
     try {
       const user = await FindUserById(user_id);
+      if (!user) throw new Error("user not found");
       const message = {
         notification: {
           title,
@@ -109,7 +119,7 @@ const NotificationController = {
         token: user.device_token,
         data: data,
       };
-      await prisma.notification.create({
+      const noti = await prisma.notification.create({
         data: {
           user_id,
           title,
@@ -120,9 +130,105 @@ const NotificationController = {
         },
       });
 
-      return EMessage.SUCCESS;
+      return { message: EMessage.SUCCESS, data: noti };
     } catch (error) {
       return error;
+    }
+  },
+  async SelectOne(req, res) {
+    try {
+      const id = req.params.id;
+      const noti = await FindNotification(id);
+      if (!noti)
+        return SendError({
+          res,
+          message: `${EMessage.notFound} notification `,
+          error: "id notification",
+        });
+
+      return SendSuccess({
+        res,
+        message: `${EMessage.fetchOneSuccess}`,
+        data: noti,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingOne}delete notification`,
+        err,
+      });
+    }
+  },
+  async SelectNotiByUser_id(req, res) {
+    try {
+      let page = parseInt(req.query.page);
+      page = !page || page < 0 ? 0 : page - 1;
+      const user_id = req.user;
+      const [noti] = await Promise.all([
+        CachDataLimit(
+          user_id + key + page,
+          model,
+          { ...where, user_id },
+          page,
+          select,
+          [{ isNewNoti: "desc" }, { created_at: "desc" }]
+        ),
+        CachDataLimit(
+          user_id + key + page + 1,
+          model,
+          { ...where, user_id },
+          page + 1,
+          select,
+          [{ isNewNoti: "desc" }, { created_at: "desc" }]
+        ),
+      ]);
+      return SendSuccess({
+        res,
+        message: `${EMessage.fetchAllSuccess}`,
+        data: noti,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll} notification by user_id`,
+        err,
+      });
+    }
+  },
+  async SelectByAdmin(req, res) {
+    try {
+      let page = parseInt(req.query.page);
+      page = !page || page < 0 ? 0 : page - 1;
+      const admin = "admin";
+      const [noti] = await Promise.all([
+        CachDataLimit(
+          admin + key + page,
+          model,
+          { ...where, role: admin },
+          page,
+          select,
+          [{ isNewNoti: "desc" }, { created_at: "desc" }]
+        ),
+        CachDataLimit(
+          admin + key + page + 1,
+          model,
+          { ...where, role: admin },
+          page + 1,
+          select,
+          [{ isNewNoti: "desc" }, { created_at: "desc" }]
+        ),
+      ]);
+      return SendSuccess({
+        res,
+        message: `${EMessage.fetchAllSuccess}`,
+        data: noti,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll} notification by admin`,
+        err,
+      });
     }
   },
 };

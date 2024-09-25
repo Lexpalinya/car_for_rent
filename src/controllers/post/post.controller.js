@@ -881,13 +881,14 @@ const PostController = {
           },
           select: {
             id: true,
-            user: {
-              select: {
-                first_name: true,
-                last_name: true,
-                phone_number: true,
-              },
-            },
+            // user: {
+            //   select: {
+
+            //   },
+            // },
+            frist_name: true,
+            last_name: true,
+            phone_number: true,
             type_rent: true,
             start_date: true,
             end_date: true,

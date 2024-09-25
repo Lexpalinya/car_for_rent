@@ -448,3 +448,10 @@ export const FindKycById = (id) => {
     }
   );
 };
+
+export const FindNotification = (id) => {
+  return CachDataFindDataId_One(id + "notification", "notification", {
+    is_active: true,
+    id,
+  });
+};

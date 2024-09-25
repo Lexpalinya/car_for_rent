@@ -40,6 +40,7 @@ export const EMessage = {
   searchsuccess: "Search successful",
   searchfailed: "Search failed",
   SUCCESS: "success",
+  FAILE: "faile",
 };
 
 export const userType = {

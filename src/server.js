@@ -7,6 +7,7 @@ import redis from "./DB/redis";
 import APIRoute from "./routes/index.routes";
 import { EAPI, SERVER_PORT } from "./config/api.config";
 import { broadcast, initSocketServer } from "./server/socketIO.server"; // Import the Socket.IO setup
+import NotificationController from "./controllers/notification.controller";
 
 const app = new express();
 
@@ -46,7 +47,21 @@ const CheckConnectionDatabase = async () => {
 };
 
 await redis.flushdb();
+// await NotificationController.notiNew({
+//   data: "test",
+//   type: "customer",
+//   title: "car_rent",
+//   user_id: "90542f76-d080-405d-bae6-996b709cd187",
+//   ref_id: "test",
+//   text: "test",
+//   role: "customer",
+// });
 
+// const a = await NotificationController.getNoti({
+//   user_id: "90542f76-d080-405d-bae6-996b709cd187",
+//   type: "admin",
+// });
+// console.log("a :>> ", a);
 export const server = app.listen(SERVER_PORT, async () => {
   console.log(`server listening on port:${SERVER_PORT}`);
   console.log(`Express is running at http://localhost:${SERVER_PORT}`);
@@ -54,31 +69,4 @@ export const server = app.listen(SERVER_PORT, async () => {
 
   // Initialize Socket.IO after the server is up
   initSocketServer(server);
-});
-app.post("/products", async (req, res) => {
-  res.json({
-    message: "ok",
-  });
-  const products = {
-    name: "asdf",
-  };
-  broadcast({
-    client_id: "client1",
-    ctx: "123",
-    data: { type: "NEW_PRODUCT", products },
-  });
-});
-
-app.post("/sell", async (req, res) => {
-  res.json({
-    message: "ok",
-  });
-  const products = {
-    name: "asdf",
-  };
-  broadcast({
-    client_id: "client1",
-    ctx: "a",
-    data: { type: "NEW_PRODUCT", products },
-  });
 });

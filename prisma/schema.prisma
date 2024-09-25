@@ -456,7 +456,7 @@ model notification {
   is_active  Boolean   @default(true)
   isNewNoti  Boolean   @default(true)
   ref_id     String    @db.VarChar(36)
-  title     String
+  title      String
   text       String?   @db.LongText
   role       userRoles @default(customer)
   type       String
@@ -464,4 +464,6 @@ model notification {
   users      users     @relation(fields: [user_id], references: [id])
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt
+
+  @@index([role])
 }
