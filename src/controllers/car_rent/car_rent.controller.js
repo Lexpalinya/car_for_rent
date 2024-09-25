@@ -362,7 +362,6 @@ const Car_rentController = {
         user_id,
         role: "admin",
       });
-      console.log("noti :>> ", noti);
       broadcast({
         client_id: "admin",
         ctx: "car_rent",
@@ -735,6 +734,17 @@ const Car_rentController = {
         }),
         redis.del(postExists.id + "posts"),
       ]);
+
+      const noti = await NotificationController.notiNew({
+        data,
+        ref_id: car_rent.id,
+
+        type: "car_rent",
+        title: "new car_rent order ",
+        text: "new car_rent order",
+        user_id,
+        role: "admin",
+      });
       const dt = await FindCar_rentById(id);
       console.log("dt :>> ", dt);
       broadcast({
