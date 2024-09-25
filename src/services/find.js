@@ -441,6 +441,7 @@ export const FindKycById = (id) => {
       last_name: true,
       birthday: true,
       nationality: true,
+      doc_no: true,
       doc_type: true,
       user_id: true,
       created_at: true,

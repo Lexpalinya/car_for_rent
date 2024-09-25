@@ -28,7 +28,9 @@ let select = {
   first_name: true,
   last_name: true,
   birthday: true,
+  phone_number: true,
   nationality: true,
+  doc_no: true,
   doc_type: true,
   point: true,
   village: true,
@@ -77,6 +79,7 @@ const KycController = {
         village,
         district,
         province,
+        doc_no,
       } = req.body;
       const data = req.files;
       if (!data || !data.doc_image)
@@ -113,6 +116,7 @@ const KycController = {
           village,
           district,
           province,
+          doc_no,
         },
       });
 

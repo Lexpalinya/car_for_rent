@@ -300,6 +300,7 @@ export const ValidateKyc = (data) => {
     village,
     district,
     province,
+    doc_no,
   } = data;
   return ValidateData({
     user_type,
@@ -313,5 +314,6 @@ export const ValidateKyc = (data) => {
     village,
     district,
     province,
+    doc_no,
   });
 };

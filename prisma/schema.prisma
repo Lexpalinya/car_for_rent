@@ -51,6 +51,7 @@ model kycs {
   last_name     String
   birthday      DateTime
   nationality   String
+  doc_no        String          @default("1234567891011")
   doc_type      String
   phone_number  String
   point         String?
