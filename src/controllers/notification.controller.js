@@ -162,13 +162,14 @@ const NotificationController = {
   async SelectNotiByUser_id(req, res) {
     try {
       let page = parseInt(req.query.page);
+      let type = req.query.type;
       page = !page || page < 0 ? 0 : page - 1;
       const user_id = req.user;
       const [noti] = await Promise.all([
         CachDataLimit(
           user_id + key + page,
           model,
-          { ...where, user_id },
+          { ...where, user_id, type },
           page,
           select,
           [{ isNewNoti: "desc" }, { created_at: "desc" }]

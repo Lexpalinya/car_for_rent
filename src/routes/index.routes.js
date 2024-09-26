@@ -30,6 +30,7 @@ import PostController from "../controllers/post/post.controller";
 import Post_rent_dataController from "../controllers/post/post_rent_dataController";
 import Car_rentController from "../controllers/car_rent/car_rent.controller";
 import BannerController from "../controllers/banner.controller";
+import NotificationController from "../controllers/notification.controller";
 const route = express.Router();
 
 //-----------Promotion-------------------------
@@ -587,3 +588,24 @@ route.delete(
   admin,
   ExchagneRateController.Delete
 );
+
+const noti = "/noti";
+route.get(
+  `${noti}/selByUser`,
+  auth,
+  NotificationController.SelectNotiByUser_id
+);
+route.get(`${noti}/selOne/:id`, auth, NotificationController.SelectOne);
+route.get(
+  `${noti}/selByAdmin`,
+  auth,
+  NotificationController.SelectNotiByUser_id
+);
+
+route.post(
+  `${noti}/seveDevice_token`,
+  auth,
+  NotificationController.saveRegisterToken
+);
+
+route.put(`${noti}/readNoti/:id`, auth, NotificationController.readNoti);
