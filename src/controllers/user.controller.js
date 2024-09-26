@@ -15,6 +15,7 @@ import {
   DataExists,
   ValidateChangePassword,
   ValidateCheckUsernameAndPhone_number,
+  ValidateFacebook,
   ValidateForgotPassword,
   ValidateGoogle,
   ValidateLogin,
@@ -768,7 +769,86 @@ const UsersController = {
     } catch (err) {
       SendErrorLog({
         res,
-        message: `${EMessage.serverError} ${EMessage.loginFailed} sign in and sign up failed`,
+        message: `${EMessage.serverError} ${EMessage.loginFailed} sign in and sign up failed google`,
+        err,
+      });
+    }
+  },
+
+  async FaceBookSignInAndSignUp(req, res) {
+    try {
+      const validate = ValidateFacebook(req.body);
+      if (validate.length > 0)
+        return SendError({
+          res,
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: validate.join(", "),
+        });
+      const { id, name, email, image } = req.body;
+      const checksAccount = await FindUserEmailAlready(email);
+      if (checksAccount) {
+        const user = await prisma.users.update({
+          where: { id: checksAccount.id, is_active: true },
+          data: {
+            login_version: checksAccount.login_version + 1,
+          },
+          select,
+        });
+        if (user.google_id !== id)
+          return SendError({
+            res,
+            statuscode: 400,
+            message: `sign in facebook failed`,
+            err: `fackbook_id not match`,
+          });
+        const token_data = {
+          id: user.id,
+          login_version: user.login_version,
+        };
+
+        const token = await generateToken(token_data);
+        const result = {
+          ...user,
+          ...token,
+        };
+        await RecacheData(user.id, { page: true });
+
+        return SendSuccess({
+          res,
+          message: `${EMessage.loginSuccess}`,
+          data: result,
+        });
+      } else {
+        const user = await prisma.users.create({
+          data: {
+            username: name,
+            profile: image,
+            email,
+            fackbook_id: id,
+          },
+          select,
+        });
+        const datatoken = {
+          id: user.id,
+          login_version: user.login_version,
+        };
+        const token = await generateToken(datatoken);
+        const result = {
+          ...user,
+          ...token,
+        };
+        await RecacheData(user.id, { page: true });
+        return SendSuccess({
+          res,
+          message: `Sign up User Success`,
+          data: result,
+        });
+      }
+    } catch (err) {
+      SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.loginFailed} sign in and sign up failed facebook`,
         err,
       });
     }

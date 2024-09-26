@@ -16,12 +16,12 @@ let key = "promotions";
 let model = "promotions";
 let where = { is_active: true };
 let select;
-const RecacheData = async () => {
-  await DeleteCachedKey(key + "*");
-  await CachDataAll(key, model, where, select);
-  CachDataLimit(key + "-" + "0", model, where, 0, select);
-  let id = "";
-  FindPromotionById_ID(id);
+export const RecacheDataPromotion = async ({ key, key_id }) => {
+  let promiselist = [DeleteCachedKey(key)];
+  if (key_id) {
+    promiselist.push(DeleteCachedKey(key_id));
+  }
+  await Promise.all(promiselist);
 };
 
 const PromotionController = {
@@ -35,7 +35,7 @@ const PromotionController = {
           message: `${EMessage.pleaseInput}`,
           err: validate.join(", "),
         });
-      let {title, price, amount, out_date } = req.body;
+      let { title, price, amount, out_date } = req.body;
       if (typeof price !== "number") {
         price = parseFloat(price);
       }
@@ -54,7 +54,7 @@ const PromotionController = {
           out_date,
         },
       });
-      await RecacheData();
+      await RecacheDataPromotion({ key });
       return SendCreate({
         res,
         message: `${EMessage.insertSuccess} promotion`,
@@ -96,7 +96,7 @@ const PromotionController = {
         where: { id },
         data,
       });
-      await RecacheData();
+      await RecacheDataPromotion({ key, key_id: id + key });
       return SendSuccess({
         res,
         message: `${EMessage.updateSuccess}`,
@@ -127,7 +127,7 @@ const PromotionController = {
           is_active: false,
         },
       });
-      await RecacheData();
+      await RecacheDataPromotion({ key, key_id: id + key });
       return SendSuccess({
         res,
         message: `${EMessage.deleteSuccess}`,
@@ -142,27 +142,26 @@ const PromotionController = {
     }
   },
 
-  async SelectAll(req, res) {
-    try {
-      const promotion = await CachDataAll(key, model, where, select);
-      return SendSuccess({
-        res,
-        message: `${EMessage.fetchAllSuccess} promotion`,
-        data: promotion,
-      });
-    } catch (err) {
-      SendErrorLog({
-        res,
-        message: `${EMessage.serverError} ${EMessage.errorFetchingAll} promotion`,
-        err,
-      });
-    }
-  },
+  // async SelectAll(req, res) {
+  //   try {
+  //     const promotion = await CachDataAll(key, model, where, select);
+  //     return SendSuccess({
+  //       res,
+  //       message: `${EMessage.fetchAllSuccess} promotion`,
+  //       data: promotion,
+  //     });
+  //   } catch (err) {
+  //     SendErrorLog({
+  //       res,
+  //       message: `${EMessage.serverError} ${EMessage.errorFetchingAll} promotion`,
+  //       err,
+  //     });
+  //   }
+  // },
   async SelecOne(req, res) {
     try {
       const id = req.params.id;
-      const promotionData = await CachDataAll(key, model, where, select);
-      let promotion = promotionData.find((item) => item.id === id);
+      const promotion = await FindPromotionById_ID(id);
       if (!promotion)
         return SendError({
           res,
@@ -186,33 +185,34 @@ const PromotionController = {
 
   async SelectIsPublic(req, res) {
     try {
-      const promotionData = await CachDataAll(key, model, where, select);
-      let promotion = promotionData.filter((item) => item.is_public === true);
+      const promotion = await CachDataAll(
+        key,
+        model,
+        { is_public: true, ...where },
+        select
+      );
+
       return SendSuccess({
         res,
         message: `${EMessage.fetchAllSuccess} by isPublic`,
         data: promotion,
       });
     } catch (err) {
-      SendErrorLog(
+      SendErrorLog({
         res,
-        `${EMessage.serverError} ${EMessage.errorFetchingOne} promotion by isPublic`,
-        err
-      );
+        message: `${EMessage.serverError} ${EMessage.errorFetchingOne} promotion by isPublic`,
+        err,
+      });
     }
   },
   async SelectPage(req, res) {
     try {
       let page = parseInt(req.query.page);
       page = !page || page < 0 ? 0 : page - 1;
-      const promotion = await CachDataLimit(
-        key + "-" + page,
-        model,
-        where,
-        page,
-        select
-      );
-      CachDataLimit(key + "-" + (page + 1), model, where, page + 1, select);
+      const [promotion] = await Promise.all([
+        CachDataLimit(key + "-" + page, model, where, page, select),
+        CachDataLimit(key + "-" + (page + 1), model, where, page + 1, select),
+      ]);
       return SendSuccess({
         res,
         message: `${EMessage.fetchOneSuccess} promotion`,

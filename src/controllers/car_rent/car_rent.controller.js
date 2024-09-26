@@ -6,7 +6,6 @@ import { EMessage } from "../../services/enum";
 import {
   FindCar_Rent_StatusById,
   FindCar_rentById,
-  FindCar_rentById_for_edit,
   FindPostById,
   FindPostById_for_edit,
   FindPromotionById_ID,
@@ -38,6 +37,8 @@ import {
   post_status_being_hired_id,
   RecacheDataPost,
 } from "../post/post.controller";
+import { RecacheDataPromotion } from "../promotion.controller";
+import { RecacheDataWallet } from "../wallet.controller";
 const car_rent_status = "a8581879-1cc6-4607-b998-74a79d74dd63";
 const car_rent_status_user_approval = "7a55f7c4-4f6e-4992-bf02-66f1c1c47b99";
 const car_rent_status_Success = "818ca297-e08a-49ba-88c6-9834459564a1";
@@ -120,6 +121,81 @@ let select = {
   car_rent_driving_lincense_image: true,
   car_rent_payment_image: true,
   car_rent_visa: true,
+};
+const select_user_post = {
+  id: true,
+  is_active: true,
+  user_id: true,
+  post_id: true,
+  type_rent: true,
+  price_rent: true,
+  start_date: true,
+  end_date: true,
+  frist_name: true,
+  last_name: true,
+  // village: true,
+  // district: true,
+  // province: true,
+  phone_number: true,
+  email: true,
+  // doc_type: true,
+  scope: true,
+  // description: true,
+  // promotion_id: true,
+  // discount: true,
+  total_price: true,
+  // booking_fee: true,
+  // tax: true,
+  pay_destination: true,
+  khampakan: true,
+  // pay_type: true,
+  // bank_no: true,
+  // pay_status: true,
+  // reason: true,
+  // status_id: true,
+  // admin_id: true,
+  // is_success: true,
+  currency: true,
+  // jaiykhon: true,
+  created_at: true,
+  updated_at: true,
+  post: {
+    select: {
+      id: true,
+      user_id: true,
+      star: true,
+      users: {
+        select: {
+          profile: true,
+          kycs: {
+            where: {
+              is_active: true,
+            },
+            select: {
+              first_name: true,
+              last_name: true,
+              village: true,
+              district: true,
+              province: true,
+              phone_number: true,
+            },
+          },
+        },
+      },
+
+      car_brand: true,
+      car_types: true,
+      type_of_fual: true,
+      car_version: true,
+      car_year: true,
+      post_car_image: {
+        select: {
+          url: true,
+        },
+      },
+    },
+  },
+  status: true,
 };
 const ResCachedDataCar_rent = async ({
   id,
@@ -248,14 +324,33 @@ const Car_rentController = {
       ];
       if (promotion_id) {
         promiseFind.push(FindPromotionById_ID(promotion_id));
+        promiseFind.push(
+          prisma.wallet.findMany({
+            where: {
+              is_active: true,
+              promotion_id,
+              user_id,
+              is_use: true,
+            },
+            orderBy: {
+              created_at: "desc",
+            },
+          })
+        );
       }
-      const [userExists, postExists, car_Rent_StatusExists, promotionExists] =
-        await Promise.all(promiseFind);
+      const [
+        userExists,
+        postExists,
+        car_Rent_StatusExists,
+        promotionExists,
+        walletExists,
+      ] = await Promise.all(promiseFind);
       if (
         !userExists ||
         !postExists ||
         !car_Rent_StatusExists ||
-        (promotion_id && !promotionExists)
+        (promotion_id && !promotionExists) ||
+        (promotion_id && walletExists.length == 0)
       ) {
         return SendError({
           res,
@@ -268,8 +363,24 @@ const Car_rentController = {
               ? "post"
               : !car_Rent_StatusExists
               ? "car_rent_status"
-              : "promotion"
+              : promotion_id && !promotionExists
+              ? "promotion"
+              : "you not have promotion"
           }`,
+        });
+      }
+      let wallet_id;
+      if (promotion_id && walletExists) {
+        [wallet_id] = walletExists;
+      }
+      console.log("wallet_id :>> ", walletExists);
+      if (promotion_id && promotionExists.count_use < 0) {
+        return SendError({
+          res,
+          statuscode: 400,
+          message:
+            "The promotion has already been used according to the promotion amount ",
+          err: "try the new promotion",
         });
       }
       const [
@@ -360,8 +471,7 @@ const Car_rentController = {
           },
         }),
       ]);
-
-      const [noti] = await Promise.all([
+      let promiselist = [
         NotificationController.notiNew({
           // data,
           ref_id: car_rent.id,
@@ -378,7 +488,38 @@ const Car_rentController = {
           user_id_key: post.user_id + "posts",
           post_status_key: post.status_id + "posts",
         }),
-      ]);
+      ];
+      if (promotion_id) {
+        promiselist.push(
+          prisma.promotions.update({
+            where: { id: promotion_id },
+            data: { count_use: promotionExists.count_use - 1 },
+          })
+        );
+        promiselist.push(
+          prisma.wallet.update({
+            where: { id: wallet_id.id },
+            data: {
+              is_use: false,
+            },
+          })
+        );
+        promiselist.push(
+          RecacheDataPromotion({
+            key: "promotions",
+            key_id: promotion_id + "promotions",
+          })
+        );
+        promiselist.push(
+          RecacheDataWallet({
+            key: "wallets",
+            key_user_id: wallet_id.user_id + "wallets",
+            key_promotion_id: wallet_id.promotion_id + "wallets",
+          })
+        );
+      }
+
+      const [noti] = await Promise.all(promiselist);
       broadcast({
         client_id: "admin",
         ctx: "car_rent",
@@ -424,7 +565,7 @@ const Car_rentController = {
       if (data.pay_destination && typeof data.pay_destination !== "number")
         data.pay_destination = parseFloat(data.pay_destination);
 
-      let promiseList = [FindCar_rentById_for_edit(id)];
+      let promiseList = [FindCar_rentById(id)];
       if (data.user_id) promiseList.push(FindUserById_ID(data.user_id));
 
       if (data.post_id) promiseList.push(FindPostById_for_edit(data.post_id));
@@ -483,7 +624,7 @@ const Car_rentController = {
           post_key: car_rentExists.post_id,
           user_key: car_rentExists.user_id,
           pay_status: car_rentExists.pay_status,
-          user_post_key: car_rentExists.user_id + "post",
+          user_post_key: car_rentExists.post.user_id + "post",
         }),
         await ResCachedDataCar_rent({
           id,
@@ -496,7 +637,7 @@ const Car_rentController = {
       ]);
 
       const dt = await FindCar_rentById(id);
-      console.log("dt :>> ", dt);
+
       return SendSuccess({
         res,
         message: `${EMessage.deleteSuccess}`,
@@ -525,7 +666,7 @@ const Car_rentController = {
       const { status_id } = req.body;
 
       const [car_rentExists, statusExists] = await Promise.all([
-        FindCar_rentById_for_edit(id),
+        FindCar_rentById(id),
 
         FindCar_Rent_StatusById(status_id),
       ]);
@@ -552,7 +693,7 @@ const Car_rentController = {
           post_key: car_rentExists.post_id,
           user_key: car_rentExists.user_id,
           pay_status: car_rentExists.pay_status,
-          user_post_key: car_rentExists.user_id + "post",
+          user_post_key: car_rentExists.post.user_id + "post",
         }),
         ResCachedDataCar_rent({
           id,
@@ -629,7 +770,7 @@ const Car_rentController = {
       const { user_id, status_id } = req.body;
 
       const [car_rentExists, userExists, statusExists] = await Promise.all([
-        FindCar_rentById_for_edit(id),
+        FindCar_rentById(id),
         FindUserById_ID(user_id),
         FindCar_Rent_StatusById(status_id),
       ]);
@@ -670,7 +811,7 @@ const Car_rentController = {
           post_key: car_rentExists.post_id,
           user_key: car_rentExists.user_id,
           pay_status: car_rentExists.pay_status,
-          user_post_key: car_rentExists.user_id + "post",
+          user_post_key: car_rentExists.post.user_id + "post",
         }),
         ResCachedDataCar_rent({
           id,
@@ -714,7 +855,7 @@ const Car_rentController = {
         });
       if (typeof pay_status !== "boolean") pay_status = pay_status === "true";
       const [car_rentExists, userExists] = await Promise.all([
-        FindCar_rentById_for_edit(id),
+        FindCar_rentById(id),
         FindUserById_ID(user_id),
       ]);
       if (!car_rentExists || !userExists)
@@ -757,7 +898,7 @@ const Car_rentController = {
           post_key: car_rentExists.post_id,
           user_key: car_rentExists.user_id,
           pay_status: car_rentExists.pay_status,
-          user_post_key: car_rentExists.user_id + "post",
+          user_post_key: car_rentExists.post.user_id + "post",
         }),
         ResCachedDataCar_rent({
           id,
@@ -853,7 +994,7 @@ const Car_rentController = {
       const id = req.params.id;
       let { user_id } = req.body;
       const [car_rentExists, userExists] = await Promise.all([
-        FindCar_rentById_for_edit(id),
+        FindCar_rentById(id),
         FindUserById_ID(user_id),
       ]);
       if (!car_rentExists || !userExists)
@@ -889,7 +1030,7 @@ const Car_rentController = {
           post_key: car_rentExists.post_id,
           user_key: car_rentExists.user_id,
           pay_status: car_rentExists.pay_status,
-          user_post_key: car_rentExists.user_id + "post",
+          user_post_key: car_rentExists.post.user_id + "post",
         }),
         ResCachedDataCar_rent({
           id,
@@ -988,7 +1129,7 @@ const Car_rentController = {
         }
       }
       const [car_rentExists, car_rent_visaExists] = await Promise.all([
-        FindCar_rentById_for_edit(id),
+        FindCar_rentById(id),
         Car_rent_visa.findUnique({ id: car_rent_visa.id }),
       ]);
 
@@ -1008,7 +1149,7 @@ const Car_rentController = {
         post_key: car_rentExists.post_id,
         user_key: car_rentExists.user_id,
         pay_status: car_rentExists.pay_status,
-        user_post_key: car_rentExists.user_id + "post",
+        user_post_key: car_rentExists.post.user_id + "post",
       });
       return SendSuccess({
         res,
@@ -1053,7 +1194,7 @@ const Car_rentController = {
   async Delete(req, res) {
     try {
       const id = req.params.id;
-      const car_rentExists = await FindCar_rentById_for_edit(id);
+      const car_rentExists = await FindCar_rentById(id);
       if (!car_rentExists)
         return SendError({
           res,
@@ -1125,7 +1266,7 @@ const Car_rentController = {
           is_active: true,
         },
         page,
-        select,
+        select_user_post,
         {
           updated_at: "desc",
         }
@@ -1137,7 +1278,7 @@ const Car_rentController = {
           is_active: true,
         },
         page + 1,
-        select,
+        select_user_post,
         {
           updated_at: "desc",
         }
@@ -1264,7 +1405,7 @@ const Car_rentController = {
           is_active: true,
         },
         page,
-        select,
+        select_user_post,
         {
           updated_at: "desc",
         }
@@ -1278,7 +1419,7 @@ const Car_rentController = {
           is_active: true,
         },
         page + 1,
-        select,
+        select_user_post,
         {
           updated_at: "desc",
         }
@@ -1312,7 +1453,7 @@ const Car_rentController = {
             notIn: [car_rent_status_Success, car_rent_status_Failure],
           },
         },
-        select,
+        select_user_post,
         {
           updated_at: "desc",
         }
@@ -1350,7 +1491,7 @@ const Car_rentController = {
             },
           },
           page,
-          select,
+          select_user_post,
           {
             updated_at: "desc",
           }
@@ -1409,7 +1550,7 @@ const Car_rentController = {
             ],
           },
         },
-        undefined,
+        select_user_post,
         {
           updated_at: "desc",
         }
@@ -1449,7 +1590,7 @@ const Car_rentController = {
             },
           },
           page,
-          select,
+          select_user_post,
           {
             updated_at: "desc",
           }
@@ -1535,7 +1676,7 @@ const UpdateCar_rentImage = async (
     }
 
     const [car_rentExists, imageExists] = await Promise.all([
-      FindCar_rentById_for_edit(id),
+      FindCar_rentById(id),
       findImageById({ id: image_data_update.id }),
     ]);
 

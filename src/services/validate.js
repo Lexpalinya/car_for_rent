@@ -104,6 +104,10 @@ export const ValidateGoogle = (data) => {
   const { id, name, email, image } = data;
   return ValidateData({ id, name, email, image });
 };
+export const ValidateFacebook = (data) => {
+  const { id, name, email, image } = data;
+  return ValidateData({ id, name, email, image });
+};
 export const ValidateChangePassword = (data) => {
   const { new_password, old_password } = data;
   return ValidateData({ new_password, old_password });

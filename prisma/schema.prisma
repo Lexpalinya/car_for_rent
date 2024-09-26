@@ -110,7 +110,7 @@ model promotions {
   code       String
   price      Int
   amount     Int
-  out_date   DateTime //@default(now())
+  out_date   DateTime
   count_use  Int
   created_at DateTime   @default(now())
   updated_at DateTime   @updatedAt

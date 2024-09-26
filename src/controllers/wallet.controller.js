@@ -15,6 +15,7 @@ import {
 } from "../services/services";
 import { DataExists, ValidateWallet } from "../services/validate";
 import prisma from "../utils/prisma.client";
+import { RecacheDataPromotion } from "./promotion.controller";
 
 let key = "wallets";
 let model = "wallet";
@@ -33,6 +34,18 @@ let select = {
     },
   },
   promotions: true,
+};
+export const RecacheDataWallet = async ({
+  key,
+  key_user_id,
+  key_promotion_id,
+}) => {
+  let promises = [
+    DeleteCachedKey(key),
+    redis.del([key_user_id, key_promotion_id]),
+  ];
+
+  await Promise.all(promises);
 };
 const WalletController = {
   async Insert(req, res) {
@@ -65,23 +78,30 @@ const WalletController = {
           err: "promotion out",
         });
       }
-      const wallet = await prisma.wallet.create({
-        data: {
-          user_id,
-          promotion_id,
-        },
-        select,
-      });
-      const promotion = await prisma.promotions.update({
-        where: { id: promotion_id },
-        data: { amount: promotionExists.amount - 1 },
-      });
-
-      await redis.del(user_id + key, promotion_id + key);
-      await DeleteCachedKey("promotions");
-
-      await DeleteCachedKey(key);
-      await CachDataAll(key, model, where, select);
+      const [wallet] = await Promise.all([
+        prisma.wallet.create({
+          data: {
+            user_id,
+            promotion_id,
+          },
+          select,
+        }),
+        prisma.promotions.update({
+          where: { id: promotion_id },
+          data: { amount: promotionExists.amount - 1 },
+        }),
+      ]);
+      await Promise.all([
+        RecacheDataWallet({
+          key,
+          key_user_id: user_id + key,
+          key_promotion_id: promotion_id + key,
+        }),
+        RecacheDataPromotion({
+          key: "promotions",
+          key_id: promotion_id + "promotions",
+        }),
+      ]);
 
       return SendCreate({
         res,
@@ -141,6 +161,19 @@ const WalletController = {
         data,
       });
 
+      await Promise.all([
+        RecacheDataWallet({
+          key,
+          key_user_id: walletExists.user_id + key,
+          key_promotion_id: walletExists.promotion_id + key,
+        }),
+        RecacheDataWallet({
+          key,
+          key_user_id: updatedWallet.user_id + key,
+          key_promotion_id: updatedWallet.promotion_id + key,
+        }),
+      ]);
+
       // Send success response with the updated wallet data
       return SendSuccess({
         res,
@@ -174,14 +207,12 @@ const WalletController = {
           is_active: false,
         },
       });
-      await redis.del(
-        walletExists.user_id + key,
-        walletExists.promotion_id + key
-      );
-      // await DeleteCachedKey("promotions");
+      await RecacheDataWallet({
+        key,
+        key_user_id: walletExists.user_id + key,
+        key_promotion_id: walletExists.promotion_id + key,
+      });
 
-      await DeleteCachedKey(key);
-      await CachDataAll(key, model, where, select);
       return SendSuccess({
         res,
         message: `${EMessage.deleteSuccess}`,
@@ -199,7 +230,7 @@ const WalletController = {
   async SelectByUserID(req, res) {
     try {
       const id = req.user;
-      console.log("id :>> ", id);
+
       const wallet = await CachDataAll(
         id + key,
         model,

@@ -30,12 +30,10 @@ export const FindBannerById = (id) => {
 };
 
 export const FindPromotionById_ID = (id) => {
-  return CachDataFindByIdNoClear(
-    "promotions-id",
-    "promotions",
-    { id, is_active: true },
-    { id: true, amount: true, count_use: true }
-  );
+  return CachDataFindDataId_One(id + "promotions", "promotions", {
+    id,
+    is_active: true,
+  });
 };
 
 //-----------------Post-----------------------------

@@ -35,7 +35,7 @@ const route = express.Router();
 //-----------Promotion-------------------------
 const promotion = "/promotion";
 route.get(`${promotion}/selOne/:id`, auth, PromotionController.SelecOne);
-route.get(`${promotion}/selAll`, auth, admin, PromotionController.SelectAll);
+// route.get(`${promotion}/selAll`, auth, admin, PromotionController.SelectAll);
 route.get(`${promotion}/selIsPublic`, auth, PromotionController.SelectIsPublic);
 route.get(
   `${promotion}/selAllpages`,
