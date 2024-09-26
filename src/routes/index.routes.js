@@ -302,8 +302,8 @@ route.get(
   WalletController.SelectByPromotionID
 );
 route.post(`${wallet}/insert`, auth, WalletController.Insert);
-route.put(`${wallet}/update/:id`, auth, WalletController.Update);
-route.delete(`${wallet}/delete/:id`, auth, WalletController.Delete);
+route.put(`${wallet}/update`, auth, WalletController.Update);
+route.delete(`${wallet}/delete`, auth, WalletController.Delete);
 //------------Post---------------------------------
 const post = "/post";
 route.get(`${post}/selAllPage`, auth, PostController.SelectAllPage);

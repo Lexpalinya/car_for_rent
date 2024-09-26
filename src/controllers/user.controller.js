@@ -58,6 +58,7 @@ let select = {
 
 export const RecacheData = async (id = "", { page = true }) => {
   let promise = [redis.del([id + key, "ID_user"])];
+  console.log('redis.get("ID_user") :>> ', await redis.get("ID_user"));
   if (page === true) {
     promise.push(DeleteCachedKey(key));
   }
@@ -708,17 +709,24 @@ const UsersController = {
       const checksAccount = await FindUserEmailAlready(email);
       if (checksAccount) {
         const user = await prisma.users.update({
-          where: { id: checksAccount.id },
+          where: { id: checksAccount.id, is_active: true },
           data: {
             login_version: checksAccount.login_version + 1,
           },
           select,
         });
+        if (user.google_id !== id)
+          return SendError({
+            res,
+            statuscode: 400,
+            message: `sign in google failed`,
+            err: `google_id not match`,
+          });
         const token_data = {
           id: user.id,
           login_version: user.login_version,
         };
-  
+
         const token = await generateToken(token_data);
         const result = {
           ...user,
@@ -737,6 +745,7 @@ const UsersController = {
             username: name,
             profile: image,
             email,
+            google_id: id,
           },
           select,
         });
