@@ -599,7 +599,7 @@ route.get(`${noti}/selOne/:id`, auth, NotificationController.SelectOne);
 route.get(
   `${noti}/selByAdmin`,
   auth,
-  NotificationController.SelectNotiByUser_id
+  NotificationController.SelectByAdmin
 );
 
 route.post(

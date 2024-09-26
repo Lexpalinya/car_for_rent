@@ -1545,6 +1545,7 @@ const Car_rentController = {
           status_id: {
             notIn: [
               car_rent_status,
+              car_rent_status_user_approval,
               car_rent_status_Success,
               car_rent_status_Failure,
             ],

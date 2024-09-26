@@ -379,33 +379,68 @@ export const FindCar_rentById = (id) => {
       post: {
         select: {
           id: true,
+          is_active: true,
+          car_type_id: true,
           user_id: true,
           star: true,
+          car_insurance: true,
+          insurance_company_id: true,
+          level_insurance_id: true,
+          car_brand: true,
+          car_version: true,
+          car_year: true,
+          car_resgistration: true,
+          door: true,
+          type_of_fual_id: true,
+          driver_system: true,
+          seat: true,
+          car_color: true,
+          description: true,
+          street: true,
+          point: true,
+          village: true,
+          district: true,
+          province: true,
+          mutjum: true,
+          pubmai: true,
+          status_id: true,
+          isShowPost: true,
+          created_at: true,
+          updated_at: true,
+          insurance_company: true,
+          level_insurance: true,
+          type_of_fual: true,
+          currency: true,
+          status: true,
+
           users: {
             select: {
+              username: true,
+              phone_number: true,
               profile: true,
               kycs: {
-                select: {
-                  first_name: true,
-                  last_name: true,
-                  village: true,
-                  district: true,
-                  province: true,
-                  phone_number: true,
+                where: {
+                  is_active: true,
                 },
               },
             },
           },
-
           car_types: true,
-
-          car_version: true,
-          car_year: true,
-          post_car_image: {
-            select: {
-              url: true,
-            },
-          },
+          post_doc_image: true,
+          post_car_image: true,
+          // post_driver_license_image: true,
+          // post_insurance_image: true,
+          post_rent_data: true,
+          // like_post: {
+          //   select: {
+          //     user_id: true,
+          //   },
+          // },
+          // _count: {
+          //   select: {
+          //     like_post: true,
+          //   },
+          // },
         },
       },
       status: true,

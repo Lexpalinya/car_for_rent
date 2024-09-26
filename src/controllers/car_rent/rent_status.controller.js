@@ -207,7 +207,7 @@ const Car_Rent_StatusController = {
         {
           is_active: true,
           priority: {
-            gte: 2,
+            gte: 3,
             lte: 5,
           },
         },
