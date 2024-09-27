@@ -537,6 +537,11 @@ route.put(
   auth,
   Car_rentController.UpdateStatusCancel
 );
+route.put(
+  `${car_rent}/UpdateStatusSuccess/:id`,
+  auth,
+  Car_rentController.UpdateStatusSuccess
+);
 
 route.delete(`${car_rent}/delete/:id`, auth, Car_rentController.Delete);
 //-----Location-----------------------------

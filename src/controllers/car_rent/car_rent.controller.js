@@ -784,6 +784,16 @@ const Car_rentController = {
       post_status_ready_id
     );
   },
+  async UpdateStatusSuccess(req, res) {
+    return UpdateStatusUser(
+      req,
+      res,
+      car_rent_status_Success,
+      "update status Success",
+      "update status Success by user",
+      post_status_ready_id
+    );
+  },
   async UpdateStatusAdmin(req, res) {
     try {
       const id = req.params.id;
