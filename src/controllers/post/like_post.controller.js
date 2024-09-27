@@ -1,4 +1,6 @@
 import redis from "../../DB/redis";
+import { CachDataLimit } from "../../services/cach.contro";
+import { DeleteCachedKey } from "../../services/cach.deletekey";
 import { EMessage } from "../../services/enum";
 import { FindPostById_for_edit, FindUserById_ID } from "../../services/find";
 import { SendError, SendErrorLog, SendSuccess } from "../../services/services";
@@ -6,8 +8,12 @@ import { Post_like_posts } from "../../services/subtabel";
 import prisma from "../../utils/prisma.client";
 import { RecacheDataPost } from "./post.controller";
 
-let key = "post";
-
+const key = "post";
+const key_like_post = "like_post";
+const model = "like_post";
+const RecacheData = async ({ key_user, key_post }) => {
+  await Promise.all([DeleteCachedKey(key_user), DeleteCachedKey(key_post)]);
+};
 const Like_postController = {
   async Like_post(req, res) {
     try {
@@ -47,6 +53,10 @@ const Like_postController = {
         post_status_key: postExists.status_id + key,
       });
       await redis.del(postExists.id + key);
+      RecacheData({
+        key_user: like.user_id + key_like_post,
+        key_post: like.post_id + key_like_post,
+      });
       return SendSuccess({
         res,
         message: `${EMessage.insertSuccess}: like post successfully`,
@@ -111,9 +121,177 @@ const Like_postController = {
         post_status_key: postExists.status_id + key,
       });
       await redis.del(postExists.id + key);
+      RecacheData({
+        key_user: like.user_id + key_like_post,
+        key_post: like.post_id + key_like_post,
+      });
       return SendSuccess({
         res,
         message: `${EMessage.deleteSuccess} :unlike post successfully`,
+        data: like,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.deleteFailed} post`,
+        err,
+      });
+    }
+  },
+
+  async SelectByUser(req, res) {
+    try {
+      const user_id = req.user;
+      let page = parseInt(req.query.page);
+      page = !page || page < 0 ? 0 : page - 1;
+      const select = {
+        post_id: true,
+        user_id: true,
+        created_at: true,
+        posts: {
+          select: {
+            id: true,
+            is_active: true,
+            car_type_id: true,
+            user_id: true,
+            star: true,
+            car_insurance: true,
+            insurance_company_id: true,
+            level_insurance_id: true,
+            car_brand: true,
+            car_version: true,
+            car_year: true,
+            car_resgistration: true,
+            door: true,
+            type_of_fual_id: true,
+            driver_system: true,
+            seat: true,
+            car_color: true,
+            description: true,
+            street: true,
+            point: true,
+            village: true,
+            district: true,
+            province: true,
+            mutjum: true,
+            pubmai: true,
+            status_id: true,
+            isShowPost: true,
+            created_at: true,
+            updated_at: true,
+            insurance_company: true,
+            level_insurance: true,
+            type_of_fual: true,
+            currency: true,
+            status: true,
+
+            users: {
+              select: {
+                username: true,
+                phone_number: true,
+                profile: true,
+                kycs: {
+                  where: {
+                    is_active: true,
+                  },
+                },
+              },
+            },
+            car_types: true,
+            // post_doc_image: true,
+            // post_car_image: true,
+            // post_driver_license_image: true,
+            // post_insurance_image: true,
+            post_rent_data: true,
+            _count: {
+              select: {
+                like_post: true,
+              },
+            },
+          },
+        },
+      };
+      const [like] = await Promise.all([
+        CachDataLimit(
+          user_id + key_like_post + page,
+          model,
+          {
+            user_id: user_id,
+            posts: {
+              is_active: true,
+            },
+          },
+          page,
+          select
+        ),
+        CachDataLimit(
+          user_id + key_like_post + (page + 1),
+          model,
+          {
+            user_id: user_id,
+            posts: {
+              is_active: true,
+            },
+          },
+          page + 1,
+          select
+        ),
+      ]);
+      return SendSuccess({
+        res,
+        message: `${EMessage.fetchAllSuccess} user_id`,
+        data: like,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.insertFailed} post`,
+        err,
+      });
+    }
+  },
+  async SelectByPost(req, res) {
+    try {
+      const post_id = req.params.id;
+      let page = parseInt(req.query.page);
+      page = !page || page < 0 ? 0 : page - 1;
+      const select = {
+        post_id: true,
+        user_id: true,
+        created_at: true,
+        users: {
+          select: {
+            username: true,
+            phone_number: true,
+            profile: true,
+            kycs: {
+              where: {
+                is_active: true,
+              },
+            },
+          },
+        },
+      };
+      const [like] = await Promise.all([
+        CachDataLimit(
+          post_id + key_like_post + page,
+          model,
+          { post_id, users: { is_active: true } },
+          page,
+          select
+        ),
+        CachDataLimit(
+          post_id + key_like_post + (page + 1),
+          model,
+          { post_id, users: { is_active: true } },
+          page + 1,
+          select
+        ),
+      ]);
+
+      return SendSuccess({
+        res,
+        message: `${EMessage.fetchAllSuccess} user_id`,
         data: like,
       });
     } catch (err) {

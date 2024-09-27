@@ -215,10 +215,11 @@ model type_of_fuals {
 }
 
 model like_post {
-  user_id String @db.VarChar(36)
-  post_id String @db.VarChar(36)
-  posts   posts  @relation(fields: [post_id], references: [id])
-  users   users  @relation(fields: [user_id], references: [id])
+  user_id    String   @db.VarChar(36)
+  post_id    String   @db.VarChar(36)
+  created_at DateTime @default(now())
+  posts      posts    @relation(fields: [post_id], references: [id])
+  users      users    @relation(fields: [user_id], references: [id])
 
   @@id([user_id, post_id])
   @@index([post_id])

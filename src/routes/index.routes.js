@@ -424,6 +424,9 @@ route.put(
 //-----------Like_post---------------------------------
 route.put(`${post}/like_post/:id`, auth, Like_postController.Like_post);
 route.put(`${post}/unlike_post/:id`, auth, Like_postController.UnLike_post);
+const like_post = "/like_post";
+route.get(`${like_post}/selByUser`, auth, Like_postController.SelectByUser);
+route.get(`${like_post}/selByPost/:id`, auth, Like_postController.SelectByPost);
 
 // //--------------Labels_post_data------------------------------------
 // route.put(`${post}/labels_post_add`, auth, Labels_DataController.Insert);
