@@ -880,11 +880,11 @@ const PostController = {
             created_at: "desc",
           },
           where: {
+            is_active: true,
             post: {
-              OR: [
-                { status_id: post_status_being_hired_id },
-                { status_id: post_status_ready_id },
-              ],
+              status_id: {
+                notIn: [post_status_ready_id],
+              },
             },
           },
           select: {
