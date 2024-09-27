@@ -524,6 +524,12 @@ route.put(
   Car_rentController.UpdateStatusAdmin
 );
 
+route.put(
+  `${car_rent}/UpdateStatusApproval/:id`,
+  auth,
+  Car_rentController.UpdateStatusApproval
+);
+
 route.delete(`${car_rent}/delete/:id`, auth, Car_rentController.Delete);
 //-----Location-----------------------------
 const location = "/location";
@@ -596,11 +602,7 @@ route.get(
   NotificationController.SelectNotiByUser_id
 );
 route.get(`${noti}/selOne/:id`, auth, NotificationController.SelectOne);
-route.get(
-  `${noti}/selByAdmin`,
-  auth,
-  NotificationController.SelectByAdmin
-);
+route.get(`${noti}/selByAdmin`, auth, NotificationController.SelectByAdmin);
 
 route.post(
   `${noti}/seveDevice_token`,

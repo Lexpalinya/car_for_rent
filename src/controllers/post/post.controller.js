@@ -38,6 +38,7 @@ import prisma from "../../utils/prisma.client";
 export const post_status_being_hired_id =
   "44c3d8f0-432b-4f26-a9de-059df566761c";
 const post_status_ready_id = "ccd5c106-0a6c-45e9-b01c-e0a523221506";
+export const post_status_Being_rented = "4baa3353-88c3-46f2-ac36-ed7971bd64bc";
 let key = "posts";
 const model = "posts";
 let where = {

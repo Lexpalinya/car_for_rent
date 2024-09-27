@@ -35,6 +35,7 @@ import prisma from "../../utils/prisma.client";
 import NotificationController from "../notification.controller";
 import {
   post_status_being_hired_id,
+  post_status_Being_rented,
   RecacheDataPost,
 } from "../post/post.controller";
 import { RecacheDataPromotion } from "../promotion.controller";
@@ -43,6 +44,8 @@ const car_rent_status = "a8581879-1cc6-4607-b998-74a79d74dd63";
 const car_rent_status_user_approval = "7a55f7c4-4f6e-4992-bf02-66f1c1c47b99";
 const car_rent_status_Success = "818ca297-e08a-49ba-88c6-9834459564a1";
 const car_rent_status_Failure = "b3b177e3-9f07-4546-ad14-bc96a7d62185";
+const car_rent_status_Hand_over_the_car =
+  "0942b123-b2d7-4b5c-9dc6-c2cc75fc5e7f";
 let key = "car_rent";
 let model = "car_rent";
 let select = {
@@ -488,6 +491,7 @@ const Car_rentController = {
           user_id_key: post.user_id + "posts",
           post_status_key: post.status_id + "posts",
         }),
+        redis.del(post.id + "posts-edit", post.id + "posts"),
       ];
       if (promotion_id) {
         promiselist.push(
@@ -756,6 +760,121 @@ const Car_rentController = {
       });
     }
   },
+
+  async UpdateStatusApproval(req, res) {
+    try {
+      const id = req.params.id;
+      const status_id = car_rent_status_Hand_over_the_car;
+      const [car_rentExists, statusExists] = await Promise.all([
+        FindCar_rentById(id),
+        FindCar_Rent_StatusById(status_id),
+      ]);
+      if (!car_rentExists || !statusExists)
+        return SendError({
+          res,
+          message: `${EMessage.notFound}`,
+          err: `${!car_rentExists ? "car_rent_id" : "status_id"}`,
+        });
+
+      const car_rent = await prisma.car_rent.update({
+        where: {
+          id,
+        },
+        data: {
+          status_id,
+        },
+      });
+
+      await Promise.all([
+        ResCachedDataCar_rent({
+          id,
+          key,
+          post_key: car_rentExists.post_id,
+          user_key: car_rentExists.user_id,
+          pay_status: car_rentExists.pay_status,
+          user_post_key: car_rentExists.post.user_id + "post",
+        }),
+        ResCachedDataCar_rent({
+          id,
+          key,
+          post_key: car_rent.post_id,
+          user_key: car_rent.user_id,
+          pay_status: car_rent.pay_status,
+          user_post_key: car_rent.user_id + "post",
+        }),
+      ]);
+
+      const dt = await FindCar_rentById(id);
+      // const postExists = await FindPostById_for_edit(dt.id);
+      const [noti_user_post, noti_user_rent, post] = await Promise.all([
+        NotificationController.notiNew({
+          // data,
+          ref_id: car_rent.id,
+          type: "car_rent_user_post",
+          title: "update status payment ",
+          text: "update status payment",
+          user_id: dt.post.user_id,
+          role: "customer",
+        }),
+        NotificationController.notiNew({
+          // data,
+          ref_id: car_rent.id,
+          type: "car_rent_user_rent",
+          title: "update status payment ",
+          text: "update status payment",
+          user_id: dt.user_id,
+          role: "customer",
+        }),
+        prisma.posts.update({
+          where: { id: dt.post_id },
+          data: {
+            status_id: post_status_Being_rented,
+          },
+        }),
+      ]);
+
+      broadcast({
+        client_id: dt.post.user_id,
+        ctx: "car_rent_user_post",
+        data: {
+          noti: noti_user_post.data,
+          data: dt,
+        },
+      });
+      broadcast({
+        client_id: dt.user_id,
+        ctx: "car_rent_user_rent",
+        data: {
+          noti: noti_user_rent.data,
+          data: dt,
+        },
+      });
+      await Promise.all([
+        RecacheDataPost({
+          key: "posts",
+          car_type_id_key: post.car_type_id + "posts",
+          type_of_fual_id_key: post.type_of_fual_id + "posts",
+          user_id_key: post.user_id + "posts",
+          post_status_key: post.status_id + "posts",
+        }),
+        // RecacheDataPost({
+        //   post_status_key: postExists.status_id + "posts",
+        // }),
+        redis.del(post.id + "posts-edit", post.id + "posts"),
+      ]);
+      return SendSuccess({
+        res,
+        message: `${EMessage.deleteSuccess}`,
+        data: car_rent,
+      });
+    } catch (err) {
+      return SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.updateFailed} `,
+        err,
+      });
+    }
+  },
   async UpdateStatusAdmin(req, res) {
     try {
       const id = req.params.id;
@@ -918,7 +1037,7 @@ const Car_rentController = {
         RecacheDataPost({
           post_status_key: postExists.status_id + "posts",
         }),
-        redis.del(postExists.id + "posts"),
+        redis.del(post.id + "posts-edit", post.id + "posts"),
       ]);
       const dt = await FindCar_rentById(id);
 
@@ -1047,7 +1166,7 @@ const Car_rentController = {
           user_id_key: post.user_id + "posts",
           post_status_key: post.status_id + "posts",
         }),
-        redis.del(post.id + "posts"),
+        redis.del(post.id + "posts-edit", post.id + "posts"),
       ]);
       const dt = await FindCar_rentById(id);
 

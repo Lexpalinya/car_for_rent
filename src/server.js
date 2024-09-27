@@ -16,7 +16,7 @@ app.use(
   express.urlencoded({ extended: false, limit: "500mb", parameterLimit: 500 })
 );
 app.use(fileUpload());
-app.use(morgan("dev"));
+app.use(morgan());
 
 app.use(
   cors({
