@@ -901,6 +901,8 @@ const PostController = {
             end_date: true,
             total_price: true,
             currency: true,
+            status_id: true,
+            status: true,
           },
         },
         id: true,
