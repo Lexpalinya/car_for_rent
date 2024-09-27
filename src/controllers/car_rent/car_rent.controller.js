@@ -36,10 +36,12 @@ import NotificationController from "../notification.controller";
 import {
   post_status_being_hired_id,
   post_status_Being_rented,
+  post_status_ready_id,
   RecacheDataPost,
 } from "../post/post.controller";
 import { RecacheDataPromotion } from "../promotion.controller";
 import { RecacheDataWallet } from "../wallet.controller";
+import { UpdateCar_rentImage, UpdateStatusUser } from "./car_rent_update";
 const car_rent_status = "a8581879-1cc6-4607-b998-74a79d74dd63";
 const car_rent_status_user_approval = "7a55f7c4-4f6e-4992-bf02-66f1c1c47b99";
 const car_rent_status_Success = "818ca297-e08a-49ba-88c6-9834459564a1";
@@ -200,7 +202,7 @@ const select_user_post = {
   },
   status: true,
 };
-const ResCachedDataCar_rent = async ({
+export const ResCachedDataCar_rent = async ({
   id,
   key,
   post_key,
@@ -762,118 +764,25 @@ const Car_rentController = {
   },
 
   async UpdateStatusApproval(req, res) {
-    try {
-      const id = req.params.id;
-      const status_id = car_rent_status_Hand_over_the_car;
-      const [car_rentExists, statusExists] = await Promise.all([
-        FindCar_rentById(id),
-        FindCar_Rent_StatusById(status_id),
-      ]);
-      if (!car_rentExists || !statusExists)
-        return SendError({
-          res,
-          message: `${EMessage.notFound}`,
-          err: `${!car_rentExists ? "car_rent_id" : "status_id"}`,
-        });
+    return UpdateStatusUser(
+      req,
+      res,
+      car_rent_status_Hand_over_the_car,
+      "update status Approved",
+      "update status Approved by user",
+      post_status_Being_rented
+    );
+  },
 
-      const car_rent = await prisma.car_rent.update({
-        where: {
-          id,
-        },
-        data: {
-          status_id,
-        },
-      });
-
-      await Promise.all([
-        ResCachedDataCar_rent({
-          id,
-          key,
-          post_key: car_rentExists.post_id,
-          user_key: car_rentExists.user_id,
-          pay_status: car_rentExists.pay_status,
-          user_post_key: car_rentExists.post.user_id + "post",
-        }),
-        ResCachedDataCar_rent({
-          id,
-          key,
-          post_key: car_rent.post_id,
-          user_key: car_rent.user_id,
-          pay_status: car_rent.pay_status,
-          user_post_key: car_rent.user_id + "post",
-        }),
-      ]);
-
-      const dt = await FindCar_rentById(id);
-      // const postExists = await FindPostById_for_edit(dt.id);
-      const [noti_user_post, noti_user_rent, post] = await Promise.all([
-        NotificationController.notiNew({
-          // data,
-          ref_id: car_rent.id,
-          type: "car_rent_user_post",
-          title: "update status payment ",
-          text: "update status payment",
-          user_id: dt.post.user_id,
-          role: "customer",
-        }),
-        NotificationController.notiNew({
-          // data,
-          ref_id: car_rent.id,
-          type: "car_rent_user_rent",
-          title: "update status payment ",
-          text: "update status payment",
-          user_id: dt.user_id,
-          role: "customer",
-        }),
-        prisma.posts.update({
-          where: { id: dt.post_id },
-          data: {
-            status_id: post_status_Being_rented,
-          },
-        }),
-      ]);
-
-      broadcast({
-        client_id: dt.post.user_id,
-        ctx: "car_rent_user_post",
-        data: {
-          noti: noti_user_post.data,
-          data: dt,
-        },
-      });
-      broadcast({
-        client_id: dt.user_id,
-        ctx: "car_rent_user_rent",
-        data: {
-          noti: noti_user_rent.data,
-          data: dt,
-        },
-      });
-      await Promise.all([
-        RecacheDataPost({
-          key: "posts",
-          car_type_id_key: post.car_type_id + "posts",
-          type_of_fual_id_key: post.type_of_fual_id + "posts",
-          user_id_key: post.user_id + "posts",
-          post_status_key: post.status_id + "posts",
-        }),
-        // RecacheDataPost({
-        //   post_status_key: postExists.status_id + "posts",
-        // }),
-        redis.del(post.id + "posts-edit", post.id + "posts"),
-      ]);
-      return SendSuccess({
-        res,
-        message: `${EMessage.deleteSuccess}`,
-        data: car_rent,
-      });
-    } catch (err) {
-      return SendErrorLog({
-        res,
-        message: `${EMessage.serverError} ${EMessage.updateFailed} `,
-        err,
-      });
-    }
+  async UpdateStatusCancel(req, res) {
+    return UpdateStatusUser(
+      req,
+      res,
+      car_rent_status_Failure,
+      "update status Cancelled",
+      "update status Cancelled by user",
+      post_status_ready_id
+    );
   },
   async UpdateStatusAdmin(req, res) {
     try {
@@ -1108,7 +1017,7 @@ const Car_rentController = {
     }
   },
 
-  async UpdatePayment_statusCancle(req, res) {
+  async UpdatePayment_statusCancel(req, res) {
     try {
       const id = req.params.id;
       let { user_id } = req.body;
@@ -1751,100 +1660,3 @@ const Car_rentController = {
   },
 };
 export default Car_rentController;
-
-const UpdateCar_rentImage = async (
-  req,
-  res,
-  imageType,
-  findImageById,
-  updateImage
-) => {
-  try {
-    const id = req.params.id;
-    let { image_data_update } = req.body;
-
-    if (!image_data_update) {
-      return SendError(res, 400, `${EMessage.pleaseInput}: image_data_update`);
-    }
-
-    if (typeof image_data_update === "string") {
-      image_data_update = JSON.parse(image_data_update);
-    }
-
-    if (
-      !image_data_update.id ||
-      !image_data_update.url ||
-      !image_data_update.car_rent_id
-    ) {
-      return SendError({
-        res,
-        statuscode: 400,
-        message: `${EMessage.pleaseInput}`,
-        err: ` ${imageType} type object {id,car_rent_id,url}`,
-      });
-    }
-
-    const data = req.files;
-
-    if (!data || !data[imageType]) {
-      return SendError({
-        res,
-        statuscode: 400,
-        message: `${EMessage.pleaseInput}`,
-        err: ` ${imageType}`,
-      });
-    }
-
-    const [car_rentExists, imageExists] = await Promise.all([
-      FindCar_rentById(id),
-      findImageById({ id: image_data_update.id }),
-    ]);
-
-    if (!car_rentExists || !imageExists) {
-      return SendError({
-        res,
-        statuscode: 404,
-        message: `${EMessage.notFound}`,
-        err: ` ${!car_rentExists ? "car_rent" : imageType} id`,
-      });
-    }
-    if (id !== imageExists.car_rent_id)
-      return SendError({
-        res,
-        statuscode: 400,
-        message: `you not own car_rent`,
-        err: `you not own car_rent`,
-      });
-    const imageUrl = await UploadImage(
-      data[imageType].data,
-      image_data_update.url
-    );
-
-    if (!imageUrl) {
-      throw new Error(`upload ${imageType} failed`);
-    }
-
-    const imageUpdate = await updateImage(image_data_update.id, {
-      url: imageUrl,
-    });
-    await ResCachedDataCar_rent({
-      id,
-      key,
-      post_key: car_rentExists.post_id,
-      user_key: car_rentExists.user_id,
-      pay_status: car_rentExists.pay_status,
-      user_post_key: car_rentExists.user_id + "post",
-    });
-    return SendSuccess({
-      res,
-      message: `${EMessage.updateSuccess} update ${imageType}`,
-      data: imageUpdate,
-    });
-  } catch (err) {
-    return SendErrorLog({
-      res,
-      message: `${EMessage.serverError} ${EMessage.updateFailed} car_rent ${imageType}`,
-      err,
-    });
-  }
-};

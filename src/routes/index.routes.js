@@ -509,7 +509,7 @@ route.put(
   `${car_rent}/updatePayment_statusCancle/:id`,
   auth,
   admin,
-  Car_rentController.UpdatePayment_statusCancle
+  Car_rentController.UpdatePayment_statusCancel
 );
 route.put(
   `${car_rent}/updateDriving_lincense_image/:id`,
@@ -531,6 +531,11 @@ route.put(
   `${car_rent}/UpdateStatusApproval/:id`,
   auth,
   Car_rentController.UpdateStatusApproval
+);
+route.put(
+  `${car_rent}/UpdateStatusCancel/:id`,
+  auth,
+  Car_rentController.UpdateStatusCancel
 );
 
 route.delete(`${car_rent}/delete/:id`, auth, Car_rentController.Delete);
