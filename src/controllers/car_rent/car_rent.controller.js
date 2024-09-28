@@ -752,7 +752,7 @@ const Car_rentController = {
       return SendSuccess({
         res,
         message: `${EMessage.deleteSuccess}`,
-        data: car_rent,
+        data: dt,
       });
     } catch (err) {
       return SendErrorLog({
@@ -870,7 +870,7 @@ const Car_rentController = {
       return SendSuccess({
         res,
         message: `${EMessage.deleteSuccess}`,
-        data: car_rent,
+        data: dt,
       });
     } catch (err) {
       return SendErrorLog({
@@ -1016,7 +1016,7 @@ const Car_rentController = {
       return SendSuccess({
         res,
         message: `${EMessage.deleteSuccess}`,
-        data: car_rent,
+        data: dt,
       });
     } catch (err) {
       return SendErrorLog({
@@ -1129,7 +1129,7 @@ const Car_rentController = {
       return SendSuccess({
         res,
         message: `${EMessage.deleteSuccess}`,
-        data: car_rent,
+        data: dt,
       });
     } catch (err) {
       return SendErrorLog({
@@ -1297,30 +1297,32 @@ const Car_rentController = {
     try {
       let page = parseInt(req.query.page);
       page = !page || page < 0 ? 0 : page - 1;
-      const car_rent = await CachDataLimit(
-        key + "-" + page,
-        model,
-        {
-          is_active: true,
-        },
-        page,
-        select_user_post,
-        {
-          updated_at: "desc",
-        }
-      );
-      CachDataLimit(
-        key + "-" + (page + 1),
-        model,
-        {
-          is_active: true,
-        },
-        page + 1,
-        select_user_post,
-        {
-          updated_at: "desc",
-        }
-      );
+      const [car_rent] = await Promise.all([
+        CachDataLimit(
+          key + "-" + page,
+          model,
+          {
+            is_active: true,
+          },
+          page,
+          select_user_post,
+          {
+            updated_at: "desc",
+          }
+        ),
+        CachDataLimit(
+          key + "-" + (page + 1),
+          model,
+          {
+            is_active: true,
+          },
+          page + 1,
+          select_user_post,
+          {
+            updated_at: "desc",
+          }
+        ),
+      ]);
       return SendSuccess({
         res,
         message: `${EMessage.fetchOneSuccess} user`,
@@ -1348,32 +1350,34 @@ const Car_rentController = {
       }
       if (typeof pay_status !== "boolean") pay_status = pay_status === "true";
       page = !page || page < 0 ? 0 : page - 1;
-      const car_rent = await CachDataLimit(
-        `${pay_status}` + key + "-" + page,
-        model,
-        {
-          pay_status,
-          is_active: true,
-        },
-        page,
-        select,
-        {
-          updated_at: "desc",
-        }
-      );
-      CachDataLimit(
-        `${pay_status}` + key + "-" + (page + 1),
-        model,
-        {
-          pay_status,
-          is_active: true,
-        },
-        page + 1,
-        select,
-        {
-          updated_at: "desc",
-        }
-      );
+      const [car_rent] = await Promise.all([
+        CachDataLimit(
+          `${pay_status}` + key + "-" + page,
+          model,
+          {
+            pay_status,
+            is_active: true,
+          },
+          page,
+          select,
+          {
+            updated_at: "desc",
+          }
+        ),
+        CachDataLimit(
+          `${pay_status}` + key + "-" + (page + 1),
+          model,
+          {
+            pay_status,
+            is_active: true,
+          },
+          page + 1,
+          select,
+          {
+            updated_at: "desc",
+          }
+        ),
+      ]);
       return SendSuccess({
         res,
         message: `${EMessage.fetchOneSuccess} user`,
@@ -1434,34 +1438,36 @@ const Car_rentController = {
       let page = parseInt(req.query.page);
       const id = req.params.id;
       page = !page || page < 0 ? 0 : page - 1;
-      const car_rent = await CachDataLimit(
-        id + key + "-" + page,
-        model,
-        {
-          post_id: id,
-          pay_status: true,
-          is_active: true,
-        },
-        page,
-        select_user_post,
-        {
-          updated_at: "desc",
-        }
-      );
-      CachDataLimit(
-        id + key + "-" + (page + 1),
-        model,
-        {
-          post_id: true,
-          pay_status: true,
-          is_active: true,
-        },
-        page + 1,
-        select_user_post,
-        {
-          updated_at: "desc",
-        }
-      );
+      const [car_rent] = await Promise.all([
+        CachDataLimit(
+          id + key + "-" + page,
+          model,
+          {
+            post_id: id,
+            pay_status: true,
+            is_active: true,
+          },
+          page,
+          select_user_post,
+          {
+            updated_at: "desc",
+          }
+        ),
+        CachDataLimit(
+          id + key + "-" + (page + 1),
+          model,
+          {
+            post_id: true,
+            pay_status: true,
+            is_active: true,
+          },
+          page + 1,
+          select_user_post,
+          {
+            updated_at: "desc",
+          }
+        ),
+      ]);
       return SendSuccess({
         res,
         message: `${EMessage.fetchOneSuccess} user`,
@@ -1517,7 +1523,7 @@ const Car_rentController = {
       let page = parseInt(req.query.page);
       page = !page || page < 0 ? 0 : page - 1;
 
-      const car_rent = await Promise.all([
+      const [car_rent] = await Promise.all([
         CachDataLimit(
           user_id + key + "h" + page,
           model,

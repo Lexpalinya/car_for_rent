@@ -267,8 +267,9 @@ route.delete(
 
 //----------Users------------------------------------
 const user = "/users";
-route.get(`${user}/selAllPage`, auth, UsersController.SelectAllPage);
+route.get(`${user}/selAllPage`, auth, admin, UsersController.SelectAllPage);
 route.get(`${user}/selOne`, auth, UsersController.SelectOne);
+route.get(`${user}/count`, auth, admin, UsersController.CountUser);
 
 route.post(
   `${user}/check_username_phone_number`,

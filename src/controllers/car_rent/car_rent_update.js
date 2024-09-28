@@ -213,7 +213,7 @@ export const UpdateStatusUser = async (
     return SendSuccess({
       res,
       message: `${EMessage.deleteSuccess}`,
-      data: car_rent,
+      data: dt,
     });
   } catch (err) {
     return SendErrorLog({

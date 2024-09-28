@@ -147,6 +147,7 @@ const UsersController = {
       };
 
       await RecacheData(user.id, { page: true });
+      await redis.del("count_user");
       return SendCreate({
         res,
         message: `${EMessage.registrationSuccess} `,
@@ -184,6 +185,7 @@ const UsersController = {
         select
       );
       await RecacheData(user.id, { page: true });
+      await redis.del("count_user");
       return SendSuccess({
         res,
         message: `${EMessage.deleteSuccess}`,
@@ -849,6 +851,51 @@ const UsersController = {
       SendErrorLog({
         res,
         message: `${EMessage.serverError} ${EMessage.loginFailed} sign in and sign up failed facebook`,
+        err,
+      });
+    }
+  },
+  async CountUser(req, res) {
+    try {
+      const dataCasch = await redis.get("count_user");
+      let result;
+      if (!dataCasch) {
+        const [total_user, user_post, user_rent] = await Promise.all([
+          prisma.users.count({
+            where: { is_active: true },
+          }),
+          prisma.users.count({
+            where: {
+              is_active: true,
+              kyc: true,
+            },
+          }),
+          prisma.users.count({
+            where: {
+              is_active: true,
+              kyc: false,
+            },
+          }),
+        ]);
+        result = {
+          total_user,
+          user_post,
+          user_rent,
+        };
+        await redis.set("count_user", JSON.stringify(result), "EX", 3600);
+      } else {
+        result = JSON.parse(dataCasch);
+      }
+
+      return SendSuccess({
+        res,
+        message: `count user`,
+        data: result,
+      });
+    } catch (err) {
+      SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.fetchAllSuccess} count user`,
         err,
       });
     }
