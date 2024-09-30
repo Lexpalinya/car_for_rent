@@ -199,7 +199,7 @@ const Like_postController = {
             },
             car_types: true,
             // post_doc_image: true,
-            // post_car_image: true,
+            post_car_image: true,
             // post_driver_license_image: true,
             // post_insurance_image: true,
             post_rent_data: true,
