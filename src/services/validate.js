@@ -48,6 +48,10 @@ export const ValidateCar_Brands = (data) => {
   const { name } = data;
   return ValidateData({ name });
 };
+export const ValidatePayment_qr = (data) => {
+  const { currency } = data;
+  return ValidateData({ currency });
+};
 export const ValidateExchange_rate = (data) => {
   const { currency, sell, buy } = data;
   return ValidateData({ currency, sell, buy });

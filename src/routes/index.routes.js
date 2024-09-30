@@ -31,6 +31,7 @@ import Post_rent_dataController from "../controllers/post/post_rent_dataControll
 import Car_rentController from "../controllers/car_rent/car_rent.controller";
 import BannerController from "../controllers/banner.controller";
 import NotificationController from "../controllers/notification.controller";
+import Payment_qrController from "../controllers/payment_qr.controller";
 const route = express.Router();
 
 //-----------Promotion-------------------------
@@ -87,6 +88,18 @@ route.put(
 );
 
 route.delete(`${car_brands}/delete/:id`, auth, Car_BrandsController.Delete);
+
+//---------------Car_brands-------------------------------------
+const payment_qr = `/payment_qr`;
+route.get(`${payment_qr}/selAll`, auth, Payment_qrController.SelectAll);
+route.get(`${payment_qr}/selOne/:id`, auth, Payment_qrController.SelectOne);
+
+route.post(`${payment_qr}/insert`, auth, Payment_qrController.Insert);
+
+route.put(`${payment_qr}/update/:id`, auth, Payment_qrController.Update);
+route.put(`${payment_qr}/updateIcon/:id`, auth, Payment_qrController.UpdateQr);
+
+route.delete(`${payment_qr}/delete/:id`, auth, Payment_qrController.Delete);
 
 //-----------------------Car_type-----------------------------------------
 const car_types = `/car_types`;

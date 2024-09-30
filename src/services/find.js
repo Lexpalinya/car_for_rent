@@ -89,6 +89,12 @@ export const FindCar_BrandsById = (id) => {
     is_active: true,
   });
 };
+export const FindPayment_qrById = (id) => {
+  return CachDataFindByIdNoClear("payment_qr", "payment_qr", {
+    id,
+    is_active: true,
+  });
+};
 
 export const FindInsurance_CompanysById = (id) => {
   return CachDataFindByIdNoClear("insurance_companies", "insurance_companies", {

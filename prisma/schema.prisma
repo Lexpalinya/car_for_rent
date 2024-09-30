@@ -35,6 +35,7 @@ model users {
   wallet        wallet[]
   exchange_rate exchange_rate[]
   notification  notification[]
+  payment_qr    payment_qr[]
 
   @@index([username])
   @@index([email])
@@ -468,4 +469,15 @@ model notification {
   updated_at DateTime  @updatedAt
 
   @@index([role])
+}
+
+model payment_qr {
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  is_active  Boolean  @default(true)
+  user_id    String
+  currency   String
+  qr         String
+  users      users    @relation(fields: [user_id], references: [id])
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
