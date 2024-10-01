@@ -293,6 +293,7 @@ route.post(`${user}/refrechToken`, UsersController.RefrechToken);
 
 route.post(`${user}/registor`, UsersController.Registor);
 route.post(`${user}/login`, UsersController.Login);
+route.post(`${user}/loginEmail`, UsersController.LoginEmail);
 route.post(`${user}/loginPhoneNumber`, UsersController.LoginPhoneNumber);
 route.post(
   `${user}/googleSignInandSingUp`,

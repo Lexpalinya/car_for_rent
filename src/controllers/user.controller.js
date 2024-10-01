@@ -19,6 +19,7 @@ import {
   ValidateForgotPassword,
   ValidateGoogle,
   ValidateLogin,
+  ValidateLoginEmail,
   ValidateLoginPhoneNumber,
   ValidateUserRegistor,
 } from "../services/validate";
@@ -418,6 +419,65 @@ const UsersController = {
       SendErrorLog({
         res,
         message: `${EMessage.serverError} ${EMessage.loginFailed} user login phone_number`,
+        err,
+      });
+    }
+  },
+  async LoginEmail(req, res) {
+    try {
+      const validate = ValidateLoginEmail(req.body);
+      if (validate.length > 0)
+        return SendError({
+          res,
+          statuscode: 400,
+          message: `${EMessage.pleaseInput}`,
+          err: validate.join(", "),
+        });
+      const { email, password } = req.body;
+      const userExists = await FindUserEmailAlready(email);
+      if (!userExists)
+        return SendError({
+          res,
+          statuscode: 404,
+          message: `${EMessage.notFound}: user`,
+          err: "email",
+        });
+      CheckUserBlackList(res, userExists);
+      const decrypassword = await Decrypt(userExists.password);
+
+      if (decrypassword !== password)
+        return SendError({
+          res,
+          statuscode: 400,
+          message: `${EMessage.loginFailed} `,
+          err: EMessage.passwordnotmatch,
+        });
+      const user = await prisma.users.update({
+        where: { id: userExists.id },
+        data: {
+          login_version: userExists.login_version + 1,
+        },
+        select,
+      });
+      const token_data = {
+        id: user.id,
+        login_version: user.login_version,
+      };
+      const token = await generateToken(token_data);
+      const result = {
+        ...user,
+        ...token,
+      };
+      await RecacheData(user.id, { page: false });
+      return SendSuccess({
+        res,
+        message: `${EMessage.loginSuccess}`,
+        data: result,
+      });
+    } catch (err) {
+      SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.loginFailed} user login email`,
         err,
       });
     }

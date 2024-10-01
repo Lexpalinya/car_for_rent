@@ -99,6 +99,10 @@ export const ValidateLogin = (data) => {
   const { username, password } = data;
   return ValidateData({ username, password });
 };
+export const ValidateLoginEmail = (data) => {
+  const { email, password } = data;
+  return ValidateData({ email, password });
+};
 export const ValidateLoginPhoneNumber = (data) => {
   const { phone_number, password } = data;
   return ValidateData({ phone_number, password });

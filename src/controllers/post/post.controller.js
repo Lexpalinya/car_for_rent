@@ -1,5 +1,6 @@
 import redis from "../../DB/redis";
-import { CachDataAll, CachDataLimit } from "../../services/cach.contro";
+
+import { CachDataAll, CachDataLimit ,CachDataFindData_limitNoSkip} from "../../services/cach.contro";
 import { DeleteCachedKey } from "../../services/cach.deletekey";
 import { EMessage } from "../../services/enum";
 import {
@@ -720,19 +721,31 @@ const PostController = {
   },
   async SelectPopular(req, res) {
     try {
-      const post = await prisma.posts.findMany({
-        take: 5,
-        where: {
+      const post = await CachDataFindData_limitNoSkip(
+        key + "-" + "popular",
+        model,
+        {
           ...where,
           users: {
             OR: [{ role: "admin" }, { role: "superadmin" }],
           },
         },
         select,
-        orderBy: {
-          updated_at: "desc",
-        },
-      });
+        5
+      );
+      // prisma.posts.findMany({
+      //   take: 5,
+      //   where: {
+      //     ...where,
+      //     users: {
+      //       OR: [{ role: "admin" }, { role: "superadmin" }],
+      //     },
+      //   },
+      //   select,
+      //   orderBy: {
+      //     updated_at: "desc",
+      //   },
+      // });
       return SendSuccess({
         res,
         message: `${EMessage.fetchAllSuccess} post`,

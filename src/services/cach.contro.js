@@ -181,3 +181,21 @@ export const CachDataFindDataId_One = async (key, model, where, select) => {
 
   return result || null;
 };
+
+export const CachDataFindData_limitNoSkip = async (
+  key,
+  model,
+  where,
+  select,
+  take
+) => {
+  let cachedData = await redis.get(key);
+  if (!cachedData) {
+    const results = await prisma[model].findMany({ take, where, select });
+    await redis.set(key, JSON.stringify(results), "EX", 3600);
+    return results;
+  }
+  const result = JSON.parse(cachedData);
+
+  return result || null;
+};
