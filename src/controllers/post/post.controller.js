@@ -718,6 +718,34 @@ const PostController = {
       });
     }
   },
+  async SelectPopular(req, res) {
+    try {
+      const post = await prisma.posts.findMany({
+        take: 5,
+        where: {
+          ...where,
+          users: {
+            OR: [{ role: "admin" }, { role: "superadmin" }],
+          },
+        },
+        select,
+        orderBy: {
+          updated_at: "desc",
+        },
+      });
+      return SendSuccess({
+        res,
+        message: `${EMessage.fetchAllSuccess} post`,
+        data: post,
+      });
+    } catch (err) {
+      SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll} post select allpage`,
+        err,
+      });
+    }
+  },
   async SelectAllAdminPage(req, res) {
     try {
       // await DeleteCachedKey(key);

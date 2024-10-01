@@ -5,7 +5,7 @@ import { SendError, SendErrorLog, SendSuccess } from "../services/services";
 import { ValidateData } from "../services/validate";
 import prisma from "../utils/prisma.client";
 import { RecacheData } from "./user.controller";
-
+import messaging from "../config/firebase.Admin";
 const key = "notification";
 const model = "notification";
 let select;
@@ -107,18 +107,24 @@ const NotificationController = {
       });
     }
   },
-  async notiNew({ data, ref_id, type, title, text, user_id, role }) {
+  async sendNotification({ data, ref_id, type, title, text, user_id, role }) {
     try {
+      // Find the user by ID
       const user = await FindUserById(user_id);
-      if (!user) throw new Error("user not found");
+      if (!user) throw new Error("User not found");
+
+      // Construct the notification message
       const message = {
         notification: {
           title,
-          detail: text,
+          body: text, // Changed 'detail' to 'body' for FCM compatibility
         },
         token: user.device_token,
+        // Uncomment the following line if you need to send additional data
         data: data,
       };
+
+      // Create the notification record in the database
       const noti = await prisma.notification.create({
         data: {
           user_id,
@@ -130,9 +136,17 @@ const NotificationController = {
         },
       });
 
+      // Send the notification and await the response
+      const response = await messaging.send(message);
+      console.log("Successfully sent message:", response);
+
       return { message: EMessage.SUCCESS, data: noti };
     } catch (error) {
-      return error;
+      console.error("Error sending notification:", error);
+      return {
+        message: EMessage.ERROR,
+        error: error.message || "An error occurred",
+      };
     }
   },
   async SelectOne(req, res) {

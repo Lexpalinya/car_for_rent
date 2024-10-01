@@ -322,6 +322,7 @@ route.delete(`${wallet}/delete/:id`, auth, WalletController.Delete);
 //------------Post---------------------------------
 const post = "/post";
 route.get(`${post}/selAllPage`, auth, PostController.SelectAllPage);
+route.get(`${post}/selPopular`, auth, PostController.SelectPopular);
 route.get(
   `${post}/selAllAdminPage`,
   auth,
@@ -621,7 +622,7 @@ route.delete(
   admin,
   ExchagneRateController.Delete
 );
-
+//------------Notification-------------------------------
 const noti = "/noti";
 route.get(
   `${noti}/selByUser`,
