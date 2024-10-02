@@ -109,8 +109,8 @@ export const ValidateLoginPhoneNumber = (data) => {
 };
 
 export const ValidateGoogle = (data) => {
-  const { id, name, email, image } = data;
-  return ValidateData({ id, name, email, image });
+  const { id, name, email } = data;
+  return ValidateData({ id, name, email });
 };
 export const ValidateFacebook = (data) => {
   const { id, name, email, image } = data;

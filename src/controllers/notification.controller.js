@@ -8,7 +8,52 @@ import { RecacheData } from "./user.controller";
 import messaging from "../config/firebase.Admin";
 const key = "notification";
 const model = "notification";
-let select;
+let select = {
+  id: true,
+  is_active: true,
+  isNewNoti: true,
+  title: true,
+  text: true,
+  role: true,
+  type: true,
+  car_rents: {
+    where: {
+      is_active: true,
+    },
+    select: {
+      post: {
+        select: {
+          id: true,
+          user_id: true,
+          star: true,
+          users: {
+            select: {
+              profile: true,
+              kycs: {
+                where: {
+                  is_active: true,
+                },
+                select: {
+                  first_name: true,
+                  last_name: true,
+                  village: true,
+                  district: true,
+                  province: true,
+                  phone_number: true,
+                },
+              },
+            },
+            post_car_image: {
+              select: {
+                url: true,
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+};
 const where = { is_active: true };
 const NotificationController = {
   async saveRegisterToken(req, res) {
