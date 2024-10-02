@@ -107,7 +107,7 @@ const NotificationController = {
       });
     }
   },
-  async sendNotification({ data, ref_id, type, title, text, user_id, role }) {
+  async notiNew({ data, ref_id, type, title, text, user_id, role }) {
     try {
       // Find the user by ID
       const user = await FindUserById(user_id);
