@@ -282,6 +282,7 @@ export const FindPostById = (id) => {
       province: true,
       mutjum: true,
       pubmai: true,
+      discount: true,
       status_id: true,
       isShowPost: true,
       created_at: true,

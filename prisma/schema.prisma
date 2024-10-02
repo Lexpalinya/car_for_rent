@@ -251,6 +251,7 @@ model posts {
   district             String
   province             String
   mutjum               Float
+  discount             Int                    @default(0)
   status_id            String                 @db.VarChar(36)
   created_at           DateTime               @default(now())
   updated_at           DateTime               @updatedAt

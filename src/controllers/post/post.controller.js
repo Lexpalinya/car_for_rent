@@ -1,6 +1,10 @@
 import redis from "../../DB/redis";
 
-import { CachDataAll, CachDataLimit ,CachDataFindData_limitNoSkip} from "../../services/cach.contro";
+import {
+  CachDataAll,
+  CachDataLimit,
+  CachDataFindData_limitNoSkip,
+} from "../../services/cach.contro";
 import { DeleteCachedKey } from "../../services/cach.deletekey";
 import { EMessage } from "../../services/enum";
 import {
@@ -73,6 +77,7 @@ let select = {
   province: true,
   mutjum: true,
   pubmai: true,
+  discount: true,
   status_id: true,
   isShowPost: true,
   created_at: true,
@@ -162,6 +167,7 @@ const PostController = {
         district,
         post_rent_data,
         currency,
+        discount,
       } = req.body;
       const status_id = post_status_ready_id;
       // const user_id = req.user;
@@ -182,7 +188,9 @@ const PostController = {
       if (pubmai && typeof pubmai !== "number") {
         pubmai = parseFloat(pubmai);
       }
-
+      if (discount && typeof discount !== "number") {
+        discount = parseInt(discount);
+      }
       if (
         (car_insurance && !insurance_company_id) ||
         (car_insurance && !level_insurance_id)
@@ -389,6 +397,7 @@ const PostController = {
           village,
           status_id,
           currency,
+          discount,
         },
       });
 
@@ -451,6 +460,9 @@ const PostController = {
 
       if (data.star && typeof data.star !== "number") {
         data.star = parseFloat(data.star);
+      }
+      if (data.discount && typeof data.discount !== "number") {
+        data.discount = parseFloat(data.discount);
       }
       // if (data.deposits_fee && typeof data.deposits_fee !== "number") {
       //   data.deposits_fee = parseFloat(data.deposits_fee);
@@ -721,31 +733,34 @@ const PostController = {
   },
   async SelectPopular(req, res) {
     try {
-      const post = await CachDataFindData_limitNoSkip(
-        key + "-" + "popular",
-        model,
-        {
-          ...where,
-          users: {
-            OR: [{ role: "admin" }, { role: "superadmin" }],
+      let page = parseInt(req.query.page);
+      page = !page || page < 0 ? 0 : page - 1;
+      const [post] = await Promise.all([
+        CachDataLimit(
+          key + "-" + "popular" + page,
+          model,
+          {
+            ...where,
+            users: {
+              OR: [{ role: "admin" }, { role: "superadmin" }],
+            },
           },
-        },
-        select,
-        5
-      );
-      // prisma.posts.findMany({
-      //   take: 5,
-      //   where: {
-      //     ...where,
-      //     users: {
-      //       OR: [{ role: "admin" }, { role: "superadmin" }],
-      //     },
-      //   },
-      //   select,
-      //   orderBy: {
-      //     updated_at: "desc",
-      //   },
-      // });
+          page,
+          select
+        ),
+        CachDataLimit(
+          key + "-" + "popular" + (page + 1),
+          model,
+          {
+            ...where,
+            users: {
+              OR: [{ role: "admin" }, { role: "superadmin" }],
+            },
+          },
+          page + 1,
+          select
+        ),
+      ]);
       return SendSuccess({
         res,
         message: `${EMessage.fetchAllSuccess} post`,
