@@ -785,6 +785,7 @@ const UsersController = {
             message: `sign in google failed`,
             err: `google_id not match`,
           });
+          
         const token_data = {
           id: user.id,
           login_version: user.login_version,
