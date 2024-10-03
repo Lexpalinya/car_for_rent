@@ -161,45 +161,45 @@ export const UpdateStatusUser = async (
 
     const dt = await FindCar_rentById(id);
     // console.log("dt :>> ", dt);
-    const [noti_user_post, noti_user_rent, post] = await Promise.all([
-      NotificationController.notiNew({
-        ref_id: car_rent.id,
-        type: "car_rent_user_post",
-        title: notificationTitle,
-        text: notificationText,
-        user_id: dt.post.user_id,
-        role: "customer",
-      }),
-      NotificationController.notiNew({
-        ref_id: car_rent.id,
-        type: "car_rent_user_rent",
-        title: notificationTitle,
-        text: notificationText,
-        user_id: dt.user_id,
-        role: "customer",
-      }),
-      prisma.posts.update({
-        where: { id: dt.post_id },
-        data: { status_id: postStatusId, ...additionalPostData },
-      }),
-    ]);
+    // const [noti_user_post, noti_user_rent, post] = await Promise.all([
+    //   NotificationController.notiNew({
+    //     ref_id: car_rent.id,
+    //     type: "car_rent_user_post",
+    //     title: notificationTitle,
+    //     text: notificationText,
+    //     user_id: dt.post.user_id,
+    //     role: "customer",
+    //   }),
+    //   NotificationController.notiNew({
+    //     ref_id: car_rent.id,
+    //     type: "car_rent_user_rent",
+    //     title: notificationTitle,
+    //     text: notificationText,
+    //     user_id: dt.user_id,
+    //     role: "customer",
+    //   }),
+    //   prisma.posts.update({
+    //     where: { id: dt.post_id },
+    //     data: { status_id: postStatusId, ...additionalPostData },
+    //   }),
+    // ]);
 
-    broadcast({
-      client_id: dt.post.user_id,
-      ctx: "car_rent_user_post",
-      data: {
-        noti: noti_user_post.data,
-        data: dt,
-      },
-    });
-    broadcast({
-      client_id: dt.user_id,
-      ctx: "car_rent_user_rent",
-      data: {
-        noti: noti_user_rent.data,
-        data: dt,
-      },
-    });
+    // broadcast({
+    //   client_id: dt.post.user_id,
+    //   ctx: "car_rent_user_post",
+    //   data: {
+    //     noti: noti_user_post.data,
+    //     data: dt,
+    //   },
+    // });
+    // broadcast({
+    //   client_id: dt.user_id,
+    //   ctx: "car_rent_user_rent",
+    //   data: {
+    //     noti: noti_user_rent.data,
+    //     data: dt,
+    //   },
+    // });
     await Promise.all([
       RecacheDataPost({
         key: "posts",

@@ -8,6 +8,7 @@ import APIRoute from "./routes/index.routes";
 import { EAPI, SERVER_PORT } from "./config/api.config";
 import { broadcast, initSocketServer } from "./server/socketIO.server"; // Import the Socket.IO setup
 import NotificationController from "./controllers/notification.controller";
+import { CachDataFindUserNoClear } from "./services/cach.contro";
 
 const app = new express();
 
@@ -52,10 +53,30 @@ await redis.flushdb();
 //   type: "customer",
 //   title: "car_rent",
 //   user_id: "90542f76-d080-405d-bae6-996b709cd187",
-//   ref_id: "test",
+//   ref_id: "23669040-8bc6-481d-874f-69b382a8b7e8",
 //   text: "test",
 //   role: "customer",
+//   token:"12354668"
 // });
+// const a = await CachDataFindUserNoClear(
+//   "ID_user",
+//   "users",
+//   {
+//     is_active: true,
+//   },
+//   {
+//     id: true,
+//     username: true,
+//     email: true,
+//     phone_number: true,
+//     password: true,
+//     login_version: true,
+//     blacklist: true,
+//     role: true,
+//     device_token: true,
+//   }
+// );
+// console.log(" a :>> ", a);
 
 // const a = await NotificationController.getNoti({
 //   user_id: "90542f76-d080-405d-bae6-996b709cd187",

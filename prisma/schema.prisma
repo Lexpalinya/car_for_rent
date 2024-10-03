@@ -392,6 +392,7 @@ model car_rent {
   car_rent_payment_image          car_rent_payment_image[]
   car_rent_visa                   car_rent_visa?
   // notification                    notification[]
+  notification                    notification[]
 
   @@index([post_id], map: "car_rent_post_id_fkey")
   @@index([promotion_id], map: "car_rent_promotion_id_fkey")
@@ -460,13 +461,13 @@ model notification {
   id         String    @id @default(uuid()) @db.VarChar(36)
   is_active  Boolean   @default(true)
   isNewNoti  Boolean   @default(true)
-  // ref_id     String    @db.VarChar(36)
+  ref_id     String    @db.VarChar(36)
   title      String
   text       String?   @db.LongText
   role       userRoles @default(customer)
   type       String
   user_id    String
-  // car_rents  car_rent  @relation(fields: [ref_id], references: [id])
+  car_rents  car_rent  @relation(fields: [ref_id], references: [id])
   users      users     @relation(fields: [user_id], references: [id])
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt

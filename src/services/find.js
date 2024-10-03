@@ -151,6 +151,7 @@ export const FindUserById_ID = (id) => {
       login_version: true,
       blacklist: true,
       role: true,
+      device_token: true,
     }
   );
 };
@@ -173,6 +174,7 @@ export const FindUserUserNameAlready = (username) => {
       login_version: true,
       blacklist: true,
       role: true,
+      device_token: true,
     },
     "username"
   );
@@ -194,6 +196,7 @@ export const FindUserEmailAlready = (email) => {
       login_version: true,
       blacklist: true,
       role: true,
+      device_token: true,
     },
     "email"
   );
@@ -216,6 +219,7 @@ export const FindUserPhone_NumberAlready = (phone_number) => {
       login_version: true,
       blacklist: true,
       role: true,
+      device_token: true,
     },
     "phone_number"
   );

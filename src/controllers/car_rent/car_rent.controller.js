@@ -476,16 +476,18 @@ const Car_rentController = {
           },
         }),
       ]);
+
+
       let promiselist = [
-        NotificationController.notiNew({
-          // data,
-          ref_id: car_rent.id,
-          type: "car_rent",
-          title: "new car_rent order ",
-          text: "new car_rent order",
-          user_id,
-          role: "admin",
-        }),
+        // NotificationController.notiNew({
+        //   // data,
+        //   ref_id: car_rent.id,
+        //   type: "car_rent",
+        //   title: "new car_rent order ",
+        //   text: "new car_rent order",
+        //   user_id,
+        //   role: "admin",
+        // }),
         RecacheDataPost({
           key: "posts",
           car_type_id_key: post.car_type_id + "posts",
@@ -495,6 +497,7 @@ const Car_rentController = {
         }),
         redis.del(post.id + "posts-edit", post.id + "posts"),
       ];
+
       if (promotion_id) {
         promiselist.push(
           prisma.promotions.update({
@@ -525,15 +528,15 @@ const Car_rentController = {
         );
       }
 
-      const [noti] = await Promise.all(promiselist);
-      broadcast({
-        client_id: "admin",
-        ctx: "car_rent",
-        data: {
-          noti: noti.data,
-          data: dt,
-        },
-      });
+      // const [noti] = await Promise.all(promiselist);
+      // broadcast({
+      //   client_id: "admin",
+      //   ctx: "car_rent",
+      //   data: {
+      //     noti: noti.data,
+      //     data: dt,
+      //   },
+      // });
       return SendSuccess({
         res,
         message: `${EMessage.insertSuccess} car_rent`,
@@ -712,42 +715,42 @@ const Car_rentController = {
       ]);
 
       const dt = await FindCar_rentById(id);
-      const [noti_user_post, noti_user_rent] = await Promise.all([
-        NotificationController.notiNew({
-          // data,
-          ref_id: car_rent.id,
-          type: "car_rent_user_post",
-          title: "update status payment ",
-          text: "update status payment",
-          user_id: dt.post.user_id,
-          role: "customer",
-        }),
-        NotificationController.notiNew({
-          // data,
-          ref_id: car_rent.id,
-          type: "car_rent_user_rent",
-          title: "update status payment ",
-          text: "update status payment",
-          user_id: dt.user_id,
-          role: "customer",
-        }),
-      ]);
-      broadcast({
-        client_id: dt.post.user_id,
-        ctx: "car_rent_user_post",
-        data: {
-          noti: noti_user_post.data,
-          data: dt,
-        },
-      });
-      broadcast({
-        client_id: dt.user_id,
-        ctx: "car_rent_user_rent",
-        data: {
-          noti: noti_user_rent.data,
-          data: dt,
-        },
-      });
+      // const [noti_user_post, noti_user_rent] = await Promise.all([
+      //   NotificationController.notiNew({
+      //     // data,
+      //     ref_id: car_rent.id,
+      //     type: "car_rent_user_post",
+      //     title: "update status payment ",
+      //     text: "update status payment",
+      //     user_id: dt.post.user_id,
+      //     role: "customer",
+      //   }),
+      //   NotificationController.notiNew({
+      //     // data,
+      //     ref_id: car_rent.id,
+      //     type: "car_rent_user_rent",
+      //     title: "update status payment ",
+      //     text: "update status payment",
+      //     user_id: dt.user_id,
+      //     role: "customer",
+      //   }),
+      // ]);
+      // broadcast({
+      //   client_id: dt.post.user_id,
+      //   ctx: "car_rent_user_post",
+      //   data: {
+      //     noti: noti_user_post.data,
+      //     data: dt,
+      //   },
+      // });
+      // broadcast({
+      //   client_id: dt.user_id,
+      //   ctx: "car_rent_user_rent",
+      //   data: {
+      //     noti: noti_user_rent.data,
+      //     data: dt,
+      //   },
+      // });
 
       return SendSuccess({
         res,
@@ -862,11 +865,11 @@ const Car_rentController = {
       ]);
       const dt = await FindCar_rentById(id);
 
-      broadcast({
-        client_id: dt.user_id,
-        ctx: "car_rent_user_rent",
-        data: JSON.stringify(dt),
-      });
+      // broadcast({
+      //   client_id: dt.user_id,
+      //   ctx: "car_rent_user_rent",
+      //   data: JSON.stringify(dt),
+      // });
       return SendSuccess({
         res,
         message: `${EMessage.deleteSuccess}`,
@@ -960,59 +963,59 @@ const Car_rentController = {
       ]);
       const dt = await FindCar_rentById(id);
 
-      const [noti_admin, noti_user_post, noti_user_rent] = await Promise.all([
-        NotificationController.notiNew({
-          // data,
-          ref_id: car_rent.id,
-          type: "car_rent",
-          title: "update status payment",
-          text: "update status payment ",
-          user_id,
-          role: "admin",
-        }),
-        NotificationController.notiNew({
-          // data,
-          ref_id: car_rent.id,
-          type: "car_rent_user_post",
-          title: "update status payment ",
-          text: "update status payment",
-          user_id: dt.post.user_id,
-          role: "customer",
-        }),
-        NotificationController.notiNew({
-          // data,
-          ref_id: car_rent.id,
-          type: "car_rent_user_rent",
-          title: "update status payment ",
-          text: "update status payment",
-          user_id: dt.user_id,
-          role: "customer",
-        }),
-      ]);
-      broadcast({
-        client_id: dt.post.user_id,
-        ctx: "car_rent_user_post",
-        data: {
-          noti: noti_user_post.data,
-          data: dt,
-        },
-      });
-      broadcast({
-        client_id: dt.user_id,
-        ctx: "car_rent_user_rent",
-        data: {
-          noti: noti_user_rent.data,
-          data: dt,
-        },
-      });
-      broadcast({
-        client_id: "admin",
-        ctx: "car_rent",
-        data: {
-          noti: noti_admin.data,
-          data: dt,
-        },
-      });
+      // const [noti_admin, noti_user_post, noti_user_rent] = await Promise.all([
+      //   NotificationController.notiNew({
+      //     // data,
+      //     ref_id: car_rent.id,
+      //     type: "car_rent",
+      //     title: "update status payment",
+      //     text: "update status payment ",
+      //     user_id,
+      //     role: "admin",
+      //   }),
+      //   NotificationController.notiNew({
+      //     // data,
+      //     ref_id: car_rent.id,
+      //     type: "car_rent_user_post",
+      //     title: "update status payment ",
+      //     text: "update status payment",
+      //     user_id: dt.post.user_id,
+      //     role: "customer",
+      //   }),
+      //   NotificationController.notiNew({
+      //     // data,
+      //     ref_id: car_rent.id,
+      //     type: "car_rent_user_rent",
+      //     title: "update status payment ",
+      //     text: "update status payment",
+      //     user_id: dt.user_id,
+      //     role: "customer",
+      //   }),
+      // ]);
+      // broadcast({
+      //   client_id: dt.post.user_id,
+      //   ctx: "car_rent_user_post",
+      //   data: {
+      //     noti: noti_user_post.data,
+      //     data: dt,
+      //   },
+      // });
+      // broadcast({
+      //   client_id: dt.user_id,
+      //   ctx: "car_rent_user_rent",
+      //   data: {
+      //     noti: noti_user_rent.data,
+      //     data: dt,
+      //   },
+      // });
+      // broadcast({
+      //   client_id: "admin",
+      //   ctx: "car_rent",
+      //   data: {
+      //     noti: noti_admin.data,
+      //     data: dt,
+      //   },
+      // });
       return SendSuccess({
         res,
         message: `${EMessage.deleteSuccess}`,
@@ -1089,43 +1092,43 @@ const Car_rentController = {
       ]);
       const dt = await FindCar_rentById(id);
 
-      const [noti_admin, noti_user_rent] = await Promise.all([
-        NotificationController.notiNew({
-          // data,
-          ref_id: car_rent.id,
-          type: "car_rent",
-          title: "update status cancel",
-          text: "update status cancel ",
-          user_id,
-          role: "admin",
-        }),
-        NotificationController.notiNew({
-          // data,
-          ref_id: car_rent.id,
-          type: "car_rent_user_rent",
-          title: "update status cancel ",
-          text: "update status cancel",
-          user_id: dt.user_id,
-          role: "customer",
-        }),
-      ]);
+      // const [noti_admin, noti_user_rent] = await Promise.all([
+      //   NotificationController.notiNew({
+      //     // data,
+      //     ref_id: car_rent.id,
+      //     type: "car_rent",
+      //     title: "update status cancel",
+      //     text: "update status cancel ",
+      //     user_id,
+      //     role: "admin",
+      //   }),
+      //   NotificationController.notiNew({
+      //     // data,
+      //     ref_id: car_rent.id,
+      //     type: "car_rent_user_rent",
+      //     title: "update status cancel ",
+      //     text: "update status cancel",
+      //     user_id: dt.user_id,
+      //     role: "customer",
+      //   }),
+      // ]);
 
-      broadcast({
-        client_id: dt.user_id,
-        ctx: "car_rent_user_rent",
-        data: {
-          noti: noti_user_rent.data,
-          data: dt,
-        },
-      });
-      broadcast({
-        client_id: "admin",
-        ctx: "car_rent",
-        data: {
-          noti: noti_admin.data,
-          data: dt,
-        },
-      });
+      // broadcast({
+      //   client_id: dt.user_id,
+      //   ctx: "car_rent_user_rent",
+      //   data: {
+      //     noti: noti_user_rent.data,
+      //     data: dt,
+      //   },
+      // });
+      // broadcast({
+      //   client_id: "admin",
+      //   ctx: "car_rent",
+      //   data: {
+      //     noti: noti_admin.data,
+      //     data: dt,
+      //   },
+      // });
       return SendSuccess({
         res,
         message: `${EMessage.deleteSuccess}`,

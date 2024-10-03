@@ -65,7 +65,7 @@ const NotificationController = {
         return SendError({
           res,
           message: EMessage.pleaseInput,
-          error: validate.join(","),
+          err: validate.join(","),
         });
       const user = await prisma.users.update({
         where: {
@@ -152,22 +152,13 @@ const NotificationController = {
       });
     }
   },
-  async notiNew({ data, ref_id, type, title, text, user_id, role }) {
+  async notiNew({ ref_id, type, title, text, user_id, role, token }) {
     try {
       // Find the user by ID
-      const user = await FindUserById(user_id);
-      if (!user) throw new Error("User not found");
+      // const user = await FindUserById(user_id);
+      // if (!user) throw new Error("User not found");
 
       // Construct the notification message
-      const message = {
-        notification: {
-          title,
-          body: text, // Changed 'detail' to 'body' for FCM compatibility
-        },
-        token: user.device_token,
-        // Uncomment the following line if you need to send additional data
-        data: data,
-      };
 
       // Create the notification record in the database
       const noti = await prisma.notification.create({
@@ -179,11 +170,74 @@ const NotificationController = {
           type,
           role,
         },
-      });
+        select: {
+          id: true,
 
-      // Send the notification and await the response
-      const response = await messaging.send(message);
-      console.log("Successfully sent message:", response);
+          is_active: true,
+          isNewNoti: true,
+          title: true,
+          text: true,
+          role: true,
+          type: true,
+          car_rents: {
+            // where: {
+            //   is_active: true,
+            // },
+            select: {
+              frist_name: true,
+              last_name: true,
+              total_price: true,
+              jaiykhon: true,
+              post: {
+                select: {
+                  id: true,
+                  user_id: true,
+                  star: true,
+                  users: {
+                    select: {
+                      profile: true,
+                      kycs: {
+                        where: {
+                          is_active: true,
+                        },
+                        select: {
+                          first_name: true,
+                          last_name: true,
+                          village: true,
+                          district: true,
+                          province: true,
+                          phone_number: true,
+                        },
+                      },
+                    },
+                  },
+
+                  post_car_image: {
+                    select: {
+                      url: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+      console.log("noti :>> ", noti);
+
+      const message = {
+        notification: {
+          title,
+          body: text, // Changed 'detail' to 'body' for FCM compatibility
+        },
+        token: token,
+        data: noti,
+      };
+      console.log("message :>> ", message);
+
+      // // Send the notification and await the response
+      // const response = await messaging.send(message);
+      // console.log("Successfully sent message:", response);
 
       return { message: EMessage.SUCCESS, data: noti };
     } catch (error) {
