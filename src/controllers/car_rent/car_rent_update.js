@@ -2,6 +2,9 @@ import redis from "../../DB/redis";
 import { broadcast } from "../../server/socketIO.server";
 import { EMessage } from "../../services/enum";
 import { FindCar_Rent_StatusById, FindCar_rentById } from "../../services/find";
+import sendNotificationToAdmin, {
+  SendNotificationToUser,
+} from "../../services/noti.services";
 import { SendError, SendErrorLog, SendSuccess } from "../../services/services";
 import { UploadImage } from "../../services/upload.file";
 import prisma from "../../utils/prisma.client";
@@ -112,6 +115,8 @@ export const UpdateStatusUser = async (
   newStatusId,
   notificationTitle,
   notificationText,
+  notificationTitleUserpost,
+  notificationTextUserpost,
   postStatusId
 ) => {
   try {
@@ -200,6 +205,31 @@ export const UpdateStatusUser = async (
     //     data: dt,
     //   },
     // });
+    const post = await prisma.posts.update({
+      where: { id: dt.post_id },
+      data: { status_id: postStatusId, ...additionalPostData },
+    });
+
+    SendNotificationToUser({
+      title: notificationTitle,
+      text: notificationText,
+      image:
+        "https://static.vecteezy.com/system/resources/thumbnails/043/033/254/small_2x/colored-pencils-arranged-neatly-in-a-row-photo.jpg",
+      ref_id: dt.id,
+      user_id: dt.user_id,
+      role: "customer",
+      type: "car_rent_user_rent",
+    });
+    SendNotificationToUser({
+      title: notificationTitleUserpost,
+      text: notificationTextUserpost,
+      image:
+        "https://static.vecteezy.com/system/resources/thumbnails/043/033/254/small_2x/colored-pencils-arranged-neatly-in-a-row-photo.jpg",
+      ref_id: dt.id,
+      user_id: dt.post.user_id,
+      role: "customer",
+      type: "car_rent_user_post",
+    });
     await Promise.all([
       RecacheDataPost({
         key: "posts",

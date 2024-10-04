@@ -11,6 +11,9 @@ import {
   FindPromotionById_ID,
   FindUserById_ID,
 } from "../../services/find";
+import sendNotificationToAdmin, {
+  SendNotificationToUser,
+} from "../../services/noti.services";
 import {
   AddCar_rent_id_url,
   EnsureArray,
@@ -477,17 +480,7 @@ const Car_rentController = {
         }),
       ]);
 
-
       let promiselist = [
-        // NotificationController.notiNew({
-        //   // data,
-        //   ref_id: car_rent.id,
-        //   type: "car_rent",
-        //   title: "new car_rent order ",
-        //   text: "new car_rent order",
-        //   user_id,
-        //   role: "admin",
-        // }),
         RecacheDataPost({
           key: "posts",
           car_type_id_key: post.car_type_id + "posts",
@@ -528,15 +521,11 @@ const Car_rentController = {
         );
       }
 
-      // const [noti] = await Promise.all(promiselist);
-      // broadcast({
-      //   client_id: "admin",
-      //   ctx: "car_rent",
-      //   data: {
-      //     noti: noti.data,
-      //     data: dt,
-      //   },
-      // });
+      sendNotificationToAdmin({
+        title: "new car_rent",
+        text: "Order pending approval",
+        ref_id: dt.id,
+      });
       return SendSuccess({
         res,
         message: `${EMessage.insertSuccess} car_rent`,
@@ -676,7 +665,6 @@ const Car_rentController = {
 
       const [car_rentExists, statusExists] = await Promise.all([
         FindCar_rentById(id),
-
         FindCar_Rent_StatusById(status_id),
       ]);
       if (!car_rentExists || !statusExists)
@@ -771,8 +759,10 @@ const Car_rentController = {
       req,
       res,
       car_rent_status_Hand_over_the_car,
-      "update status Approved",
-      "update status Approved by user",
+      "Update Approval Status",
+      "Your order has been approved by the owner",
+      "Update Approval Status",
+      "You have approved the rental car reservation",
       post_status_Being_rented
     );
   },
@@ -782,8 +772,10 @@ const Car_rentController = {
       req,
       res,
       car_rent_status_Failure,
-      "update status Cancelled",
-      "update status Cancelled by user",
+      "Update Denial Status",
+      "Your order has been rejected by the owner",
+      "Update Cancellation Status",
+      "You have canceled your rental car reservation",
       post_status_ready_id
     );
   },
@@ -792,8 +784,10 @@ const Car_rentController = {
       req,
       res,
       car_rent_status_Success,
-      "update status Success",
-      "update status Success by user",
+      "Update Status Successful",
+      "Your car rental is complete",
+      "Status update completed",
+      "Your car has been successfully rented",
       post_status_ready_id
     );
   },
@@ -963,6 +957,32 @@ const Car_rentController = {
       ]);
       const dt = await FindCar_rentById(id);
 
+      sendNotificationToAdmin({
+        title: "update payment approved",
+        text: "update car_rent payment status approved",
+        ref_id: dt.id,
+      });
+
+      SendNotificationToUser({
+        title: "The approval has been done",
+        text: "Your car_rent order has been approved by an administrator",
+        image:
+          "https://static.vecteezy.com/system/resources/thumbnails/043/033/254/small_2x/colored-pencils-arranged-neatly-in-a-row-photo.jpg",
+        ref_id: dt.id,
+        user_id: dt.user_id,
+        role: "customer",
+        type: "car_rent_user_rent",
+      });
+      SendNotificationToUser({
+        title: "There are new car rental items",
+        text: "Your car has been rented. Waiting for your reply please reply to rent as soon as possible",
+        image:
+          "https://static.vecteezy.com/system/resources/thumbnails/043/033/254/small_2x/colored-pencils-arranged-neatly-in-a-row-photo.jpg",
+        ref_id: dt.id,
+        user_id: dt.post.user_id,
+        role: "customer",
+        type: "car_rent_user_post",
+      });
       // const [noti_admin, noti_user_post, noti_user_rent] = await Promise.all([
       //   NotificationController.notiNew({
       //     // data,
@@ -1092,43 +1112,22 @@ const Car_rentController = {
       ]);
       const dt = await FindCar_rentById(id);
 
-      // const [noti_admin, noti_user_rent] = await Promise.all([
-      //   NotificationController.notiNew({
-      //     // data,
-      //     ref_id: car_rent.id,
-      //     type: "car_rent",
-      //     title: "update status cancel",
-      //     text: "update status cancel ",
-      //     user_id,
-      //     role: "admin",
-      //   }),
-      //   NotificationController.notiNew({
-      //     // data,
-      //     ref_id: car_rent.id,
-      //     type: "car_rent_user_rent",
-      //     title: "update status cancel ",
-      //     text: "update status cancel",
-      //     user_id: dt.user_id,
-      //     role: "customer",
-      //   }),
-      // ]);
+      sendNotificationToAdmin({
+        title: "cancel order ",
+        text: "cancel car_rent payment status faild status to cancel",
+        ref_id: dt.id,
+      });
 
-      // broadcast({
-      //   client_id: dt.user_id,
-      //   ctx: "car_rent_user_rent",
-      //   data: {
-      //     noti: noti_user_rent.data,
-      //     data: dt,
-      //   },
-      // });
-      // broadcast({
-      //   client_id: "admin",
-      //   ctx: "car_rent",
-      //   data: {
-      //     noti: noti_admin.data,
-      //     data: dt,
-      //   },
-      // });
+      SendNotificationToUser({
+        title: "order failed",
+        text: "Your reservation has not been approved for payment",
+        image:
+          "https://static.vecteezy.com/system/resources/thumbnails/043/033/254/small_2x/colored-pencils-arranged-neatly-in-a-row-photo.jpg",
+        ref_id: dt.id,
+        user_id: dt.user_id,
+        role: "customer",
+        type: "car_rent_user_rent",
+      });
       return SendSuccess({
         res,
         message: `${EMessage.deleteSuccess}`,

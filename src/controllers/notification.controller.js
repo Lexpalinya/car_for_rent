@@ -8,7 +8,7 @@ import { RecacheData } from "./user.controller";
 
 const key = "notification";
 const model = "notification";
-let select = {
+export let select = {
   id: true,
   is_active: true,
   isNewNoti: true,
@@ -16,12 +16,16 @@ let select = {
   text: true,
   role: true,
   type: true,
+  created_at: true,
+  updated_at: true,
   car_rents: {
     select: {
       user_id: true,
       frist_name: true,
       last_name: true,
+      phone_number: true,
       total_price: true,
+      currency: true,
       // jaiykhon: true,
       status: true,
       post: {
@@ -47,6 +51,10 @@ let select = {
               },
             },
           },
+          car_brand: true,
+          car_version: true,
+          car_year: true,
+          car_color: true,
           post_car_image: {
             select: {
               url: true, // Fetching the car image URL
