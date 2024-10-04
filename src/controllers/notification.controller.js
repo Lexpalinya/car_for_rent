@@ -1,11 +1,11 @@
-import { CachDataAll, CachDataLimit } from "../services/cach.contro";
+import { CachDataLimit } from "../services/cach.contro";
 import { EMessage } from "../services/enum";
-import { FindNotification, FindUserById } from "../services/find";
+import { FindNotification } from "../services/find";
 import { SendError, SendErrorLog, SendSuccess } from "../services/services";
 import { ValidateData } from "../services/validate";
 import prisma from "../utils/prisma.client";
 import { RecacheData } from "./user.controller";
-import messaging from "../config/firebase.Admin";
+
 const key = "notification";
 const model = "notification";
 let select = {
@@ -17,10 +17,13 @@ let select = {
   role: true,
   type: true,
   car_rents: {
-    where: {
-      is_active: true,
-    },
     select: {
+      user_id: true,
+      frist_name: true,
+      last_name: true,
+      total_price: true,
+      // jaiykhon: true,
+      status: true,
       post: {
         select: {
           id: true,
@@ -43,10 +46,10 @@ let select = {
                 },
               },
             },
-            post_car_image: {
-              select: {
-                url: true,
-              },
+          },
+          post_car_image: {
+            select: {
+              url: true, // Fetching the car image URL
             },
           },
         },
@@ -152,102 +155,7 @@ const NotificationController = {
       });
     }
   },
-  async notiNew({ ref_id, type, title, text, user_id, role, token }) {
-    try {
-      // Find the user by ID
-      // const user = await FindUserById(user_id);
-      // if (!user) throw new Error("User not found");
 
-      // Construct the notification message
-
-      // Create the notification record in the database
-      const noti = await prisma.notification.create({
-        data: {
-          user_id,
-          title,
-          text,
-          ref_id,
-          type,
-          role,
-        },
-        select: {
-          id: true,
-
-          is_active: true,
-          isNewNoti: true,
-          title: true,
-          text: true,
-          role: true,
-          type: true,
-          car_rents: {
-            // where: {
-            //   is_active: true,
-            // },
-            select: {
-              frist_name: true,
-              last_name: true,
-              total_price: true,
-              jaiykhon: true,
-              post: {
-                select: {
-                  id: true,
-                  user_id: true,
-                  star: true,
-                  users: {
-                    select: {
-                      profile: true,
-                      kycs: {
-                        where: {
-                          is_active: true,
-                        },
-                        select: {
-                          first_name: true,
-                          last_name: true,
-                          village: true,
-                          district: true,
-                          province: true,
-                          phone_number: true,
-                        },
-                      },
-                    },
-                  },
-
-                  post_car_image: {
-                    select: {
-                      url: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
-      console.log("noti :>> ", noti);
-
-      const message = {
-        notification: {
-          title,
-          body: text, // Changed 'detail' to 'body' for FCM compatibility
-        },
-        token: token,
-        data: noti,
-      };
-      console.log("message :>> ", message);
-
-      // // Send the notification and await the response
-      // const response = await messaging.send(message);
-      // console.log("Successfully sent message:", response);
-
-      return { message: EMessage.SUCCESS, data: noti };
-    } catch (error) {
-      console.error("Error sending notification:", error);
-      return {
-        message: EMessage.ERROR,
-        error: error.message || "An error occurred",
-      };
-    }
-  },
   async SelectOne(req, res) {
     try {
       const id = req.params.id;
@@ -312,21 +220,22 @@ const NotificationController = {
   async SelectByAdmin(req, res) {
     try {
       let page = parseInt(req.query.page);
+      let type = req.query.type || "car_rent";
       page = !page || page < 0 ? 0 : page - 1;
       const admin = "admin";
       const [noti] = await Promise.all([
         CachDataLimit(
-          admin + key + page,
+          admin + key + type + page,
           model,
-          { ...where, role: admin, type: "car_rent" },
+          { ...where, role: admin, type },
           page,
           select,
           [{ isNewNoti: "desc" }, { created_at: "desc" }]
         ),
         CachDataLimit(
-          admin + key + page + 1,
+          admin + key + type + page + 1,
           model,
-          { ...where, role: admin, type: "car_rent" },
+          { ...where, role: admin, type },
           page + 1,
           select,
           [{ isNewNoti: "desc" }, { created_at: "desc" }]

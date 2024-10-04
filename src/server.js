@@ -6,9 +6,8 @@ import morgan from "morgan";
 import redis from "./DB/redis";
 import APIRoute from "./routes/index.routes";
 import { EAPI, SERVER_PORT } from "./config/api.config";
-import { broadcast, initSocketServer } from "./server/socketIO.server"; // Import the Socket.IO setup
-import NotificationController from "./controllers/notification.controller";
-import { CachDataFindUserNoClear } from "./services/cach.contro";
+import { initSocketServer } from "./server/socketIO.server"; // Import the Socket.IO setup
+import  { SendNotificationToUser } from "./services/noti.services";
 
 const app = new express();
 
@@ -56,7 +55,17 @@ await redis.flushdb();
 //   ref_id: "23669040-8bc6-481d-874f-69b382a8b7e8",
 //   text: "test",
 //   role: "customer",
-//   token:"12354668"
+//   token:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjliODVjNTk4LTc2NGUtNDU1My04MzIxLTgzMmY2Y2ZjNjkzNiIsImlhdCI6MTcyNjEzNDU1OSwiZXhwIjoxNzY5MzM0NTU5fQ.TxBmrTlaITy3l5YdFyochTkuCItWMAoeQILgZ0c-w8g"
+// });
+// SendNotificationToUser({
+//   title: "new order",
+//   text: "new order is available",
+//   image:
+//     "https://static.vecteezy.com/system/resources/thumbnails/043/033/254/small_2x/colored-pencils-arranged-neatly-in-a-row-photo.jpg",
+//   ref_id: "23669040-8bc6-481d-874f-69b382a8b7e8",
+//   user_id:"fe44bd77-1d72-4ce4-9d2f-c95b0ee78fba",
+//   role:"customer",
+//   type:"car_rent_user"
 // });
 // const a = await CachDataFindUserNoClear(
 //   "ID_user",
