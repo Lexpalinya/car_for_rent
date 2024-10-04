@@ -634,7 +634,7 @@ const Car_rentController = {
         }),
       ]);
 
-      const dt = await FindCar_rentById(id);
+      // const dt = await FindCar_rentById(id);
 
       return SendSuccess({
         res,
@@ -739,6 +739,28 @@ const Car_rentController = {
       //     data: dt,
       //   },
       // });
+      SendNotificationToUser({
+        title: "Update status",
+        text: "Your car_rent order at status" + dt.status.nameTenantEng,
+        image:
+          "https://static.vecteezy.com/system/resources/thumbnails/043/033/254/small_2x/colored-pencils-arranged-neatly-in-a-row-photo.jpg",
+        ref_id: dt.id,
+        user_id: dt.user_id,
+        role: "customer",
+        type: "car_rent_user_rent",
+      });
+      SendNotificationToUser({
+        title: "Update status",
+        text:
+          "Your car rental information is in status " +
+          dt.status.namePostertEng,
+        image:
+          "https://static.vecteezy.com/system/resources/thumbnails/043/033/254/small_2x/colored-pencils-arranged-neatly-in-a-row-photo.jpg",
+        ref_id: dt.id,
+        user_id: dt.post.user_id,
+        role: "customer",
+        type: "car_rent_user_post",
+      });
 
       return SendSuccess({
         res,
