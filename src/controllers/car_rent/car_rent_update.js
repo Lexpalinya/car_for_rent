@@ -1,14 +1,12 @@
 import redis from "../../DB/redis";
-import { broadcast } from "../../server/socketIO.server";
+
 import { EMessage } from "../../services/enum";
 import { FindCar_Rent_StatusById, FindCar_rentById } from "../../services/find";
-import sendNotificationToAdmin, {
-  SendNotificationToUser,
-} from "../../services/noti.services";
+import { SendNotificationToUser } from "../../services/noti.services";
 import { SendError, SendErrorLog, SendSuccess } from "../../services/services";
 import { UploadImage } from "../../services/upload.file";
 import prisma from "../../utils/prisma.client";
-import NotificationController from "../notification.controller";
+
 import { RecacheDataPost } from "../post/post.controller";
 import { ResCachedDataCar_rent } from "./car_rent.controller";
 let key = "car_rent";

@@ -4,7 +4,8 @@ import { CachDataAll } from "./cach.contro";
 import { EMessage } from "./enum";
 import { FindUserById_ID } from "./find";
 import { select } from "../controllers/notification.controller";
-
+import { DeleteCachedKey } from "./cach.deletekey";
+const key = "notification";
 const sendNotificationToAdmin = async ({ title, text, ref_id }) => {
   try {
     const adminLits = await CachDataAll(
@@ -50,6 +51,7 @@ const sendNotificationToAdmin = async ({ title, text, ref_id }) => {
         console.error("Error sending notification:", error);
       }
     };
+    await DeleteCachedKey("admin" + key);
 
     const sendNotification = adminLits
       .filter((admin) => admin.device_token)
@@ -103,7 +105,7 @@ export const SendNotificationToUser = async ({
       };
       messaging.send(message);
     }
-
+    await DeleteCachedKey(user_id + key + type);
     return { message: EMessage.SUCCESS, data: noti };
   } catch (error) {
     console.error("Error sending notification:", error);

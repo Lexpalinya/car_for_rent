@@ -196,7 +196,7 @@ const NotificationController = {
       const user_id = req.user;
       const [noti] = await Promise.all([
         CachDataLimit(
-          user_id + key + page + type,
+          user_id + key + type + page,
           model,
           { ...where, user_id, type },
           page,
@@ -204,7 +204,7 @@ const NotificationController = {
           [{ isNewNoti: "desc" }, { created_at: "desc" }]
         ),
         CachDataLimit(
-          user_id + key + page + type + 1,
+          user_id + key + type + page + 1,
           model,
           { ...where, user_id },
           page + 1,
