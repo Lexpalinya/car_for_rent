@@ -81,7 +81,7 @@ model location {
   id         String   @id @default(uuid()) @db.VarChar(36)
   is_active  Boolean  @default(true)
   user_id    String
-  tag        String
+  // tag        String
   street     String
   point      String
   village    String?
@@ -95,6 +95,15 @@ model location {
 }
 
 model banners {
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  is_active  Boolean  @default(true)
+  is_public  Boolean  @default(true)
+  image      String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model news {
   id         String   @id @default(uuid()) @db.VarChar(36)
   is_active  Boolean  @default(true)
   is_public  Boolean  @default(true)
@@ -484,4 +493,28 @@ model payment_qr {
   users      users    @relation(fields: [user_id], references: [id])
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+}
+
+model popular_places {
+  id                    String                  @id @default(uuid()) @db.VarChar(36)
+  is_active             Boolean                 @default(true)
+  coverimage            String
+  street                String
+  point                 String
+  village               String
+  district              String
+  province              String
+  details               String
+  created_at            DateTime                @default(now())
+  updated_at            DateTime                @updatedAt
+  popular_places_images popular_places_images[]
+}
+
+model popular_places_images {
+  id       Int            @id @default(autoincrement())
+  place_id String         @db.VarChar(36)
+  url      String
+  place    popular_places @relation(fields: [place_id], references: [id])
+
+  @@index([place_id])
 }

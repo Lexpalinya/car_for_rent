@@ -329,3 +329,8 @@ export const ValidateKyc = (data) => {
     doc_no,
   });
 };
+
+export const ValidatePopular_Places = (data) => {
+  const { street, point, village, district, province, details } = data;
+  return ValidateData({ street, point, village, district, province, details });
+};

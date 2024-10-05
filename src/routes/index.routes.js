@@ -32,6 +32,7 @@ import Car_rentController from "../controllers/car_rent/car_rent.controller";
 import BannerController from "../controllers/banner.controller";
 import NotificationController from "../controllers/notification.controller";
 import Payment_qrController from "../controllers/payment_qr.controller";
+import NewsController from "../controllers/new.controller";
 const route = express.Router();
 
 //-----------Promotion-------------------------
@@ -73,6 +74,21 @@ route.put(
 );
 route.delete(`${banners}/delete/:id`, auth, admin, BannerController.Delete);
 
+//---------------News-------------------------------------------
+const news = "/news";
+route.get(`${news}/selAll`, auth, admin, NewsController.SelectAll);
+route.get(`${news}/selIsPublic`, auth, NewsController.SelectIsPublic);
+
+route.post(`${news}/insert`, auth, admin, NewsController.Insert);
+
+route.put(`${news}/update/:id`, auth, admin, NewsController.Update);
+route.put(
+  `${news}/updateIsPublic/:id`,
+  auth,
+  admin,
+  NewsController.Update_Is_public
+);
+route.delete(`${news}/delete/:id`, auth, admin, NewsController.Delete);
 //---------------Car_brands-------------------------------------
 const car_brands = `/car_brands`;
 route.get(`${car_brands}/selAll`, auth, Car_BrandsController.SelectAll);

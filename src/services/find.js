@@ -29,6 +29,10 @@ export const FindBannerById = (id) => {
   return CachDataFindByIdNoClear("banners", "banners", { id, is_active: true });
 };
 
+//--------cach no clear-----------------------------------------------------------------------
+export const FindNewsById = (id) => {
+  return CachDataFindByIdNoClear("news", "news", { id, is_active: true });
+};
 export const FindPromotionById_ID = (id) => {
   return CachDataFindDataId_One(id + "promotions", "promotions", {
     id,
