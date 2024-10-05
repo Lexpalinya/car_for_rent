@@ -48,7 +48,7 @@ const NewsController = {
     } catch (err) {
       SendErrorLog({
         res,
-        message: `${EMessage.serverError} ${EMessage.insertFailed} bannner`,
+        message: `${EMessage.serverError} ${EMessage.insertFailed} news`,
         err,
       });
     }
@@ -131,7 +131,7 @@ const NewsController = {
     } catch (err) {
       SendErrorLog({
         res,
-        message: `${EMessage.serverError} ${EMessage.deleteFailed} bannner`,
+        message: `${EMessage.serverError} ${EMessage.deleteFailed} news`,
         err,
       });
     }
@@ -171,7 +171,7 @@ const NewsController = {
     } catch (err) {
       SendErrorLog({
         res,
-        message: `${EMessage.serverError} ${EMessage.deleteFailed} bannner`,
+        message: `${EMessage.serverError} ${EMessage.deleteFailed} news`,
         err,
       });
     }
@@ -187,7 +187,7 @@ const NewsController = {
     } catch (err) {
       SendErrorLog({
         res,
-        message: `${EMessage.serverError} ${EMessage.errorFetchingAll} bannner`,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll} news`,
         err,
       });
     }
@@ -204,7 +204,7 @@ const NewsController = {
     } catch (err) {
       SendErrorLog({
         res,
-        message: `${EMessage.serverError} ${EMessage.errorFetchingAll} bannner is public`,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll} news is public`,
         err,
       });
     }

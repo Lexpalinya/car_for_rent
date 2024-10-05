@@ -500,57 +500,86 @@ export const FindKycById = (id) => {
 };
 
 export const FindNotification = (id) => {
-  return CachDataFindDataId_One(id + "notification", "notification", {
-    is_active: true,
-    id,
-  },
-  {
-    id: true,
-    is_active: true,
-    isNewNoti: true,
-    title: true,
-    text: true,
-    role: true,
-    type: true,
-    car_rents: {
-      select: {
-        user_id: true,
-        frist_name: true,
-        last_name: true,
-        total_price: true,
-        // jaiykhon: true,
-        post: {
-          select: {
-            id: true,
-            user_id: true,
-            star: true,
-            users: {
-              select: {
-                profile: true,
-                kycs: {
-                  where: {
-                    is_active: true,
-                  },
-                  select: {
-                    first_name: true,
-                    last_name: true,
-                    village: true,
-                    district: true,
-                    province: true,
-                    phone_number: true,
+  return CachDataFindDataId_One(
+    id + "notification",
+    "notification",
+    {
+      is_active: true,
+      id,
+    },
+    {
+      id: true,
+      is_active: true,
+      isNewNoti: true,
+      title: true,
+      text: true,
+      role: true,
+      type: true,
+      car_rents: {
+        select: {
+          user_id: true,
+          frist_name: true,
+          last_name: true,
+          total_price: true,
+          // jaiykhon: true,
+          post: {
+            select: {
+              id: true,
+              user_id: true,
+              star: true,
+              users: {
+                select: {
+                  profile: true,
+                  kycs: {
+                    where: {
+                      is_active: true,
+                    },
+                    select: {
+                      first_name: true,
+                      last_name: true,
+                      village: true,
+                      district: true,
+                      province: true,
+                      phone_number: true,
+                    },
                   },
                 },
               },
-            },
-            post_car_image: {
-              select: {
-                url: true, // Fetching the car image URL
+              post_car_image: {
+                select: {
+                  url: true, // Fetching the car image URL
+                },
               },
             },
           },
         },
       },
+    }
+  );
+};
+
+export const FindPopular_placesById = (id) => {
+  return CachDataFindDataId_One(
+    id + "popular_places",
+    "popular_places",
+    {
+      is_active: true,
+      id,
     },
-  },
-);
+    {
+      id: true,
+      is_active: true,
+      name: true,
+      point: true,
+      street: true,
+      //   village: true,
+      province: true,
+      district: true,
+      coverImage: true,
+      details: true,
+      created_at: true,
+      updated_at: true,
+      popular_places_images: true,
+    }
+  );
 };

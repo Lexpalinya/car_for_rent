@@ -46,6 +46,7 @@ export const post_status_ready_id = "ccd5c106-0a6c-45e9-b01c-e0a523221506";
 export const post_status_Being_rented = "4baa3353-88c3-46f2-ac36-ed7971bd64bc";
 let key = "posts";
 const model = "posts";
+const orderBy = [{ updated_at: "desc" }, { created_at: "desc" }];
 let where = {
   is_active: true,
   isShowPost: true,
@@ -715,8 +716,15 @@ const PostController = {
       let page = parseInt(req.query.page);
       page = !page || page < 0 ? 0 : page - 1;
       const [post] = await Promise.all([
-        CachDataLimit(key + "-" + page, model, where, page, select),
-        CachDataLimit(key + "-" + (page + 1), model, where, page + 1, select),
+        CachDataLimit(key + "-" + page, model, where, page, select, orderBy),
+        CachDataLimit(
+          key + "-" + (page + 1),
+          model,
+          where,
+          page + 1,
+          select,
+          orderBy
+        ),
       ]);
       return SendSuccess({
         res,
@@ -727,6 +735,43 @@ const PostController = {
       SendErrorLog({
         res,
         message: `${EMessage.serverError} ${EMessage.errorFetchingAll} post select allpage`,
+        err,
+      });
+    }
+  },
+
+  async SelectAllDiscount(req, res) {
+    try {
+      // await DeleteCachedKey(key);
+      let page = parseInt(req.query.page);
+      page = !page || page < 0 ? 0 : page - 1;
+      const [post] = await Promise.all([
+        CachDataLimit(
+          key + "-discount" + page,
+          model,
+          { ...where, discount: { gt: 0 } },
+          page,
+          select,
+          orderBy
+        ),
+        CachDataLimit(
+          key + "-discount" + (page + 1),
+          model,
+          { ...where, discount: { gt: 0 } },
+          page + 1,
+          select,
+          orderBy
+        ),
+      ]);
+      return SendSuccess({
+        res,
+        message: `${EMessage.fetchAllSuccess} post `,
+        data: post,
+      });
+    } catch (err) {
+      SendErrorLog({
+        res,
+        message: `${EMessage.serverError} ${EMessage.errorFetchingAll} post select allpage discount`,
         err,
       });
     }
@@ -746,7 +791,8 @@ const PostController = {
             },
           },
           page,
-          select
+          select,
+          orderBy
         ),
         CachDataLimit(
           key + "-" + "popular" + (page + 1),
@@ -758,7 +804,8 @@ const PostController = {
             },
           },
           page + 1,
-          select
+          select,
+          orderBy
         ),
       ]);
       return SendSuccess({
@@ -783,13 +830,21 @@ const PostController = {
       delete whereAdmin.status_id;
       console.log("whereAdmin :>> ", whereAdmin);
       const [post] = await Promise.all([
-        CachDataLimit(key + "admin-" + page, model, whereAdmin, page, select),
+        CachDataLimit(
+          key + "admin-" + page,
+          model,
+          whereAdmin,
+          page,
+          select,
+          orderBy
+        ),
         CachDataLimit(
           key + "admin-" + (page + 1),
           model,
           whereAdmin,
           page + 1,
-          select
+          select,
+          orderBy
         ),
       ]);
       return SendSuccess({
@@ -818,14 +873,16 @@ const PostController = {
           model,
           userwhere,
           page,
-          select
+          select,
+          orderBy
         ),
         CachDataLimit(
           status_id + key + "-" + (page + 1),
           model,
           userwhere,
           page,
-          select
+          select,
+          orderBy
         ),
       ]);
       return SendSuccess({
@@ -856,16 +913,15 @@ const PostController = {
           car_typewhere,
           page,
           select,
-          {
-            updated_at: "desc",
-          }
+          orderBy
         ),
         CachDataLimit(
           car_type_id + key + "-" + (page + 1),
           model,
           car_typewhere,
           page + 1,
-          select
+          select,
+          orderBy
         ),
       ]);
       return SendSuccess({
@@ -896,14 +952,16 @@ const PostController = {
           model,
           type_fualwhere,
           page,
-          select
+          select,
+          orderBy
         ),
         CachDataLimit(
           type_of_fual_id + key + "-" + (page + 1),
           model,
           type_fualwhere,
           page + 1,
-          select
+          select,
+          orderBy
         ),
       ]);
       return SendSuccess({
@@ -1030,7 +1088,8 @@ const PostController = {
         user_id + key + "-" + page,
         model,
         userwhere,
-        selectuser
+        selectuser,
+        orderBy
       );
       return SendSuccess({
         res,
@@ -1069,8 +1128,8 @@ const PostController = {
         ...where,
       };
       const [post] = await Promise.all([
-        CachDataLimit(keysearch, model, wheresearch, page, select),
-        CachDataLimit(keysearch, model, wheresearch, page + 1, select),
+        CachDataLimit(keysearch, model, wheresearch, page, select, orderBy),
+        CachDataLimit(keysearch, model, wheresearch, page + 1, select, orderBy),
       ]);
       return SendSuccess({
         res,

@@ -33,6 +33,7 @@ import BannerController from "../controllers/banner.controller";
 import NotificationController from "../controllers/notification.controller";
 import Payment_qrController from "../controllers/payment_qr.controller";
 import NewsController from "../controllers/new.controller";
+import Popular_PlacesController from "../controllers/popular_places.controller";
 const route = express.Router();
 
 //-----------Promotion-------------------------
@@ -339,6 +340,7 @@ route.delete(`${wallet}/delete/:id`, auth, WalletController.Delete);
 //------------Post---------------------------------
 const post = "/post";
 route.get(`${post}/selAllPage`, auth, PostController.SelectAllPage);
+route.get(`${post}/selAllDiscount`, auth, PostController.SelectAllDiscount);
 route.get(`${post}/selPopular`, auth, PostController.SelectPopular);
 route.get(
   `${post}/selAllAdminPage`,
@@ -656,3 +658,50 @@ route.post(
 );
 
 route.put(`${noti}/readNoti/:id`, auth, NotificationController.readNoti);
+//--------------popular_places-------------------------------
+const popular_places = "/popular_places";
+route.get(
+  `${popular_places}/selAllPage`,
+  auth,
+  Popular_PlacesController.SelectAllPages
+);
+route.get(
+  `${popular_places}/selOne/:id`,
+  auth,
+  Popular_PlacesController.SelectOne
+);
+route.post(`${popular_places}/insert`, auth, Popular_PlacesController.Insert);
+
+route.put(
+  `${popular_places}/update/:id`,
+  auth,
+  Popular_PlacesController.Update
+);
+
+route.put(
+  `${popular_places}/updateImages_Add/:id`,
+  auth,
+  Popular_PlacesController.UpdateImages_Add_image
+);
+route.put(
+  `${popular_places}/updateImages_Update/:id`,
+  auth,
+  Popular_PlacesController.UpdateImages_Update_image
+);
+route.put(
+  `${popular_places}/updateImages_Delete/:id`,
+  auth,
+  Popular_PlacesController.UpdateImages_Delete_image
+);
+
+route.put(
+  `${popular_places}/updateCoverImage/:id`,
+  auth,
+  Popular_PlacesController.UpdateCoverImage
+);
+
+route.delete(
+  `${popular_places}/delete/:id`,
+  auth,
+  Popular_PlacesController.Delete
+);

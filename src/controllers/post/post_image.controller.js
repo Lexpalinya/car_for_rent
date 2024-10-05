@@ -115,8 +115,8 @@ const UpdatePostImage = async (
       return SendError({
         res,
         statuscode: 400,
-        message: `you not own post_rent_data`,
-        err: `you not own post_rent_data`,
+        message: `you not own post`,
+        err: `you not own post`,
       });
 
     const imageUrl = await UploadImage(

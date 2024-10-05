@@ -38,7 +38,7 @@ const sendNotificationToAdmin = async ({ title, text, ref_id }) => {
           notification: {
             title: title,
             body: text,
-            image: carImageUrl || undefined, // Attach image if available
+            // image: carImageUrl || undefined, // Attach image if available
           },
           token: device_token,
           data: {
@@ -96,7 +96,7 @@ export const SendNotificationToUser = async ({
         notification: {
           title: title,
           body: text,
-          image: carImageUrl || undefined, // Attach image if available
+          // image: carImageUrl || undefined, // Attach image if available
         },
         token: user.device_token,
         data: {

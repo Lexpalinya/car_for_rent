@@ -167,6 +167,12 @@ export const AddKyc_id_url = (arr, id) => {
     url,
   }));
 };
+export const AddPopular_places_images_id_url = (arr, id) => {
+  return arr.map((url) => ({
+    place_id: id,
+    url,
+  }));
+};
 
 export const EnsureArray = (arr) => {
   return Array.isArray(arr) ? arr : [arr];

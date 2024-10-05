@@ -126,8 +126,9 @@ const Car_rent_driving_lincense_image = createModelHandler(
   "car_rent_driving_lincense_image"
 );
 
-const Kyc_noti = createModelHandler("kyc_noti");
+// const Kyc_noti = createModelHandler("kyc_noti");
 
+const Popular_places_images = createModelHandler("popular_places_images");
 export {
   Kyc_doc_image,
   //--------------------
@@ -145,5 +146,5 @@ export {
   Car_rent_visa,
 
   //------Notification------------
-  Kyc_noti,
+  Popular_places_images,
 };

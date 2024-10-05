@@ -498,13 +498,14 @@ model payment_qr {
 model popular_places {
   id                    String                  @id @default(uuid()) @db.VarChar(36)
   is_active             Boolean                 @default(true)
-  coverimage            String
+  name                  String
+  coverImage            String
   street                String
   point                 String
-  village               String
+  // village               String
   district              String
   province              String
-  details               String
+  details               String                  @db.LongText
   created_at            DateTime                @default(now())
   updated_at            DateTime                @updatedAt
   popular_places_images popular_places_images[]
