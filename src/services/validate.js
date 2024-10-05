@@ -283,9 +283,8 @@ export const ValidateCar_rent_update_status_by_admin = (data) => {
 };
 
 export const ValidateLocation = (data) => {
-  const { tag, street, point, village, district, province } = data;
+  const { street, point, village, district, province } = data;
   return ValidateData({
-    tag,
     street,
     point,
     village,
