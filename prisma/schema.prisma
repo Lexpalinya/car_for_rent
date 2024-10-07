@@ -384,7 +384,7 @@ model car_rent {
   jaiykhon                        Float                             @default(10000000)
   pay_destination                 Float
   khampakan                       Float
-  pay_type                        String
+  pay_type                        String?
   bank_no                         String?                           @db.VarChar(17)
   pay_status                      Boolean                           @default(false)
   reason                          String?                           @db.LongText

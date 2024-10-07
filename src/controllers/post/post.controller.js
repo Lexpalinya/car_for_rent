@@ -164,6 +164,7 @@ const PostController = {
         post_rent_data,
         currency,
         discount,
+        pay_type,
       } = req.body;
       const status_id = post_status_ready_id;
       // const user_id = req.user;
