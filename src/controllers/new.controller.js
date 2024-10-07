@@ -2,6 +2,7 @@ import { CachDataAll, CachDataNoClear } from "../services/cach.contro";
 import { DeleteCachedKey } from "../services/cach.deletekey";
 import { EMessage } from "../services/enum";
 import { FindNewsById } from "../services/find";
+import { S3UploadImage } from "../services/s3UploadImage";
 import {
   SendCreate,
   SendError,
@@ -30,7 +31,7 @@ const NewsController = {
           err: "image",
         });
       }
-      const url = await UploadImage(data.image.data);
+      const url = await S3UploadImage(data.image);
       if (!url) {
         throw new Error("upload image failed");
       }
@@ -81,7 +82,7 @@ const NewsController = {
           err: "id",
         });
 
-      const url = await UploadImage(data.image.data);
+      const url = await S3UploadImage(data.image, old_image);
 
       if (!url) {
         throw new Error("upload image failed");

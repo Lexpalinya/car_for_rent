@@ -7,7 +7,7 @@ import redis from "./DB/redis";
 import APIRoute from "./routes/index.routes";
 import { EAPI, SERVER_PORT } from "./config/api.config";
 import { initSocketServer } from "./server/socketIO.server"; // Import the Socket.IO setup
-import  { SendNotificationToUser } from "./services/noti.services";
+import { SendNotificationToUser } from "./services/noti.services";
 
 const app = new express();
 
@@ -16,7 +16,7 @@ app.use(
   express.urlencoded({ extended: false, limit: "500mb", parameterLimit: 500 })
 );
 app.use(fileUpload());
-app.use(morgan());
+app.use(morgan("combined"));
 
 app.use(
   cors({

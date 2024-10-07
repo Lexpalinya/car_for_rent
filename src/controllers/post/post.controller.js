@@ -1,10 +1,5 @@
 import redis from "../../DB/redis";
-
-import {
-  CachDataAll,
-  CachDataLimit,
-  CachDataFindData_limitNoSkip,
-} from "../../services/cach.contro";
+import { CachDataAll, CachDataLimit } from "../../services/cach.contro";
 import { DeleteCachedKey } from "../../services/cach.deletekey";
 import { EMessage } from "../../services/enum";
 import {

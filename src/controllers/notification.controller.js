@@ -1,4 +1,5 @@
 import { CachDataLimit } from "../services/cach.contro";
+import { DeleteCachedKey } from "../services/cach.deletekey";
 import { EMessage } from "../services/enum";
 import { FindNotification } from "../services/find";
 import { SendError, SendErrorLog, SendSuccess } from "../services/services";
@@ -118,6 +119,7 @@ const NotificationController = {
           isNewNoti: false,
         },
       });
+      await DeleteCachedKey(noti.user_id + key + noti.type);
       return SendSuccess({
         res,
         message: `${EMessage.deleteSuccess}`,
@@ -150,6 +152,7 @@ const NotificationController = {
           is_active: false,
         },
       });
+      await DeleteCachedKey(noti.user_id + key + noti.type);
       return SendSuccess({
         res,
         message: `${EMessage.deleteSuccess}`,
