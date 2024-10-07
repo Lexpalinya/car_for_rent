@@ -1,5 +1,4 @@
 import redis from "../../DB/redis";
-import { broadcast } from "../../server/socketIO.server";
 import { CachDataAll, CachDataLimit } from "../../services/cach.contro";
 import { DeleteCachedKey } from "../../services/cach.deletekey";
 import { EMessage } from "../../services/enum";
@@ -35,7 +34,6 @@ import {
   ValidateCar_rent_update_status_by_admin,
 } from "../../services/validate";
 import prisma from "../../utils/prisma.client";
-import NotificationController from "../notification.controller";
 import {
   post_status_being_hired_id,
   post_status_Being_rented,
@@ -285,7 +283,7 @@ const Car_rentController = {
       if (
         !data ||
         !data.car_rent_doc_image ||
-        !data.car_rent_payment_image ||
+        // !data.car_rent_payment_image ||
         !data.car_rent_driving_lincense_image
       ) {
         return SendError({
@@ -294,12 +292,12 @@ const Car_rentController = {
           message: `${EMessage.pleaseInput}`,
           err: ` ${
             !data
-              ? "car_rent_doc_image,car_rent_payment_image,car_rent_driving_lincense_image"
+              ? "car_rent_doc_image,car_rent_driving_lincense_image"
               : !data.car_rent_doc_image
               ? "car_rent_doc_image"
-              : !data.car_rent_driving_lincense_image
-              ? "car_rent_driving_lincense_image"
-              : "car_rent_payment_image"
+              : // : !data.car_rent_driving_lincense_image ?
+                "car_rent_driving_lincense_image"
+            // : "car_rent_payment_image"
           }`,
         });
       }
@@ -324,7 +322,9 @@ const Car_rentController = {
       data.car_rent_driving_lincense_image = EnsureArray(
         data.car_rent_driving_lincense_image
       );
-      data.car_rent_payment_image = EnsureArray(data.car_rent_payment_image);
+      if (data.car_rent_payment_image) {
+        data.car_rent_payment_image = EnsureArray(data.car_rent_payment_image);
+      }
       let promiseFind = [
         FindUserById_ID(user_id),
         FindPostById_for_edit(post_id),
@@ -391,15 +391,18 @@ const Car_rentController = {
           err: "try the new promotion",
         });
       }
+      const promiseList_image = [
+        uploadImages(data.car_rent_doc_image),
+        uploadImages(data.car_rent_driving_lincense_image),
+      ];
+      if (data.car_rent_payment_image) {
+        promiseList_image.push(uploadImages(data.car_rent_payment_image));
+      }
       const [
         car_rent_doc_image_url,
-        car_rent_payment_image_url,
         car_rent_driving_lincense_image_url,
-      ] = await Promise.all([
-        uploadImages(data.car_rent_doc_image),
-        uploadImages(data.car_rent_payment_image),
-        uploadImages(data.car_rent_driving_lincense_image),
-      ]);
+        car_rent_payment_image_url,
+      ] = await Promise.all(promiseList_image);
       const car_rent = await prisma.car_rent.create({
         data: {
           user_id,
@@ -434,22 +437,27 @@ const Car_rentController = {
         car_rent_doc_image_url,
         car_rent.id
       );
-      const car_rent_payment_image_data = AddCar_rent_id_url(
-        car_rent_payment_image_url,
-        car_rent.id
-      );
+      let car_rent_payment_image_data;
+      if (data.car_rent_payment_image) {
+        car_rent_payment_image_data = AddCar_rent_id_url(
+          car_rent_payment_image_url,
+          car_rent.id
+        );
+      }
       const car_rent_driving_lincense_image_data = AddCar_rent_id_url(
         car_rent_driving_lincense_image_url,
         car_rent.id
       );
       const promiseAdd = [
         Car_rent_doc_image.insert(car_rent_doc_image_data),
-        Car_rent_payment_image.insert(car_rent_payment_image_data),
         Car_rent_driving_lincense_image.insert(
           car_rent_driving_lincense_image_data
         ),
       ];
 
+      if (data.car_rent_payment_image) {
+        Car_rent_payment_image.insert(car_rent_payment_image_data);
+      }
       if (car_rent_visa) {
         promiseAdd.push(
           Car_rent_visa.insertOne({
