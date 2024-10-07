@@ -2,13 +2,14 @@ import { CachDataNoClear } from "../services/cach.contro";
 import { DeleteCachedKey } from "../services/cach.deletekey";
 import { EMessage } from "../services/enum";
 import { FindPayment_qrById } from "../services/find";
+import { S3UploadImage } from "../services/s3UploadImage";
 import {
   SendCreate,
   SendError,
   SendErrorLog,
   SendSuccess,
 } from "../services/services";
-import { UploadImage } from "../services/upload.file";
+
 import { DataExists, ValidatePayment_qr } from "../services/validate";
 import prisma from "../utils/prisma.client";
 
@@ -42,7 +43,7 @@ const Payment_qrController = {
       const { currency } = req.body;
       const user_id = req.user;
 
-      const qr = await UploadImage(data.qr.data);
+      const qr = await S3UploadImage(data.qr.data);
       if (!qr) {
         throw new Error("upload image failed");
       }
@@ -127,7 +128,7 @@ const Payment_qrController = {
           message: `${EMessage.notFound}: payment_qr`,
           err: "id",
         });
-      const qr = await UploadImage(data.qr.data, old_qr);
+      const qr = await S3UploadImage(data.qr.data, old_qr);
       if (!qr) {
         throw new Error("upload image failed");
       }

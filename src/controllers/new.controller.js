@@ -9,7 +9,6 @@ import {
   SendErrorLog,
   SendSuccess,
 } from "../services/services";
-import { UploadImage } from "../services/upload.file";
 import prisma from "../utils/prisma.client";
 let key = "news";
 let model = "news";

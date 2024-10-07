@@ -7,6 +7,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Language {
+  Lao
+  Chi
+  Eng
+  Rok
+}
+
 model users {
   id            String          @id @default(uuid()) @db.VarChar(36)
   is_active     Boolean         @default(true)
@@ -23,6 +30,7 @@ model users {
   kyc           Boolean         @default(false)
   login_version Int             @default(0)
   blacklist     Boolean         @default(false)
+  language      Language        @default(Lao)
   role          userRoles       @default(customer)
   created_at    DateTime        @default(now())
   updated_at    DateTime        @updatedAt

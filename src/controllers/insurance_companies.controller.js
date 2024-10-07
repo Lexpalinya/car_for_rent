@@ -2,13 +2,13 @@ import { CachDataNoClear } from "../services/cach.contro";
 import { DeleteCachedKey } from "../services/cach.deletekey";
 import { EMessage } from "../services/enum";
 import { FindInsurance_CompanysById } from "../services/find";
+import { S3UploadImage } from "../services/s3UploadImage";
 import {
   SendCreate,
   SendError,
   SendErrorLog,
   SendSuccess,
 } from "../services/services";
-import { UploadImage } from "../services/upload.file";
 import { DataExists, ValidateInsurances_Companies } from "../services/validate";
 import prisma from "../utils/prisma.client";
 
@@ -40,7 +40,7 @@ const Insurance_companysController = {
           err: "icon",
         });
       const { name } = req.body;
-      const icon = await UploadImage(data.icon.data);
+      const icon = await S3UploadImage(data.icon);
       if (!icon) {
         throw new Error("upload image failed");
       }
@@ -123,7 +123,7 @@ const Insurance_companysController = {
           message: `${EMessage.notFound}: companies`,
           err: "id",
         });
-      const icon = await UploadImage(data.icon.data, old_icon);
+      const icon = await S3UploadImage(data.icon, old_icon);
       if (!icon) {
         throw new Error("upload image failed");
       }

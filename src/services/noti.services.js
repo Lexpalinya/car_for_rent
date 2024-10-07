@@ -5,6 +5,7 @@ import { EMessage } from "./enum";
 import { FindUserById_ID } from "./find";
 import { select } from "../controllers/notification.controller";
 import { DeleteCachedKey } from "./cach.deletekey";
+import { language } from "../utils/noti.language";
 const key = "notification";
 const sendNotificationToAdmin = async ({ title, text, ref_id }) => {
   try {
@@ -15,14 +16,14 @@ const sendNotificationToAdmin = async ({ title, text, ref_id }) => {
         is_active: true,
         OR: [{ role: "admin" }, { role: "superadmin" }],
       },
-      { id: true, role: true, device_token: true }
+      { id: true, role: true, device_token: true, language: true }
     );
 
     const noti = await prisma.notification.create({
       data: {
         user_id: adminLits[0].id,
-        title,
-        text,
+        title: language["Eng"][title],
+        text: language["Eng"][text],
         ref_id,
         type: "car_rent",
         role: "admin",
@@ -32,12 +33,12 @@ const sendNotificationToAdmin = async ({ title, text, ref_id }) => {
 
     const notificationData = JSON.stringify(noti);
     const carImageUrl = noti?.car_rents?.post?.post_car_image[0]?.url;
-    const SendMessage = async (device_token) => {
+    const SendMessage = async (device_token, ln) => {
       try {
         const message = {
           notification: {
-            title: title,
-            body: text,
+            title: language[ln][title],
+            body: language[ln][text],
             // image: carImageUrl || undefined, // Attach image if available
           },
           token: device_token,
@@ -55,7 +56,7 @@ const sendNotificationToAdmin = async ({ title, text, ref_id }) => {
 
     const sendNotification = adminLits
       .filter((admin) => admin.device_token)
-      .map((admin) => SendMessage(admin.device_token));
+      .map((admin) => SendMessage(admin.device_token, admin.language));
     await Promise.all(sendNotification);
     // Create the notification record in the database
     return { message: EMessage.SUCCESS, data: noti };

@@ -8,17 +8,14 @@ import {
   SendSuccess,
 } from "../services/services";
 import { DataExists, ValidatePopular_Places } from "../services/validate";
-import {
-  DeleteImage,
-  UploadImage,
-  uploadImages,
-} from "../services/upload.file";
+import { DeleteImage, uploadImages } from "../services/upload.file";
 import prisma from "../utils/prisma.client";
 import { Popular_places_images } from "../services/subtabel";
 import { CachDataLimit } from "../services/cach.contro";
 import { FindPopular_placesById } from "../services/find";
 import { DeleteCachedKey } from "../services/cach.deletekey";
 import redis from "../DB/redis";
+import { S3UploadImage } from "../services/s3UploadImage";
 let key = "popular_places";
 let model = "popular_places";
 let where = {
@@ -77,8 +74,7 @@ const Popular_PlacesController = {
 
       images = EnsureArray(images);
       const [coverImage_url, images_url] = await Promise.all([
-        UploadImage(coverImage.data),
-
+        S3UploadImage(coverImage),
         uploadImages(images),
       ]);
       const places = await prisma.popular_places.create({
@@ -168,7 +164,7 @@ const Popular_PlacesController = {
           message: `${EMessage.notFound}: popular_places`,
           err: "id",
         });
-      const url = await UploadImage(data.coverImage.data);
+      const url = await S3UploadImage(data.coverImage);
 
       if (!url) {
         throw new Error("upload coverImage failed");
@@ -242,7 +238,7 @@ const Popular_PlacesController = {
           message: `${EMessage.notFound}: popular_places`,
           err: "id",
         });
-      const image_url = await UploadImage(data.images.data);
+      const image_url = await S3UploadImage(data.images);
       const popular_places_images = await Popular_places_images.insertOne({
         place_id: placesExists.id,
         url: image_url,
@@ -307,8 +303,8 @@ const Popular_PlacesController = {
           err: `${!placesExists ? "popular_places" : "popular_images"} id`,
         });
 
-      const image_url = await UploadImage(
-        data.images.data,
+      const image_url = await S3UploadImage(
+        data.images,
         images_data_update.url
       );
       const popular_places_images = await Popular_places_images.update(

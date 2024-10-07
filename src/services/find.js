@@ -365,6 +365,11 @@ export const FindCar_rentById = (id) => {
       end_date: true,
       frist_name: true,
       last_name: true,
+      user: {
+        select: {
+          language: true,
+        },
+      },
       village: true,
       district: true,
       province: true,
@@ -433,6 +438,7 @@ export const FindCar_rentById = (id) => {
               username: true,
               phone_number: true,
               profile: true,
+              language: true,
               kycs: {
                 where: {
                   is_active: true,

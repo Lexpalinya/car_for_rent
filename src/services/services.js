@@ -97,6 +97,7 @@ export const verify_token = (token) => {
           );
         if (user.blacklist === true)
           return reject(new Error("this account is not blacklisted"));
+
         return resolve(user.id);
       } catch (err) {
         console.log("Decryted or Database error", err);

@@ -23,7 +23,6 @@ import {
   ValidateLoginPhoneNumber,
   ValidateUserRegistor,
 } from "../services/validate";
-import { UploadImage } from "../services/upload.file";
 import {
   FindUserById,
   FindUserById_ID,
@@ -34,6 +33,7 @@ import {
 import { DeleteCachedKey } from "../services/cach.deletekey";
 import redis from "../DB/redis";
 import { CachDataLimit } from "../services/cach.contro";
+import { S3UploadImage } from "../services/s3UploadImage";
 
 let key = "users";
 let model = "users";
@@ -121,7 +121,7 @@ const UsersController = {
         });
       let profile;
       if (data.profile !== "") {
-        profile = await UploadImage(data.profile.data);
+        profile = await S3UploadImage(data.profile);
       }
 
       const user = await prisma.users.create({
@@ -609,7 +609,7 @@ const UsersController = {
           message: `${EMessage.notFound} user`,
           err: "id",
         });
-      const profile = await UploadImage(data.profile.data, old_profile);
+      const profile = await S3UploadImage(data.profile, old_profile);
       if (!profile) throw new Error(`Upload image failed`);
       const user = await prisma.users.update({
         where: { id },
@@ -785,7 +785,7 @@ const UsersController = {
             message: `sign in google failed`,
             err: `google_id not match`,
           });
-          
+
         const token_data = {
           id: user.id,
           login_version: user.login_version,

@@ -2,13 +2,14 @@ import { CachDataNoClear } from "../services/cach.contro";
 import { DeleteCachedKey } from "../services/cach.deletekey";
 import { EMessage } from "../services/enum";
 import { FindType_of_FualsById } from "../services/find";
+import { S3UploadImage } from "../services/s3UploadImage";
 import {
   SendCreate,
   SendError,
   SendErrorLog,
   SendSuccess,
 } from "../services/services";
-import { UploadImage } from "../services/upload.file";
+
 import { DataExists, ValidateType_of_Fuals } from "../services/validate";
 import prisma from "../utils/prisma.client";
 
@@ -40,7 +41,7 @@ const Type_of_FualsController = {
           message: `${EMessage.pleaseInput}`,
           err: "icon",
         });
-      const icon = await UploadImage(data.icon.data);
+      const icon = await S3UploadImage(data.icon);
       if (!icon) {
         throw new Error("upload image failed");
       }
@@ -126,7 +127,7 @@ const Type_of_FualsController = {
           message: `${EMessage.notFound}:type_of_fuals`,
           err: "id",
         });
-      const icon = await UploadImage(data.icon.data, old_icon);
+      const icon = await S3UploadImage(data.icon, old_icon);
       if (!icon) {
         throw new Error("upload image failed");
       }

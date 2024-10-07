@@ -2,13 +2,14 @@ import { CachDataNoClear } from "../services/cach.contro";
 import { DeleteCachedKey } from "../services/cach.deletekey";
 import { EMessage } from "../services/enum";
 import { FindExChange_rate_Id, FindUserById_ID } from "../services/find";
+import { S3UploadImage } from "../services/s3UploadImage";
 import {
   SendCreate,
   SendError,
   SendErrorLog,
   SendSuccess,
 } from "../services/services";
-import { UploadImage } from "../services/upload.file";
+
 import { DataExists, ValidateExchange_rate } from "../services/validate";
 import prisma from "../utils/prisma.client";
 
@@ -53,7 +54,7 @@ const ExchagneRateController = {
           err: `${!userExists ? "user_id" : EMessage.notAllow}`,
         });
 
-      const icon = await UploadImage(data.icon.data);
+      const icon = await S3UploadImage(data.icon);
       if (!icon) {
         throw new Error("upload image failed");
       }
@@ -160,7 +161,7 @@ const ExchagneRateController = {
           message: `${EMessage.notFound}`,
           err: "id",
         });
-      const icon = await UploadImage(data.icon.data, old_icon);
+      const icon = await S3UploadImage(data.icon, old_icon);
       if (!icon) {
         throw new Error("upload image failed");
       }

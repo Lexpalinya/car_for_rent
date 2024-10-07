@@ -5,18 +5,18 @@ import s3Client from "../config/aws.s3";
 
 export const S3UploadImage = async ({ name, data }, oldFile) => {
   try {
-    if (oldFile) {
-      const deleteParams = {
-        Bucket: AWS_BUCKET_KEY,
-        Key: "images/" + oldFile,
-      };
-      console.log("Delete params :>> ", deleteParams);
+    // if (oldFile) {
+    //   const deleteParams = {
+    //     Bucket: AWS_BUCKET_KEY,
+    //     Key: "images/" + oldFile,
+    //   };
+    //   console.log("Delete params :>> ", deleteParams);
 
-      // Use the v3 DeleteObjectCommand
-      const deleteCommand = new DeleteObjectCommand(deleteParams);
-      const deleteResult = await s3Client.send(deleteCommand);
-      console.log("Delete Result :>> ", deleteResult);
-    }
+    //   // Use the v3 DeleteObjectCommand
+    //   const deleteCommand = new DeleteObjectCommand(deleteParams);
+    //   const deleteResult = await s3Client.send(deleteCommand);
+    //   console.log("Delete Result :>> ", deleteResult);
+    // }
 
     // Convert image to WebP
     const webpBuffer = await sharp(data).toFormat("webp").toBuffer();

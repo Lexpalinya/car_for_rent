@@ -1,3 +1,4 @@
+import { AWS_BASE_URL } from "../../config/api.config";
 import redis from "../../DB/redis";
 import { CachDataAll, CachDataLimit } from "../../services/cach.contro";
 import { DeleteCachedKey } from "../../services/cach.deletekey";
@@ -26,13 +27,14 @@ import {
   Car_rent_payment_image,
   Car_rent_visa,
 } from "../../services/subtabel";
-import { UploadImage, uploadImages } from "../../services/upload.file";
+import { uploadImages } from "../../services/upload.file";
 import {
   DataExists,
   ValidateCar_rent,
   ValidateCar_rent_update_status,
   ValidateCar_rent_update_status_by_admin,
 } from "../../services/validate";
+import { language } from "../../utils/noti.language";
 import prisma from "../../utils/prisma.client";
 import {
   post_status_being_hired_id,
@@ -62,6 +64,11 @@ let select = {
   end_date: true,
   frist_name: true,
   last_name: true,
+  // user: {
+  //   select: {
+  //     language: true,
+  //   },
+  // },
   village: true,
   district: true,
   province: true,
@@ -139,6 +146,11 @@ const select_user_post = {
   end_date: true,
   frist_name: true,
   last_name: true,
+  // user: {
+  //   select: {
+  //     language: true,
+  //   },
+  // },
   // village: true,
   // district: true,
   // province: true,
@@ -169,10 +181,12 @@ const select_user_post = {
     select: {
       id: true,
       user_id: true,
+
       star: true,
       users: {
         select: {
           profile: true,
+          // language: true,
           kycs: {
             where: {
               is_active: true,
@@ -528,10 +542,9 @@ const Car_rentController = {
           })
         );
       }
-
       sendNotificationToAdmin({
-        title: "new car_rent",
-        text: "Order pending approval",
+        title: "newOrderTitle",
+        text: "newOrderText",
         ref_id: dt.id,
       });
       return SendSuccess({
@@ -711,59 +724,23 @@ const Car_rentController = {
       ]);
 
       const dt = await FindCar_rentById(id);
-      // const [noti_user_post, noti_user_rent] = await Promise.all([
-      //   NotificationController.notiNew({
-      //     // data,
-      //     ref_id: car_rent.id,
-      //     type: "car_rent_user_post",
-      //     title: "update status payment ",
-      //     text: "update status payment",
-      //     user_id: dt.post.user_id,
-      //     role: "customer",
-      //   }),
-      //   NotificationController.notiNew({
-      //     // data,
-      //     ref_id: car_rent.id,
-      //     type: "car_rent_user_rent",
-      //     title: "update status payment ",
-      //     text: "update status payment",
-      //     user_id: dt.user_id,
-      //     role: "customer",
-      //   }),
-      // ]);
-      // broadcast({
-      //   client_id: dt.post.user_id,
-      //   ctx: "car_rent_user_post",
-      //   data: {
-      //     noti: noti_user_post.data,
-      //     data: dt,
-      //   },
-      // });
-      // broadcast({
-      //   client_id: dt.user_id,
-      //   ctx: "car_rent_user_rent",
-      //   data: {
-      //     noti: noti_user_rent.data,
-      //     data: dt,
-      //   },
-      // });
       SendNotificationToUser({
-        title: "Update status",
-        text: "Your car_rent order at status" + dt.status.nameTenantEng,
-        image:
-          "https://static.vecteezy.com/system/resources/thumbnails/043/033/254/small_2x/colored-pencils-arranged-neatly-in-a-row-photo.jpg",
+        title: language[dt.user.language].updateStatusTitle,
+        text:
+          language[dt.user.language].updateStatusText +
+          dt.status["nameTenant" + dt.user.language],
+        image: AWS_BASE_URL + dt?.post?.post_car_image[0]?.url,
         ref_id: dt.id,
         user_id: dt.user_id,
         role: "customer",
         type: "car_rent_user_rent",
       });
       SendNotificationToUser({
-        title: "Update status",
+        title: language[dt.post.users.language].updateStatusTitle,
         text:
-          "Your car rental information is in status " +
-          dt.status.namePostertEng,
-        image:
-          "https://static.vecteezy.com/system/resources/thumbnails/043/033/254/small_2x/colored-pencils-arranged-neatly-in-a-row-photo.jpg",
+          language[dt.post.users.language].updateStatusTitle +
+          dt.status["namePostert" + dt.post.users.language],
+        image: AWS_BASE_URL + dt?.post?.post_car_image[0]?.url,
         ref_id: dt.id,
         user_id: dt.post.user_id,
         role: "customer",
@@ -789,10 +766,10 @@ const Car_rentController = {
       req,
       res,
       car_rent_status_Hand_over_the_car,
-      "Update Approval Status",
-      "Your order has been approved by the owner",
-      "Update Approval Status",
-      "You have approved the rental car reservation",
+      "UpdateApprovalStatusTitle",
+      "UpdateApprovalStatusUser_rentText",
+      "UpdateApprovalStatusTitle",
+      "UpdateApprovalStatusUser_postText",
       post_status_Being_rented
     );
   },
@@ -802,10 +779,10 @@ const Car_rentController = {
       req,
       res,
       car_rent_status_Failure,
-      "Update Denial Status",
-      "Your order has been rejected by the owner",
-      "Update Cancellation Status",
-      "You have canceled your rental car reservation",
+      "UpdateStatusCancelUser_rentTitle",
+      "UpdateStatusCancelUser_rentText",
+      "UpdateStatusCancelUser_postTitle",
+      "UpdateStatusCancelUser_postText",
       post_status_ready_id
     );
   },
@@ -814,10 +791,10 @@ const Car_rentController = {
       req,
       res,
       car_rent_status_Success,
-      "Update Status Successful",
-      "Your car rental is complete",
-      "Status update completed",
-      "Your car has been successfully rented",
+      "UpdateStatusSuccessfulUser_rentTitle",
+      "UpdateStatusSuccessfulUser_rentText",
+      "UpdateStatusSuccessfulUser_postTitle",
+      "UpdateStatusSuccessfulUser_postText",
       post_status_ready_id
     );
   },
@@ -988,84 +965,30 @@ const Car_rentController = {
       const dt = await FindCar_rentById(id);
 
       sendNotificationToAdmin({
-        title: "update payment approved",
-        text: "update car_rent payment status approved",
+        title: "UpdatePaymentStatusAdminTitle",
+        text: "UpdatePaymentStatusAdminText",
         ref_id: dt.id,
       });
 
       SendNotificationToUser({
-        title: "The approval has been done",
-        text: "Your car_rent order has been approved by an administrator",
-        image:
-          "https://static.vecteezy.com/system/resources/thumbnails/043/033/254/small_2x/colored-pencils-arranged-neatly-in-a-row-photo.jpg",
+        title: language[dt.user.language].UpdatePaymentStatusUser_rentTitle,
+        text: language[dt.user.language].UpdatePaymentStatusUser_rentText,
+        image: AWS_BASE_URL + dt?.post?.post_car_image[0]?.url,
         ref_id: dt.id,
         user_id: dt.user_id,
         role: "customer",
         type: "car_rent_user_rent",
       });
       SendNotificationToUser({
-        title: "There are new car rental items",
-        text: "Your car has been rented. Waiting for your reply please reply to rent as soon as possible",
-        image:
-          "https://static.vecteezy.com/system/resources/thumbnails/043/033/254/small_2x/colored-pencils-arranged-neatly-in-a-row-photo.jpg",
+        title:
+          language[dt.post.users.language].UpdatePaymentStatusUser_postTitle,
+        text: language[dt.post.users.language].UpdatePaymentStatusUser_postText,
+        image: AWS_BASE_URL + dt?.post?.post_car_image[0]?.url,
         ref_id: dt.id,
         user_id: dt.post.user_id,
         role: "customer",
         type: "car_rent_user_post",
       });
-      // const [noti_admin, noti_user_post, noti_user_rent] = await Promise.all([
-      //   NotificationController.notiNew({
-      //     // data,
-      //     ref_id: car_rent.id,
-      //     type: "car_rent",
-      //     title: "update status payment",
-      //     text: "update status payment ",
-      //     user_id,
-      //     role: "admin",
-      //   }),
-      //   NotificationController.notiNew({
-      //     // data,
-      //     ref_id: car_rent.id,
-      //     type: "car_rent_user_post",
-      //     title: "update status payment ",
-      //     text: "update status payment",
-      //     user_id: dt.post.user_id,
-      //     role: "customer",
-      //   }),
-      //   NotificationController.notiNew({
-      //     // data,
-      //     ref_id: car_rent.id,
-      //     type: "car_rent_user_rent",
-      //     title: "update status payment ",
-      //     text: "update status payment",
-      //     user_id: dt.user_id,
-      //     role: "customer",
-      //   }),
-      // ]);
-      // broadcast({
-      //   client_id: dt.post.user_id,
-      //   ctx: "car_rent_user_post",
-      //   data: {
-      //     noti: noti_user_post.data,
-      //     data: dt,
-      //   },
-      // });
-      // broadcast({
-      //   client_id: dt.user_id,
-      //   ctx: "car_rent_user_rent",
-      //   data: {
-      //     noti: noti_user_rent.data,
-      //     data: dt,
-      //   },
-      // });
-      // broadcast({
-      //   client_id: "admin",
-      //   ctx: "car_rent",
-      //   data: {
-      //     noti: noti_admin.data,
-      //     data: dt,
-      //   },
-      // });
       return SendSuccess({
         res,
         message: `${EMessage.deleteSuccess}`,
@@ -1143,16 +1066,16 @@ const Car_rentController = {
       const dt = await FindCar_rentById(id);
 
       sendNotificationToAdmin({
-        title: "cancel order ",
-        text: "cancel car_rent payment status faild status to cancel",
+        title: "UpdatePaymentStatusCancelAdminTitle",
+        text: "UpdatePaymentStatusCancelAdminText",
         ref_id: dt.id,
       });
 
       SendNotificationToUser({
-        title: "order failed",
-        text: "Your reservation has not been approved for payment",
-        image:
-          "https://static.vecteezy.com/system/resources/thumbnails/043/033/254/small_2x/colored-pencils-arranged-neatly-in-a-row-photo.jpg",
+        title:
+          language[dt.user.language].UpdatePaymentStatusCancelUser_rentTitle,
+        text: language[dt.user.language].UpdatePaymentStatusCancelUser_rentText,
+        image: AWS_BASE_URL + dt?.post?.post_car_image[0]?.url,
         ref_id: dt.id,
         user_id: dt.user_id,
         role: "customer",

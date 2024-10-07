@@ -1,5 +1,6 @@
 import { EMessage } from "../services/enum";
 import { FindKycById } from "../services/find";
+import { S3UploadImage } from "../services/s3UploadImage";
 import {
   AddKyc_id_url,
   EnsureArray,
@@ -8,11 +9,7 @@ import {
   SendSuccess,
 } from "../services/services";
 import { Kyc_doc_image } from "../services/subtabel";
-import {
-  DeleteImage,
-  UploadImage,
-  uploadImages,
-} from "../services/upload.file";
+import { DeleteImage, uploadImages } from "../services/upload.file";
 import prisma from "../utils/prisma.client";
 import { ReDataInCacheKyc } from "./kyc.controller";
 import { RecacheData } from "./user.controller";
@@ -133,8 +130,8 @@ const Kyc_doc_imageController = {
           message: `you not own kyc_doc_images`,
           err: `you not own kyc_doc_images`,
         });
-      const url = await UploadImage(
-        data.kyc_doc_image.data,
+      const url = await S3UploadImage(
+        data.kyc_doc_image,
         kyc_doc_image_data.url
       );
       if (!url) {

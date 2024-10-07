@@ -2,13 +2,14 @@ import { CachDataAll, CachDataNoClear } from "../services/cach.contro";
 import { DeleteCachedKey } from "../services/cach.deletekey";
 import { EMessage } from "../services/enum";
 import { FindBannerById } from "../services/find";
+import { S3UploadImage } from "../services/s3UploadImage";
 import {
   SendCreate,
   SendError,
   SendErrorLog,
   SendSuccess,
 } from "../services/services";
-import { UploadImage } from "../services/upload.file";
+
 import prisma from "../utils/prisma.client";
 let key = "banners";
 let model = "banners";
@@ -30,7 +31,7 @@ const BannerController = {
           err: "image",
         });
       }
-      const url = await UploadImage(data.image.data);
+      const url = await S3UploadImage(data.image);
       if (!url) {
         throw new Error("upload image failed");
       }
@@ -81,7 +82,7 @@ const BannerController = {
           err: "id",
         });
 
-      const url = await UploadImage(data.image.data);
+      const url = await S3UploadImage(data.image);
 
       if (!url) {
         throw new Error("upload image failed");

@@ -2,6 +2,7 @@ import { CachDataNoClear } from "../services/cach.contro";
 import { DeleteCachedKey } from "../services/cach.deletekey";
 import { EMessage } from "../services/enum";
 import { FindCar_BrandsById } from "../services/find";
+import { S3UploadImage } from "../services/s3UploadImage";
 import {
   SendCreate,
   SendError,
@@ -40,7 +41,7 @@ const Car_BrandsController = {
           err: "icon",
         });
       const { name } = req.body;
-      const icon = await UploadImage(data.icon.data);
+      const icon = await S3UploadImage(data.icon);
       if (!icon) {
         throw new Error("upload image failed");
       }
@@ -123,7 +124,7 @@ const Car_BrandsController = {
           message: `${EMessage.notFound}: car_brands`,
           err: "id",
         });
-      const icon = await UploadImage(data.icon.data, old_icon);
+      const icon = await S3UploadImage(data.icon, old_icon);
       if (!icon) {
         throw new Error("upload image failed");
       }

@@ -1,4 +1,5 @@
 import cloudinary from "../config/cloudinary";
+import { S3UploadImage } from "./s3UploadImage";
 
 export const UploadImage = (image, old_image) => {
   return new Promise(async (resolve, reject) => {
@@ -45,7 +46,7 @@ export const DeleteImage = (image) => {
 export const uploadImages = (images) => {
   return Promise.all(
     images.map((img) =>
-      UploadImage(img.data).then((url) => {
+      S3UploadImage(img).then((url) => {
         if (!url) {
           throw new Error("Upload Image failed");
         }

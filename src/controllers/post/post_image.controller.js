@@ -1,5 +1,6 @@
 import { EMessage } from "../../services/enum";
 import { FindPostById_for_edit } from "../../services/find";
+import { S3UploadImage } from "../../services/s3UploadImage";
 import { SendError, SendErrorLog, SendSuccess } from "../../services/services";
 import {
   Post_car_image,
@@ -32,7 +33,7 @@ const InsertPostImage = async (req, res, imageType, InsertImage) => {
         err: "post_id",
       });
     }
-    const imageUrl = await UploadImage(data[imageType].data);
+    const imageUrl = await S3UploadImage(data[imageType]);
     const post_image = await InsertImage({ post_id, url: imageUrl });
     await RecacheDataPost({
       key,
@@ -119,8 +120,8 @@ const UpdatePostImage = async (
         err: `you not own post`,
       });
 
-    const imageUrl = await UploadImage(
-      data[imageType].data,
+    const imageUrl = await S3UploadImage(
+      data[imageType],
       image_data_update.url
     );
 

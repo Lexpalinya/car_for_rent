@@ -3,8 +3,10 @@ import redis from "../../DB/redis";
 import { EMessage } from "../../services/enum";
 import { FindCar_Rent_StatusById, FindCar_rentById } from "../../services/find";
 import { SendNotificationToUser } from "../../services/noti.services";
+import { S3UploadImage } from "../../services/s3UploadImage";
 import { SendError, SendErrorLog, SendSuccess } from "../../services/services";
 import { UploadImage } from "../../services/upload.file";
+import { language } from "../../utils/noti.language";
 import prisma from "../../utils/prisma.client";
 
 import { RecacheDataPost } from "../post/post.controller";
@@ -73,11 +75,15 @@ export const UpdateCar_rentImage = async (
         message: `you not own car_rent`,
         err: `you not own car_rent`,
       });
-    const imageUrl = await UploadImage(
-      data[imageType].data,
+    // const imageUrl = await UploadImage(
+    //   data[imageType].data,
+    //   image_data_update.url
+    // );
+
+    const imageUrl = await S3UploadImage(
+      data[imageType],
       image_data_update.url
     );
-
     if (!imageUrl) {
       throw new Error(`upload ${imageType} failed`);
     }
@@ -163,66 +169,24 @@ export const UpdateStatusUser = async (
     ]);
 
     const dt = await FindCar_rentById(id);
-    // console.log("dt :>> ", dt);
-    // const [noti_user_post, noti_user_rent, post] = await Promise.all([
-    //   NotificationController.notiNew({
-    //     ref_id: car_rent.id,
-    //     type: "car_rent_user_post",
-    //     title: notificationTitle,
-    //     text: notificationText,
-    //     user_id: dt.post.user_id,
-    //     role: "customer",
-    //   }),
-    //   NotificationController.notiNew({
-    //     ref_id: car_rent.id,
-    //     type: "car_rent_user_rent",
-    //     title: notificationTitle,
-    //     text: notificationText,
-    //     user_id: dt.user_id,
-    //     role: "customer",
-    //   }),
-    //   prisma.posts.update({
-    //     where: { id: dt.post_id },
-    //     data: { status_id: postStatusId, ...additionalPostData },
-    //   }),
-    // ]);
-
-    // broadcast({
-    //   client_id: dt.post.user_id,
-    //   ctx: "car_rent_user_post",
-    //   data: {
-    //     noti: noti_user_post.data,
-    //     data: dt,
-    //   },
-    // });
-    // broadcast({
-    //   client_id: dt.user_id,
-    //   ctx: "car_rent_user_rent",
-    //   data: {
-    //     noti: noti_user_rent.data,
-    //     data: dt,
-    //   },
-    // });
     const post = await prisma.posts.update({
       where: { id: dt.post_id },
       data: { status_id: postStatusId, ...additionalPostData },
     });
 
     SendNotificationToUser({
-      title: notificationTitle,
-      text: notificationText,
-      image:
-        "https://static.vecteezy.com/system/resources/thumbnails/043/033/254/small_2x/colored-pencils-arranged-neatly-in-a-row-photo.jpg",
+      title: language[dt.user.language][notificationTitle],
+      text: language[dt.user.language][notificationText],
+      image: AWS_BASE_URL + dt?.post?.post_car_image[0]?.url,
       ref_id: dt.id,
       user_id: dt.user_id,
       role: "customer",
       type: "car_rent_user_rent",
     });
     SendNotificationToUser({
-      title: notificationTitleUserpost,
-      text: notificationTextUserpost,
-      image:
-        "https://static.vecteezy.com/system/resources/thumbnails/043/033/254/small_2x/colored-pencils-arranged-neatly-in-a-row-photo.jpg",
+      title: language[dt.post.users.language][notificationTitleUserpost],
+      text: language[dt.post.users.language][notificationTextUserpost],
+      image: AWS_BASE_URL + dt?.post?.post_car_image[0]?.url,
       ref_id: dt.id,
       user_id: dt.post.user_id,
       role: "customer",

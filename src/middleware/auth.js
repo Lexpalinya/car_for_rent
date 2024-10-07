@@ -19,7 +19,7 @@ export const auth = async (req, res, next) => {
         message: EMessage.notFound + " Token",
       });
     const decode = await verify_token(token);
-    req.user = decode;
+    req.user = decode.id;
 
     next();
   } catch (err) {

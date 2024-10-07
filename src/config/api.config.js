@@ -19,6 +19,7 @@ const AWS_ACCESS_KEY = process.env.AWS_ACCESS_KEY;
 const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
 const AWS_REGION = process.env.AWS_REGION;
 const AWS_BUCKET_KEY = process.env.AWS_BUCKET_KEY;
+const AWS_BASE_URL = process.env.AWS_BASE_URL;
 
 const CLOUDINARY_NAME = process.env.CLOUDINARY_NAME;
 const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY;
@@ -41,6 +42,7 @@ export {
   AWS_SECRET_ACCESS_KEY,
   AWS_REGION,
   AWS_BUCKET_KEY,
+  AWS_BASE_URL,
 
   //--------------
   CLOUDINARY_NAME,
